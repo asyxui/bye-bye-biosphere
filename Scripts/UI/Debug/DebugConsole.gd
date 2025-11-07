@@ -3,7 +3,11 @@ class_name DebugConsole
 
 @onready var console_panel: Panel = $ConsolePanel
 @onready var output_log: RichTextLabel = $ConsolePanel/VBoxContainer/OutputLog
+
 @onready var input_line: LineEdit = $ConsolePanel/VBoxContainer/InputLine
+@onready var autocomplete_list: AutoCompleteList = $ConsolePanel/AutoCompleteList
+var autocomplete_script := preload("res://Scripts/AutoCompleteList.gd")
+
 
 var is_console_open: bool = false
 var command_history: Array[String] = []
@@ -12,6 +16,7 @@ var max_history: int = 50
 var max_log_lines: int = 500
 
 var commands: Dictionary = {}
+var autocomplete_active: bool = false
 
 
 # Static instance for singleton pattern
@@ -29,6 +34,8 @@ func _ready() -> void:
 	
 	# Connect signals
 	input_line.text_submitted.connect(_on_input_submitted)
+	autocomplete_list.suggestion_selected.connect(_on_autocomplete_selected)
+	input_line.text_changed.connect(_on_input_text_changed)
 	
 	# Register commands
 	register_command("help", "Display all available commands", _cmd_help)
@@ -49,11 +56,23 @@ func _input(event: InputEvent) -> void:
 		elif is_console_open:
 			# Handle up/down for command history
 			if event.keycode == KEY_UP:
-				navigate_history(-1)
-				get_viewport().set_input_as_handled()
+				if autocomplete_active:
+					autocomplete_list.move_selection(-1)
+					get_viewport().set_input_as_handled()
+				else:
+					navigate_history(-1)
+					get_viewport().set_input_as_handled()
 			elif event.keycode == KEY_DOWN:
-				navigate_history(1)
-				get_viewport().set_input_as_handled()
+				if autocomplete_active:
+					autocomplete_list.move_selection(1)
+					get_viewport().set_input_as_handled()
+				else:
+					navigate_history(1)
+					get_viewport().set_input_as_handled()
+			elif event.keycode == KEY_TAB:
+				if autocomplete_active:
+					autocomplete_list.accept_selected()
+					get_viewport().set_input_as_handled()
 
 func toggle_console() -> void:
 	is_console_open = !is_console_open
@@ -63,6 +82,8 @@ func toggle_console() -> void:
 		input_line.grab_focus()
 		input_line.clear()
 		history_index = -1
+		autocomplete_list.hide_suggestions()
+		autocomplete_active = false
 	else:
 		input_line.release_focus()
 
@@ -86,6 +107,37 @@ func _on_input_submitted(text: String) -> void:
 	
 	# Clear input
 	input_line.clear()
+	autocomplete_list.hide_suggestions()
+	autocomplete_active = false
+
+func _on_input_text_changed(new_text: String) -> void:
+	if new_text.strip_edges().is_empty():
+		autocomplete_list.hide_suggestions()
+		autocomplete_active = false
+		return
+	var prefix = new_text.split(" ")[0].to_lower()
+	var matches: Array[String] = []
+	for cmd in commands.keys():
+		if cmd.begins_with(prefix):
+			matches.append(cmd)
+	if matches.size() > 0:
+		autocomplete_list.show_suggestions(matches, prefix)
+		autocomplete_active = true
+	else:
+		autocomplete_list.hide_suggestions()
+		autocomplete_active = false
+
+func _on_autocomplete_selected(suggestion: String) -> void:
+	# Fill the input line with the selected suggestion, preserving any arguments typed
+	var current_text = input_line.text
+	var parts = current_text.split(" ", false)
+	if parts.size() > 1:
+		input_line.text = suggestion + " " + " ".join(parts.slice(1))
+	else:
+		input_line.text = suggestion + " "
+	input_line.caret_column = input_line.text.length()
+	autocomplete_list.hide_suggestions()
+	autocomplete_active = false
 
 func navigate_history(direction: int) -> void:
 	if command_history.is_empty():

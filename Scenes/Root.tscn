@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_a5hps"]
 [ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt.tscn" id="2_kqog5"]
-[ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/MenuManager.tscn" id="3_menu_manager"]
-[ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/DebugConsole.tscn" id="4_debug_console"]
+[ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/UI/MenuManager.tscn" id="3_menu_manager"]
+[ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="4_debug_console"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kqog5"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
