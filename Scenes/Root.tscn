@@ -57,6 +57,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8571234, -3.9852517)
 shape = SubResource("BoxShape3D_kqog5")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="box/CollisionShape3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.116732836)
 mesh = SubResource("BoxMesh_knkkn")
 skeleton = NodePath("../..")
 

@@ -1,13 +1,40 @@
 extends CharacterBody3D
 
+@onready var camera = $Camera3D
+@export var conveyor_scene: PackedScene
 
 const SPEED = 5.0
 const SPRINTING_MODIFIER = 2
 const JUMP_VELOCITY = 7
 const MOUSE_SENSITIVITY = 0.002
+const CONVEYOR_SCENE_LENGTH = 20.0
+const RAY_LENGTH = 20.0
+
+var waiting_for_second_press := false
+var start_pos: Vector3
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func spawn_conveyor(start: Vector3, end: Vector3):
+	var conveyor = conveyor_scene.instantiate()
+
+	var mid = (start + end) / 2.0
+	var direction = (end - start).normalized()
+	var length = start.distance_to(end)
+	
+	var basis = Basis()
+	basis.x = direction
+	basis.y = Vector3.UP
+	basis.z = basis.x.cross(basis.y).normalized()
+	basis = basis.orthonormalized()
+
+	var transform = Transform3D(basis, mid)
+
+	conveyor.global_transform = transform
+	conveyor.scale.x = length / CONVEYOR_SCENE_LENGTH
+
+	get_tree().current_scene.add_child(conveyor)
 
 func _input(event):
 	# Don't process input when game is paused
@@ -22,6 +49,29 @@ func _input(event):
 	if event.is_action_pressed("click"):
 		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			
+	if event.is_action_pressed("menu"):
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			
+	if event.is_action_pressed("place_conveyor"):
+		var center = get_viewport().size / 2
+		var from = camera.project_ray_origin(center)
+		var to = from + camera.project_ray_normal(center) * RAY_LENGTH
+		var space_state = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.create(from, to)
+		var result = space_state.intersect_ray(query)
+		
+		if result:
+			if not waiting_for_second_press:
+				start_pos = result.position
+				print(start_pos)
+				waiting_for_second_press = true
+			else:
+				var end_pos = result.position
+				print(end_pos)
+				spawn_conveyor(start_pos, end_pos)
+				waiting_for_second_press = false
 
 func _physics_process(delta: float) -> void:
 	# Don't process movement when game is paused
