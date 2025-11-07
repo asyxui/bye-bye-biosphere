@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://843h8d3cgi62"]
+[gd_scene load_steps=8 format=3 uid="uid://843h8d3cgi62"]
 
 [ext_resource type="Script" uid="uid://besc3q2wos2ko" path="res://Scripts/Player.gd" id="1_rpqav"]
 [ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt.tscn" id="2_kyqiw"]
@@ -6,6 +6,14 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kyqiw"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_gntrk"]
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_kyqiw"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kyqiw"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_gntrk"]
+material = SubResource("StandardMaterial3D_kyqiw")
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_rpqav")
@@ -19,3 +27,15 @@ mesh = SubResource("CapsuleMesh_gntrk")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.60367095, -0.20594597)
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1.0000002, 0, 0, 0, -4.3711392e-08, -1.0000001, 0, 1.0000001, -4.3711392e-08, 0, 0, -1)
+shape = SubResource("SeparationRayShape3D_kyqiw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.17240953, 0, 0, 0, 0.14826003, 0, 0, 0, 0.104667045, 0.11500636, 0.63063323, -0.6374414)
+mesh = SubResource("SphereMesh_gntrk")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.17240953, 0, 0, 0, 0.14826003, 0, 0, 0, 0.104667045, -0.115, 0.631, -0.637)
+mesh = SubResource("SphereMesh_gntrk")
