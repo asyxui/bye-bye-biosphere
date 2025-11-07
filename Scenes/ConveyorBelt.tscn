@@ -1,11 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://c8s4dif53qa4d"]
+[gd_scene load_steps=11 format=3 uid="uid://c8s4dif53qa4d"]
 
 [ext_resource type="Texture2D" uid="uid://b5iurlx3gkmq2" path="res://Assets/Conveyor/background-with-metallic-grid-texture.jpg" id="1_cel3d"]
 [ext_resource type="Texture2D" uid="uid://c2m5oglu1ecu" path="res://Assets/Conveyor/Texturelabs_Concrete_181L.jpg" id="1_rkfof"]
 [ext_resource type="Script" uid="uid://wsgtjfircds6" path="res://Scripts/ConveyorBelt.gd" id="2_83n0b"]
 [ext_resource type="Script" uid="uid://uk6bt2gcdsx3" path="res://Scenes/ConveyorPhysics.gd" id="2_skxa2"]
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1o1em"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ucexd"]
 size = Vector3(20, 1, 1)
@@ -24,38 +22,36 @@ size = Vector3(20, 0.01, 0.9)
 [sub_resource type="ORMMaterial3D" id="ORMMaterial3D_skxa2"]
 albedo_texture = ExtResource("1_cel3d")
 
-[node name="ConveyorBelt" type="Node3D"]
+[node name="ConveyorBelt" type="StaticBody3D"]
 
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
+[node name="Stand" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-physics_material_override = SubResource("PhysicsMaterial_1o1em")
-
-[node name="Stand" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("BoxShape3D_ucexd")
 
-[node name="CSGCombiner3D" type="CSGCombiner3D" parent="StaticBody3D/Stand"]
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="Stand"]
 material_override = SubResource("ORMMaterial3D_rkfof")
 
-[node name="MeshInstance3D" type="CSGBox3D" parent="StaticBody3D/Stand/CSGCombiner3D"]
+[node name="MeshInstance3D" type="CSGBox3D" parent="Stand/CSGCombiner3D"]
 transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
-[node name="CSGCylinder3D" type="CSGCylinder3D" parent="StaticBody3D/Stand/CSGCombiner3D"]
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="Stand/CSGCombiner3D"]
 transform = Transform3D(-4.371139e-08, -10, 0, 1, -4.371139e-07, 0, 0, 0, 1, 0, -0.007, -0.587)
 operation = 2
 
-[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="StaticBody3D/Stand/CSGCombiner3D"]
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="Stand/CSGCombiner3D"]
 transform = Transform3D(-4.371139e-08, -10, 0, 1, -4.371139e-07, 0, 0, 0, 1, 0, -0.007, 0.587)
 operation = 2
 
-[node name="Belt" type="StaticBody3D" parent="StaticBody3D"]
+[node name="Belt" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 physics_material_override = SubResource("PhysicsMaterial_6np6u")
 script = ExtResource("2_skxa2")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D/Belt"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Belt"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.51, 0)
 shape = SubResource("BoxShape3D_cel3d")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D/Belt/CollisionShape3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Belt/CollisionShape3D"]
 transform = Transform3D(20, 0, 0, 0, 0.005, 0, 0, 0, 0.9, 0, 0, 0)
 mesh = SubResource("BoxMesh_83n0b")
 surface_material_override/0 = SubResource("ORMMaterial3D_skxa2")
