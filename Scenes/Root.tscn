@@ -66,7 +66,9 @@ mesh = SubResource("BoxMesh_knkkn")
 skeleton = NodePath("../..")
 
 [node name="MenuManager" parent="." instance=ExtResource("3_menu_manager")]
+layer = 3
 
 [node name="DebugConsole" parent="." instance=ExtResource("4_debug_console")]
+layer = 2
 
 [node name="Hud" parent="." instance=ExtResource("6_pl8e4")]
