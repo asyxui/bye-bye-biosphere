@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_a5hps"]
 [ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt.tscn" id="2_kqog5"]
-[ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/MenuManager.tscn" id="3_menu_manager"]
+[ext_resource type="PackedScene" path="res://Scenes/MenuManager.tscn" id="3_menu_manager"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_kqog5"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -48,7 +48,7 @@ mesh = SubResource("BoxMesh_a5hps")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
 [node name="ConveyorBelt" parent="." instance=ExtResource("2_kqog5")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3522682, 1, -3.8585744)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.352, 0.5, -3.859)
 
 [node name="box" type="RigidBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8571234, -3.9852517)

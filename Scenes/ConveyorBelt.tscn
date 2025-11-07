@@ -1,8 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://c8s4dif53qa4d"]
+[gd_scene load_steps=12 format=3 uid="uid://c8s4dif53qa4d"]
 
 [ext_resource type="Texture2D" uid="uid://b5iurlx3gkmq2" path="res://Assets/Conveyor/background-with-metallic-grid-texture.jpg" id="1_cel3d"]
 [ext_resource type="Texture2D" uid="uid://c2m5oglu1ecu" path="res://Assets/Conveyor/Texturelabs_Concrete_181L.jpg" id="1_rkfof"]
 [ext_resource type="Script" uid="uid://wsgtjfircds6" path="res://Scripts/ConveyorBelt.gd" id="2_83n0b"]
+[ext_resource type="Script" uid="uid://uk6bt2gcdsx3" path="res://Scenes/ConveyorPhysics.gd" id="2_skxa2"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1o1em"]
 
@@ -20,13 +21,13 @@ size = Vector3(20, 0.01, 0.9)
 
 [sub_resource type="BoxMesh" id="BoxMesh_83n0b"]
 
-[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_cel3d"]
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_skxa2"]
 albedo_texture = ExtResource("1_cel3d")
-uv1_scale = Vector3(40, 1, 1)
 
 [node name="ConveyorBelt" type="Node3D"]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 physics_material_override = SubResource("PhysicsMaterial_1o1em")
 
 [node name="Stand" type="CollisionShape3D" parent="StaticBody3D"]
@@ -48,7 +49,7 @@ operation = 2
 
 [node name="Belt" type="StaticBody3D" parent="StaticBody3D"]
 physics_material_override = SubResource("PhysicsMaterial_6np6u")
-constant_linear_velocity = Vector3(2, 0, 0)
+script = ExtResource("2_skxa2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D/Belt"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.51, 0)
@@ -57,5 +58,5 @@ shape = SubResource("BoxShape3D_cel3d")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D/Belt/CollisionShape3D"]
 transform = Transform3D(20, 0, 0, 0, 0.005, 0, 0, 0, 0.9, 0, 0, 0)
 mesh = SubResource("BoxMesh_83n0b")
-surface_material_override/0 = SubResource("ORMMaterial3D_cel3d")
+surface_material_override/0 = SubResource("ORMMaterial3D_skxa2")
 script = ExtResource("2_83n0b")
