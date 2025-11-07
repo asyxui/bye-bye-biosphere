@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8s4dif53qa4d"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1o1em"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ucexd"]
+size = Vector3(20, 1, 1)
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_6np6u"]
+albedo_color = Color(0.34901962, 0.25882354, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1o1em"]
+
+[node name="ConveyorBelt" type="Node3D"]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+physics_material_override = SubResource("PhysicsMaterial_1o1em")
+constant_linear_velocity = Vector3(1, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_ucexd")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D/CollisionShape3D"]
+transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+material_override = SubResource("ORMMaterial3D_6np6u")
+mesh = SubResource("BoxMesh_1o1em")
