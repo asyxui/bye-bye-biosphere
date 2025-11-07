@@ -1,11 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://b10q0mm5qd3ir"]
+[gd_scene load_steps=7 format=3 uid="uid://b10q0mm5qd3ir"]
 
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_a5hps"]
+[ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt.tscn" id="2_kqog5"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_pfle4"]
 size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxMesh" id="BoxMesh_a5hps"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kqog5"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_knkkn"]
 
 [node name="Root" type="Node3D"]
 
@@ -20,3 +25,16 @@ mesh = SubResource("BoxMesh_a5hps")
 
 [node name="Player" parent="." instance=ExtResource("1_a5hps")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="ConveyorBelt" parent="." instance=ExtResource("2_kqog5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3522682, 1, -3.8585744)
+
+[node name="box" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8571234, -3.9852517)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box"]
+shape = SubResource("BoxShape3D_kqog5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="box/CollisionShape3D"]
+mesh = SubResource("BoxMesh_knkkn")
+skeleton = NodePath("../..")
