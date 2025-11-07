@@ -1,15 +1,15 @@
 extends Control
 
-@onready var quality_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/QualitySlider
-@onready var quality_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/QualityValue
-@onready var master_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/MasterSlider
-@onready var master_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/MasterValue
-@onready var music_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/MusicSlider
-@onready var music_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/MusicValue
-@onready var sfx_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/SFXSlider
-@onready var sfx_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/SFXValue
-@onready var sensitivity_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Controls/SensitivitySlider
-@onready var sensitivity_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Controls/SensitivityValue
+@onready var quality_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/QualitySlider
+@onready var quality_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/VBoxContainer/QualityValue
+@onready var master_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MasterSlider
+@onready var master_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MasterValue
+@onready var music_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MusicSlider
+@onready var music_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/MusicValue
+@onready var sfx_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/SFXSlider
+@onready var sfx_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/SFXValue
+@onready var sensitivity_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Controls/VBoxContainer/SensitivitySlider
+@onready var sensitivity_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Controls/VBoxContainer/SensitivityValue
 
 const QUALITY_LABELS = ["Very Low", "Low", "Medium", "High", "Ultra"]
 
