@@ -1,0 +1,153 @@
+
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Theme" path="res://Assets/FactoryTheme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://Scripts/SettingsMenu.gd" id="2_script"]
+
+[node name="SettingsMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("1_theme")
+script = ExtResource("2_script")
+
+[node name="Overlay" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.5)
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchor_left = 0.25
+anchor_top = 0.15
+anchor_right = 0.75
+anchor_bottom = 0.85
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+text = "SETTINGS"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 38
+
+[node name="TabContainer" type="TabContainer" parent="Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 400)
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Graphics" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+theme_override_constants/separation = 16
+
+[node name="QualityLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+text = "Graphics Quality"
+theme_override_font_sizes/font_size = 18
+
+[node name="QualitySlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+min_value = 1.0
+max_value = 5.0
+value = 5.0
+tick_count = 5
+ticks_on_borders = true
+
+[node name="QualityValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+text = "Ultra"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="ResolutionLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+text = "Resolution"
+theme_override_font_sizes/font_size = 18
+
+[node name="ResolutionOption" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+items = ["1280x720", "1920x1080", "2560x1440", "3840x2160"]
+selected = 1
+
+[node name="FullscreenCheck" type="CheckBox" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+text = "Fullscreen"
+theme_override_font_sizes/font_size = 16
+
+[node name="VsyncCheck" type="CheckBox" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+text = "V-Sync"
+theme_override_font_sizes/font_size = 16
+button_pressed = true
+
+[node name="Audio" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+theme_override_constants/separation = 16
+
+[node name="MasterLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+text = "Master Volume"
+theme_override_font_sizes/font_size = 18
+
+[node name="MasterSlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+min_value = 0.0
+max_value = 100.0
+value = 75.0
+
+[node name="MasterValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+text = "75%"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="MusicLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+text = "Music Volume"
+theme_override_font_sizes/font_size = 18
+
+[node name="MusicSlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+min_value = 0.0
+max_value = 100.0
+value = 60.0
+
+[node name="MusicValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+text = "60%"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="SFXLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+text = "SFX Volume"
+theme_override_font_sizes/font_size = 18
+
+[node name="SFXSlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+min_value = 0.0
+max_value = 100.0
+value = 80.0
+
+[node name="SFXValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+text = "80%"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="Controls" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+theme_override_constants/separation = 16
+
+[node name="SensitivityLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls"]
+text = "Mouse Sensitivity"
+theme_override_font_sizes/font_size = 18
+
+[node name="SensitivitySlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls"]
+min_value = 0.1
+max_value = 2.0
+step = 0.1
+value = 1.0
+
+[node name="SensitivityValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls"]
+text = "1.0x"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="InvertYCheck" type="CheckBox" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls"]
+text = "Invert Y-Axis"
+theme_override_font_sizes/font_size = 16
+
+[node name="ButtonContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="BackButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(150, 50)
+text = "← Back"
+theme_override_font_sizes/font_size = 22

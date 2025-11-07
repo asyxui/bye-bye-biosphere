@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://caj87l6awn6h4"]
+
+[ext_resource type="Script" uid="uid://e6tmerrhqsye" path="res://Scripts/MenuManager.gd" id="1_menu_manager"]
+[ext_resource type="PackedScene" uid="uid://c2vx7y8qbm3kl" path="res://Scenes/PauseMenu.tscn" id="2_pause_menu"]
+[ext_resource type="PackedScene" uid="uid://dwm8x30aqbk5n" path="res://Scenes/SettingsMenu.tscn" id="3_settings_menu"]
+
+[node name="MenuManager" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_menu_manager")
+
+[node name="PauseMenu" parent="." instance=ExtResource("2_pause_menu")]
+
+[node name="SettingsMenu" parent="." instance=ExtResource("3_settings_menu")]
