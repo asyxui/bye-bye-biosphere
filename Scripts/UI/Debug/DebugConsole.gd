@@ -6,7 +6,7 @@ class_name DebugConsole
 
 @onready var input_line: LineEdit = $ConsolePanel/VBoxContainer/InputLine
 @onready var autocomplete_list: AutoCompleteList = $ConsolePanel/AutoCompleteList
-var autocomplete_script := preload("res://Scripts/AutoCompleteList.gd")
+var autocomplete_script := preload("res://Scripts/UI/AutoCompleteList.gd")
 
 
 var is_console_open: bool = false
@@ -79,6 +79,7 @@ func toggle_console() -> void:
 	console_panel.visible = is_console_open
 	
 	if is_console_open:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		input_line.grab_focus()
 		input_line.clear()
 		history_index = -1
@@ -86,6 +87,7 @@ func toggle_console() -> void:
 		autocomplete_active = false
 	else:
 		input_line.release_focus()
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _on_input_submitted(text: String) -> void:
 	if text.strip_edges().is_empty():
