@@ -1,0 +1,95 @@
+[gd_scene load_steps=11 format=3 uid="uid://c3j0mhe5tttpw"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mqean"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_g24sy"]
+
+[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_mqean"]
+
+[sub_resource type="VoxelGeneratorGraph" id="VoxelGeneratorGraph_62tj5"]
+graph_data = {
+"connections": [[1, 0, 15, 0], [1, 0, 16, 0], [10, 0, 11, 0], [2, 0, 13, 1], [2, 0, 15, 1], [11, 0, 6, 0], [3, 0, 15, 2], [3, 0, 16, 1], [12, 0, 13, 0], [13, 0, 11, 2], [15, 0, 12, 0], [16, 0, 10, 2]],
+"nodes": {
+"1": {
+"gui_position": Vector2(420, 40),
+"type": "InputX"
+},
+"10": {
+"a": 1.0,
+"b": 2.0,
+"gui_position": Vector2(940, 20),
+"threshold": 0.0,
+"type": "Select"
+},
+"11": {
+"b": 0.0,
+"gui_position": Vector2(1240, 80),
+"threshold": 0.0,
+"type": "Select"
+},
+"12": {
+"b": 200.0,
+"gui_position": Vector2(880, 200),
+"type": "Multiply"
+},
+"13": {
+"gui_position": Vector2(1080, 260),
+"type": "Add"
+},
+"15": {
+"auto_connect": true,
+"gui_position": Vector2(640, 200),
+"noise": SubResource("ZN_FastNoiseLite_g24sy"),
+"type": "FastNoise3D"
+},
+"16": {
+"auto_connect": true,
+"gui_position": Vector2(640, 20),
+"noise": SubResource("ZN_FastNoiseLite_mqean"),
+"type": "FastNoise2D"
+},
+"2": {
+"gui_position": Vector2(400, 380),
+"type": "InputY"
+},
+"3": {
+"gui_position": Vector2(400, 200),
+"type": "InputZ"
+},
+"6": {
+"gui_position": Vector2(1420, 80),
+"type": "OutputType"
+}
+},
+"version": 2
+}
+
+[sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_pmkc2"]
+
+[sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_hvvm8"]
+color = Color(0.30323282, 0.30323282, 0.30323282, 1)
+
+[sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_62tj5"]
+color = Color(0.36625546, 0.054711305, 0, 1)
+
+[sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_62tj5"]
+models = Array[VoxelBlockyModel]([SubResource("VoxelBlockyModelEmpty_pmkc2"), SubResource("VoxelBlockyModelCube_hvvm8"), SubResource("VoxelBlockyModelCube_62tj5")])
+
+[sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_pmkc2"]
+library = SubResource("VoxelBlockyLibrary_62tj5")
+
+[sub_resource type="VoxelFormat" id="VoxelFormat_hvvm8"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9217617, 0.3877569, 0, -0.3877569, 0.9217617, 0, 63, -13)
+
+[node name="VoxelViewer" type="VoxelViewer" parent="Camera3D"]
+
+[node name="VoxelTerrain" type="VoxelTerrain" parent="."]
+material_override = SubResource("StandardMaterial3D_mqean")
+generator = SubResource("VoxelGeneratorGraph_62tj5")
+mesher = SubResource("VoxelMesherBlocky_pmkc2")
+format = SubResource("VoxelFormat_hvvm8")
