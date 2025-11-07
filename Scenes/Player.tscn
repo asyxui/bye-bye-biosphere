@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://843h8d3cgi62"]
+[gd_scene load_steps=5 format=3 uid="uid://843h8d3cgi62"]
 
 [ext_resource type="Script" uid="uid://besc3q2wos2ko" path="res://Scripts/Player.gd" id="1_rpqav"]
+[ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt.tscn" id="2_kyqiw"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kyqiw"]
 
@@ -8,6 +9,7 @@
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_rpqav")
+conveyor_scene = ExtResource("2_kyqiw")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_kyqiw")
