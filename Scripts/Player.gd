@@ -6,9 +6,6 @@ const SPRINTING_MODIFIER = 2
 const JUMP_VELOCITY = 7
 const MOUSE_SENSITIVITY = 0.002
 
-func _ready():
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
 func _input(event):
 	# Don't process input when game is paused
 	if get_tree().paused:
@@ -18,10 +15,6 @@ func _input(event):
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
-		
-	if event.is_action_pressed("click"):
-		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _physics_process(delta: float) -> void:
 	# Don't process movement when game is paused

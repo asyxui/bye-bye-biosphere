@@ -1,14 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://c4ya2w6tvc3e6"]
+[gd_scene load_steps=2 format=3 uid="uid://c4ya2w6tvc3e6"]
 
 [ext_resource type="Script" uid="uid://cxywpcs61lnhv" path="res://Scripts/UI/AutoCompleteItem.gd" id="1_ytk2g"]
-
-[sub_resource type="Theme" id="Theme_blyba"]
-
-[sub_resource type="Theme" id="Theme_7cdw5"]
-
+[ext_resource type="Theme" uid="uid://d0jwc6ai43n1w" path="res://Assets/FactoryTheme.tres" id="2_theme"]
 
 [node name="AutoCompleteItem" type="VBoxContainer"]
-theme = SubResource("Theme_blyba")
+theme = ExtResource("2_theme")
 script = ExtResource("1_ytk2g")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
@@ -18,5 +14,4 @@ theme_override_constants/margin_right = 5
 
 [node name="Label" type="Label" parent="MarginContainer"]
 layout_mode = 2
-theme = SubResource("Theme_7cdw5")
 text = ""
