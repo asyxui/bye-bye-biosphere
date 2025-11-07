@@ -1,18 +1,25 @@
-[gd_scene load_steps=11 format=3 uid="uid://c3j0mhe5tttpw"]
+[gd_scene load_steps=13 format=3 uid="uid://c3j0mhe5tttpw"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mqean"]
 vertex_color_use_as_albedo = true
 
 [sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_g24sy"]
+noise_type = 4
+period = 66.6001
 
-[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_mqean"]
+[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_xjdud"]
+
+[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_qjaue"]
+
+[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_3auje"]
+period = 192.6001
 
 [sub_resource type="VoxelGeneratorGraph" id="VoxelGeneratorGraph_62tj5"]
 graph_data = {
-"connections": [[1, 0, 15, 0], [1, 0, 16, 0], [2, 0, 13, 1], [2, 0, 15, 1], [10, 0, 11, 0], [11, 0, 6, 0], [12, 0, 13, 0], [13, 0, 11, 2], [15, 0, 12, 0], [16, 0, 10, 2], [3, 0, 15, 2], [3, 0, 16, 1]],
+"connections": [[1, 0, 15, 0], [1, 0, 17, 0], [2, 0, 13, 1], [2, 0, 15, 1], [2, 0, 17, 2], [2, 0, 42, 0], [10, 0, 11, 0], [11, 0, 41, 1], [12, 0, 13, 0], [13, 0, 11, 2], [15, 0, 12, 0], [3, 0, 15, 2], [3, 0, 17, 1], [17, 0, 10, 2], [33, 0, 34, 0], [34, 0, 47, 0], [35, 0, 37, 0], [36, 0, 35, 0], [37, 0, 40, 1], [38, 0, 36, 0], [38, 0, 36, 1], [40, 0, 46, 0], [41, 0, 6, 0], [42, 0, 33, 0], [42, 0, 33, 1], [43, 0, 44, 0], [44, 0, 42, 1], [46, 0, 41, 2], [47, 0, 40, 0]],
 "nodes": {
 "1": {
-"gui_position": Vector2(420, 40),
+"gui_position": Vector2(260, 140),
 "type": "InputX"
 },
 "10": {
@@ -24,7 +31,7 @@ graph_data = {
 },
 "11": {
 "b": 0.0,
-"gui_position": Vector2(1240, 80),
+"gui_position": Vector2(1320, 140),
 "threshold": 0.0,
 "type": "Select"
 },
@@ -39,26 +46,94 @@ graph_data = {
 },
 "15": {
 "auto_connect": true,
-"gui_position": Vector2(640, 200),
+"gui_position": Vector2(660, 200),
 "noise": SubResource("ZN_FastNoiseLite_g24sy"),
 "type": "FastNoise3D"
 },
-"16": {
+"17": {
 "auto_connect": true,
-"gui_position": Vector2(640, 20),
-"noise": SubResource("ZN_FastNoiseLite_mqean"),
-"type": "FastNoise2D"
+"gui_position": Vector2(660, 0),
+"noise": SubResource("ZN_FastNoiseLite_xjdud"),
+"type": "FastNoise3D"
 },
 "2": {
-"gui_position": Vector2(400, 380),
+"gui_position": Vector2(200, 480),
 "type": "InputY"
 },
 "3": {
-"gui_position": Vector2(400, 200),
+"gui_position": Vector2(280, 340),
 "type": "InputZ"
 },
+"33": {
+"gui_position": Vector2(620, 600),
+"type": "Multiply"
+},
+"34": {
+"b": 0.1,
+"gui_position": Vector2(820, 540),
+"type": "Multiply"
+},
+"35": {
+"b": 32.0,
+"gui_position": Vector2(600, 760),
+"type": "Multiply"
+},
+"36": {
+"gui_position": Vector2(300, 760),
+"type": "Multiply"
+},
+"37": {
+"b": 0.75,
+"gui_position": Vector2(820, 760),
+"type": "Subtract"
+},
+"38": {
+"auto_connect": true,
+"gui_position": Vector2(-80, 760),
+"noise": SubResource("ZN_FastNoiseLite_qjaue"),
+"type": "FastNoise2D",
+"x": 0.0,
+"y": 0.0
+},
+"40": {
+"gui_position": Vector2(1180, 640),
+"type": "Add"
+},
+"41": {
+"a": 0.0,
+"gui_position": Vector2(1520, 260),
+"threshold": 0.0,
+"type": "Select"
+},
+"42": {
+"gui_position": Vector2(420, 580),
+"type": "Add"
+},
+"43": {
+"auto_connect": true,
+"gui_position": Vector2(-260, 520),
+"noise": SubResource("ZN_FastNoiseLite_3auje"),
+"type": "FastNoise2D",
+"x": 0.0,
+"y": 0.0
+},
+"44": {
+"b": 50.0,
+"gui_position": Vector2(-20, 540),
+"type": "Multiply"
+},
+"46": {
+"b": -0.75,
+"gui_position": Vector2(1340, 580),
+"type": "Add"
+},
+"47": {
+"b": -0.25,
+"gui_position": Vector2(980, 500),
+"type": "Add"
+},
 "6": {
-"gui_position": Vector2(1420, 80),
+"gui_position": Vector2(1780, 260),
 "type": "OutputType"
 }
 },
@@ -93,3 +168,4 @@ material_override = SubResource("StandardMaterial3D_mqean")
 generator = SubResource("VoxelGeneratorGraph_62tj5")
 mesher = SubResource("VoxelMesherBlocky_pmkc2")
 format = SubResource("VoxelFormat_hvvm8")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.2592926)
