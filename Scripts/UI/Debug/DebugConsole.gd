@@ -48,7 +48,6 @@ func _ready() -> void:
 	log_message("[color=cyan]Debug Console initialized. Type 'help' for available commands.[/color]")
 
 func _input(event: InputEvent) -> void:
-	# Toggle console with ~ (backtick) key
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_K:
 			toggle_console()
