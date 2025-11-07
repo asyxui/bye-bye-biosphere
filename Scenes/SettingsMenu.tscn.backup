@@ -1,0 +1,337 @@
+[gd_scene load_steps=3 format=3 uid="uid://dwm8x30aqbk5n"]
+
+[ext_resource type="Theme" path="res://Assets/FactoryTheme.tres" id="1_theme"]
+[ext_resource type="Script" uid="uid://c2vphb4qscbn" path="res://Scripts/SettingsMenu.gd" id="2_settings_script"]
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+script = ExtResource("2_settings_script")
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -275.0
+offset_right = 350.0
+offset_bottom = 275.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 42
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TabContainer" type="TabContainer" parent="Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/side_margin = 0
+current_tab = 0
+tabs_visible = true
+
+[node name="Graphics" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+metadata/_tab_index = 0
+
+[node name="Content" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Content" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="QualityLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Graphics Quality"
+
+[node name="QualitySlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+layout_mode = 2
+min_value = 1.0
+max_value = 5.0
+value = 5.0
+tick_count = 5
+ticks_on_borders = true
+
+[node name="QualityValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Ultra"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="ResolutionLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Resolution"
+
+[node name="ResolutionOption" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+
+[node name="ResolutionOption" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+selected = 1
+item_count = 4
+popup/item_0/text = "1280x720"
+popup/item_0/id = 0
+popup/item_1/text = "1920x1080"
+popup/item_1/id = 1
+popup/item_2/text = "2560x1440"
+popup/item_2/id = 2
+popup/item_3/text = "3840x2160"
+popup/item_3/id = 3
+
+[node name="Spacer2" type="Control" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="FullscreenCheck" type="CheckBox" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "  Fullscreen"
+
+[node name="VsyncCheck" type="CheckBox" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Graphics/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+button_pressed = true
+text = "  V-Sync"
+
+[node name="Audio" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+metadata/_tab_index = 1
+
+[node name="Content" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Content" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MasterLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Master Volume"
+
+[node name="MasterSlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+value = 75.0
+
+[node name="MasterValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "75%"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="MusicLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Music Volume"
+
+[node name="MusicSlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+value = 60.0
+
+[node name="MusicValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "60%"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="SFXLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "SFX Volume"
+
+[node name="SFXSlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+value = 80.0
+
+[node name="SFXValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Audio/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "80%"
+horizontal_alignment = 1
+
+[node name="Controls" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+metadata/_tab_index = 2
+
+[node name="Content" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Content" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="SensitivityLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Mouse Sensitivity"
+
+[node name="SensitivitySlider" type="HSlider" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+layout_mode = 2
+min_value = 0.1
+max_value = 2.0
+step = 0.1
+value = 1.0
+
+[node name="SensitivityValue" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "1.0x"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="InvertYCheck" type="CheckBox" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "  Invert Y-Axis"
+
+[node name="Spacer2" type="Control" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="KeybindingsLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Key Bindings"
+
+[node name="KeyBindGrid" type="GridContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/Content"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="ForwardLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 16
+text = "Forward:"
+
+[node name="ForwardKey" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "W"
+
+[node name="BackLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 16
+text = "Backward:"
+
+[node name="BackKey" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "S"
+
+[node name="LeftLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 16
+text = "Left:"
+
+[node name="LeftKey" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "A"
+
+[node name="RightLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 16
+text = "Right:"
+
+[node name="RightKey" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls/KeyBindGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "D"
+
+[node name="ButtonContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="BackButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(150, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "← Back"
