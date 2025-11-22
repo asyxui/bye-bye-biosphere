@@ -82,12 +82,8 @@ func _input(event):
 			InputManager.request_mouse_capture("gameplay")
 
 	if event.is_action_pressed("release_mouse"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 			InputManager.request_mouse_release("gameplay")
-	
-	if event.is_action_released("release_mouse"):
-		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			InputManager.request_mouse_capture("gameplay")
 
 	# Ignore movement input if debug input bar is focused
 	if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
