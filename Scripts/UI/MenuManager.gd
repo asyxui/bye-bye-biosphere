@@ -56,6 +56,7 @@ func _on_settings_pressed():
 	open_settings()
 
 func _on_quit_pressed():
+	MapManager.save_map()
 	get_tree().quit()
 
 func _on_back_pressed():

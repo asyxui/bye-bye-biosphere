@@ -1,11 +1,12 @@
 extends VoxelLodTerrain
 
-var voxelTool = null
+var voxelTool: VoxelTool = null
+var voxelTerrain: VoxelLodTerrain = null
 
 func _ready():
 	CustomLogger.log_info("Initializing MapManager")
-	var terrainNode = get_tree().root.find_child("Terrain", true, false)
-	voxelTool = terrainNode.get_voxel_tool()
+	voxelTerrain = get_tree().root.find_child("Terrain", true, false)
+	voxelTool = voxelTerrain.get_voxel_tool()
 
 func _destroy(origin: Vector3, direction: Vector3):
 	var hit = voxelTool.raycast(origin, direction, 100)
@@ -14,3 +15,6 @@ func _destroy(origin: Vector3, direction: Vector3):
 		voxelTool.channel = VoxelBuffer.CHANNEL_TYPE
 		voxelTool.value = 0
 		voxelTool.do_sphere(hit.position, 5)
+
+func save_map():
+	voxelTerrain.save_modified_blocks()
