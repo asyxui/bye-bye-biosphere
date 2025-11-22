@@ -53,30 +53,31 @@ func get_center_hit() -> Vector3:
 		return Vector3.ZERO
 
 func _input(event):
-	# Don't process input when game is paused
-	if get_tree().paused:
+	# Don't process input when game is paused or modal is active
+	if GameStateManager.is_modal_active():
+		return
+	
+	# Check current input state - only process gameplay input in gameplay state
+	if not InputManager.has_input_focus("gameplay"):
 		return
 		
 	if event.is_action_pressed("click"):
 		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-			DebugConsole.instance.input_line.unedit()
-			DebugConsole.instance.input_line.release_focus()
+			InputManager.request_mouse_capture("gameplay")
 
 	if event.is_action_pressed("release_mouse"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-			DebugConsole.instance.input_line.unedit()
-			DebugConsole.instance.input_line.release_focus()
+			InputManager.request_mouse_release("gameplay")
+	
 	if event.is_action_released("release_mouse"):
 		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			InputManager.request_mouse_capture("gameplay")
 
 	# Ignore movement input if debug input bar is focused
 	if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
 		return
 		
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseMotion and InputManager.is_mouse_captured():
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
@@ -100,7 +101,7 @@ func _input(event):
 					preview_conveyor = null
 				start_pos = Vector3.ZERO
 
-func _process(delta):
+func _process(_delta):
 	if waiting_for_second_press and preview_conveyor != null:
 		var hit_point = get_center_hit()
 		var direction = (hit_point - start_pos).normalized()
