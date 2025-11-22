@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="InventoryItem" load_steps=3 format=3 uid="uid://ben1miq8qteuf"]
+
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="1_eiwwi"]
+[ext_resource type="Texture2D" uid="uid://c55uafcnp1ntd" path="res://Assets/Items/Apple.png" id="1_jnbht"]
+
+[resource]
+script = ExtResource("1_eiwwi")
+id = "1"
+name = "Apple"
+description = "Yummy!"
+max_stack_size = 64
+icon = ExtResource("1_jnbht")
+weight = 1.0
+metadata/_custom_type_script = "uid://dnsa8h5olxgbd"

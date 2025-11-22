@@ -1,0 +1,82 @@
+[gd_scene load_steps=5 format=3 uid="uid://bppx5p1xrv02y"]
+
+[ext_resource type="Script" path="res://Scripts/Inventory/InventorySlot.gd" id="1_ktd0t"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3d4mh"]
+bg_color = Color(0.22, 0.22, 0.24, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.35, 0.38, 1.0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="LabelSettings" id="LabelSettings_u2rp2"]
+font_sizes/font_size = 14
+
+[sub_resource type="LabelSettings" id="LabelSettings_mxdoa"]
+font_sizes/font_size = 11
+
+[node name="InventorySlot" type="PanelContainer"]
+custom_minimum_size = Vector2(100, 100)
+theme_override_styles/panel = SubResource("StyleBoxFlat_3d4mh")
+script = ExtResource("1_ktd0t")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 0
+
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 0
+
+[node name="Spacer1" type="Control" parent="MarginContainer/VBoxContainer/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="QuantityLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = ""
+theme_settings = SubResource("LabelSettings_u2rp2")
+horizontal_alignment = 2
+
+[node name="IconRect" type="TextureRect" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(70, 70)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 4
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "Empty"
+theme_settings = SubResource("LabelSettings_mxdoa")
+clip_text = true
+text_overrun_behavior = 0
+horizontal_alignment = 1

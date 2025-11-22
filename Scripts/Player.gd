@@ -67,9 +67,18 @@ func _input(event):
 	# Check current input state - only process gameplay input in gameplay state
 	if not InputManager.has_input_focus("gameplay"):
 		return
+	
+	# Toggle inventory with inventory action (I key)
+	if event.is_action_pressed("inventory"):
+		# Don't open inventory if debug console input is focused
+		if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
+			return
+		HUDManager.toggle_inventory()
+		return
 		
 	if event.is_action_pressed("click"):
-		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+		# Only capture mouse if no UI is open
+		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and not HUDManager.is_inventory_open() and not HUDManager.is_debug_console_open():
 			InputManager.request_mouse_capture("gameplay")
 
 	if event.is_action_pressed("release_mouse"):

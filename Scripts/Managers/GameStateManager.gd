@@ -20,6 +20,12 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("menu"):
 		toggle_pause_menu()
 		get_viewport().set_input_as_handled()
+	# Handle debug console toggle with K
+	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_K:
+		# Only open console with K when not already open
+		if not is_console_open:
+			open_console()
+			get_viewport().set_input_as_handled()
 
 ## Toggle pause menu and game state
 func toggle_pause_menu() -> void:
@@ -70,6 +76,10 @@ func open_console() -> void:
 	is_console_open = true
 	# Release mouse - use empty string to force release regardless of reason
 	InputManager.request_mouse_release("")
+	
+	# Show console through HUDManager
+	HUDManager.set_debug_console_visible(true)
+	
 	console_opened.emit()
 
 ## Close debug console
@@ -78,6 +88,10 @@ func close_console() -> void:
 		return
 	
 	is_console_open = false
+	
+	# Hide console through HUDManager
+	HUDManager.set_debug_console_visible(false)
+	
 	# Return to previous state (gameplay or menu)
 	if is_menu_open:
 		# Stay in menu, don't capture mouse
