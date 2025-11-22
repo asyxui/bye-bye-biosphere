@@ -26,6 +26,9 @@ static var _log_buffer: Array = []
 static var _max_buffer_size: int = 100
 
 func _ready() -> void:
+	# Enable input processing
+	set_process_input(true)
+	
 	# Register this instance as the singleton
 	DebugConsole.instance = self
 
@@ -36,6 +39,10 @@ func _ready() -> void:
 	input_line.text_submitted.connect(_on_input_submitted)
 	autocomplete_list.suggestion_selected.connect(_on_autocomplete_selected)
 	input_line.text_changed.connect(_on_input_text_changed)
+	
+	# Connect to GameStateManager signals
+	GameStateManager.console_opened.connect(_on_console_opened)
+	GameStateManager.console_closed.connect(_on_console_closed)
 	
 	# Register commands
 	register_command("help", "Display all available commands", _cmd_help)
@@ -50,9 +57,9 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_K:
-			toggle_console()
+			GameStateManager.toggle_console()
 			get_viewport().set_input_as_handled()
-		elif is_console_open:
+		elif GameStateManager.is_console_open:
 			# Handle up/down for command history
 			if event.keycode == KEY_UP:
 				if autocomplete_active:
@@ -75,6 +82,9 @@ func _input(event: InputEvent) -> void:
 
 func toggle_console() -> void:
 	is_console_open = !is_console_open
+	_update_console_ui()
+
+func _update_console_ui() -> void:
 	console_panel.visible = is_console_open
 	
 	if is_console_open:
@@ -85,6 +95,14 @@ func toggle_console() -> void:
 		autocomplete_active = false
 	else:
 		input_line.release_focus()
+
+func _on_console_opened():
+	is_console_open = true
+	_update_console_ui()
+
+func _on_console_closed():
+	is_console_open = false
+	_update_console_ui()
 
 func _on_input_submitted(text: String) -> void:
 	if text.strip_edges().is_empty():

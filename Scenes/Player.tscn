@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://843h8d3cgi62"]
 
 [ext_resource type="Script" uid="uid://besc3q2wos2ko" path="res://Scripts/Player.gd" id="1_rpqav"]
-[ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt.tscn" id="2_kyqiw"]
+[ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt/ConveyorBelt.tscn" id="2_kyqiw"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kyqiw"]
 

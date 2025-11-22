@@ -11,6 +11,7 @@ const CONVEYOR_SCENE_LENGTH = 20.0
 const RAY_LENGTH = 20.0
 
 var waiting_for_second_press := false
+var conveyor_reversal:= false
 var start_pos: Vector3
 var preview_conveyor: StaticBody3D
 
@@ -59,30 +60,31 @@ func get_direction() -> Vector3:
 	return - camera.get_global_transform_interpolated().basis.z.normalized()
 
 func _input(event):
-	# Don't process input when game is paused
-	if get_tree().paused:
+	# Don't process input when game is paused or modal is active
+	if GameStateManager.is_modal_active():
+		return
+	
+	# Check current input state - only process gameplay input in gameplay state
+	if not InputManager.has_input_focus("gameplay"):
 		return
 		
 	if event.is_action_pressed("click"):
 		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-			DebugConsole.instance.input_line.unedit()
-			DebugConsole.instance.input_line.release_focus()
+			InputManager.request_mouse_capture("gameplay")
 
 	if event.is_action_pressed("release_mouse"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-			DebugConsole.instance.input_line.unedit()
-			DebugConsole.instance.input_line.release_focus()
+			InputManager.request_mouse_release("gameplay")
+	
 	if event.is_action_released("release_mouse"):
 		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			InputManager.request_mouse_capture("gameplay")
 
 	# Ignore movement input if debug input bar is focused
 	if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
 		return
 		
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseMotion and InputManager.is_mouse_captured():
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
@@ -92,6 +94,12 @@ func _input(event):
 		if hit_point != Vector3.ZERO:
 			if !waiting_for_second_press:
 				waiting_for_second_press = true
+				var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
+				if snap_point:
+					hit_point = snap_point.global_position
+					if snap_point.point_type == ConnectionPoint.PointType.START:
+						conveyor_reversal = true
+				
 				start_pos = hit_point
 				# Instantiate preview conveyor
 				if preview_conveyor == null:
@@ -100,7 +108,11 @@ func _input(event):
 			else:
 				# Second click → finalize conveyor
 				waiting_for_second_press = false
-				spawn_conveyor(start_pos, hit_point)
+				if conveyor_reversal:
+					spawn_conveyor(hit_point, start_pos)
+				else:
+					spawn_conveyor(start_pos, hit_point)
+				conveyor_reversal = false
 				if preview_conveyor:
 					preview_conveyor.queue_free()
 					preview_conveyor = null
@@ -110,12 +122,15 @@ func _input(event):
 		MapManager._destroy(get_origin(), get_direction())
 		
 
-func _process(delta):
+func _process(_delta):
 	if waiting_for_second_press and preview_conveyor != null:
 		var hit_point = get_center_hit()
 		var direction = (hit_point - start_pos).normalized()
 		var mid = (start_pos + hit_point) / 2.0
 		var length = start_pos.distance_to(hit_point)
+
+		if conveyor_reversal:
+			direction = -direction
 
 		# Build basis for rotation
 		var basis = Basis()

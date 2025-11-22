@@ -1,9 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://c8s4dif53qa4d"]
+[gd_scene load_steps=14 format=3 uid="uid://c8s4dif53qa4d"]
 
 [ext_resource type="Texture2D" uid="uid://b5iurlx3gkmq2" path="res://Assets/Conveyor/background-with-metallic-grid-texture.jpg" id="1_cel3d"]
 [ext_resource type="Texture2D" uid="uid://c2m5oglu1ecu" path="res://Assets/Conveyor/Texturelabs_Concrete_181L.jpg" id="1_rkfof"]
-[ext_resource type="Script" uid="uid://wsgtjfircds6" path="res://Scripts/ConveyorBelt.gd" id="2_83n0b"]
-[ext_resource type="Script" uid="uid://uk6bt2gcdsx3" path="res://Scenes/ConveyorPhysics.gd" id="2_skxa2"]
+[ext_resource type="Script" uid="uid://wsgtjfircds6" path="res://Scripts/ConveyorBelt/ConveyorBelt.gd" id="2_83n0b"]
+[ext_resource type="Script" uid="uid://uk6bt2gcdsx3" path="res://Scripts/ConveyorBelt/ConveyorPhysics.gd" id="2_skxa2"]
+[ext_resource type="PackedScene" uid="uid://ct5hbibsxlcre" path="res://Scenes/ConveyorBelt/StartNode.tscn" id="5_n7hj5"]
+[ext_resource type="PackedScene" uid="uid://bmodpey6blh6e" path="res://Scenes/ConveyorBelt/EndNode.tscn" id="6_0ieqd"]
+[ext_resource type="Script" uid="uid://dei4ocjq2dock" path="res://Scripts/ConveyorBelt/ConnectionPoint.gd" id="7_8nexv"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ucexd"]
 size = Vector3(20, 1, 1)
@@ -56,3 +59,11 @@ transform = Transform3D(20, 0, 0, 0, 0.005, 0, 0, 0, 0.9, 0, 0, 0)
 mesh = SubResource("BoxMesh_83n0b")
 surface_material_override/0 = SubResource("ORMMaterial3D_skxa2")
 script = ExtResource("2_83n0b")
+
+[node name="StartNode" parent="." instance=ExtResource("5_n7hj5")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, 0)
+
+[node name="EndNode" parent="." instance=ExtResource("6_0ieqd")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, 0)
+script = ExtResource("7_8nexv")
+point_type = 1
