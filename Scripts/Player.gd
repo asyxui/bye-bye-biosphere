@@ -11,6 +11,7 @@ const CONVEYOR_SCENE_LENGTH = 20.0
 const RAY_LENGTH = 20.0
 
 var waiting_for_second_press := false
+var conveyor_reversal:= false
 var start_pos: Vector3
 var preview_conveyor: StaticBody3D
 
@@ -86,6 +87,12 @@ func _input(event):
 		if hit_point != Vector3.ZERO:
 			if !waiting_for_second_press:
 				waiting_for_second_press = true
+				var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
+				if snap_point:
+					hit_point = snap_point.global_position
+					if snap_point.point_type == ConnectionPoint.PointType.START:
+						conveyor_reversal = true
+				
 				start_pos = hit_point
 				# Instantiate preview conveyor
 				if preview_conveyor == null:
@@ -94,7 +101,11 @@ func _input(event):
 			else:
 				# Second click → finalize conveyor
 				waiting_for_second_press = false
-				spawn_conveyor(start_pos, hit_point)
+				if conveyor_reversal:
+					spawn_conveyor(hit_point, start_pos)
+				else:
+					spawn_conveyor(start_pos, hit_point)
+				conveyor_reversal = false
 				if preview_conveyor:
 					preview_conveyor.queue_free()
 					preview_conveyor = null
@@ -106,6 +117,9 @@ func _process(delta):
 		var direction = (hit_point - start_pos).normalized()
 		var mid = (start_pos + hit_point) / 2.0
 		var length = start_pos.distance_to(hit_point)
+
+		if conveyor_reversal:
+			direction = -direction
 
 		# Build basis for rotation
 		var basis = Basis()

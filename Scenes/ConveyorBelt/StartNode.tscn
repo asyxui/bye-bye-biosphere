@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://ct5hbibsxlcre"]
+
+[ext_resource type="Script" uid="uid://dei4ocjq2dock" path="res://Scripts/ConveyorBelt/ConnectionPoint.gd" id="1_w2isd"]
+
+[node name="StartNode" type="Node3D"]
+script = ExtResource("1_w2isd")
+
+[node name="Marker3D" type="Marker3D" parent="."]
