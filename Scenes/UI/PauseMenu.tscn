@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c2vx7y8qbm3kl"]
 
-[ext_resource type="Theme" uid="uid://d0jwc6ai43n1w" path="res://Assets/FactoryTheme.tres" id="1_theme"]
+[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/FactoryTheme.tres" id="1_theme"]
 
 [node name="PauseMenu" type="Control"]
 layout_mode = 3

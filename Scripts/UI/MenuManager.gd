@@ -3,9 +3,10 @@ extends CanvasLayer
 @onready var pause_menu = $PauseMenu
 @onready var settings_menu = $SettingsMenu
 
-var is_paused = false
-
 func _ready():
+	# Enable input processing
+	set_process_input(true)
+	
 	# Hide menus initially
 	pause_menu.hide()
 	settings_menu.hide()
@@ -13,31 +14,24 @@ func _ready():
 	# Connect signals
 	connect_pause_menu_signals()
 	connect_settings_menu_signals()
-
-func _input(event):
-	if event.is_action_pressed("menu"):
-		toggle_pause()
-
-func toggle_pause():
-	is_paused = !is_paused
 	
-	if is_paused:
-		open_pause_menu()
-	else:
-		close_all_menus()
+	# Connect to GameStateManager signals
+	GameStateManager.menu_opened.connect(_on_menu_opened)
+	GameStateManager.menu_closed.connect(_on_menu_closed)
 
-func open_pause_menu():
+func _input(event: InputEvent) -> void:
+	# If menu is open, allow ESC to close it
+	if GameStateManager.is_menu_open and event.is_action_pressed("menu"):
+		GameStateManager.close_menu()
+		get_viewport().set_input_as_handled()
+
+func _on_menu_opened():
 	pause_menu.show()
 	settings_menu.hide()
-	get_tree().paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
-func close_all_menus():
+func _on_menu_closed():
 	pause_menu.hide()
 	settings_menu.hide()
-	get_tree().paused = false
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	is_paused = false
 
 func open_settings():
 	pause_menu.hide()
@@ -56,7 +50,7 @@ func connect_settings_menu_signals():
 	settings_menu.get_node("Panel/MarginContainer/VBoxContainer/ButtonContainer/BackButton").pressed.connect(_on_back_pressed)
 
 func _on_resume_pressed():
-	toggle_pause()
+	GameStateManager.close_menu()
 
 func _on_settings_pressed():
 	open_settings()

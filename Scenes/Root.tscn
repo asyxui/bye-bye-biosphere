@@ -1,8 +1,8 @@
 [gd_scene load_steps=14 format=3 uid="uid://b10q0mm5qd3ir"]
 
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_a5hps"]
-[ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
-[ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt/ConveyorBelt.tscn" id="2_kqog5"]
+[ext_resource type="Script" path="res://Scripts/Main.gd" id="1_oss8w"]
+[ext_resource type="PackedScene" uid="uid://c8s4dif53qa4d" path="res://Scenes/ConveyorBelt.tscn" id="2_kqog5"]
 [ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/UI/MenuManager.tscn" id="3_menu_manager"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="4_debug_console"]
 [ext_resource type="PackedScene" uid="uid://c3gynxmj3suco" path="res://Scenes/UI/HUD.tscn" id="6_pl8e4"]
