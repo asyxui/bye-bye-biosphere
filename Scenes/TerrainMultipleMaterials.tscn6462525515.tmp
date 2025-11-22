@@ -1,12 +1,12 @@
-[gd_scene load_steps=19 format=3 uid="uid://c3j0mhe5tttpw"]
+[gd_scene load_steps=20 format=3 uid="uid://c3j0mhe5tttpw"]
 
+[ext_resource type="Script" uid="uid://ucxqqw8klj6s" path="res://Scripts/MapManager.gd" id="1_5k46t"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
 [ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/UI/MenuManager.tscn" id="2_qw7le"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="3_5k46t"]
-[ext_resource type="PackedScene" path="res://Scenes/UI/HUD.tscn" id="4_rwtwo"]
+[ext_resource type="PackedScene" uid="uid://c3gynxmj3suco" path="res://Scenes/UI/HUD.tscn" id="4_rwtwo"]
 
 [sub_resource type="VoxelStreamSQLite" id="VoxelStreamSQLite_rwtwo"]
-database_path = "user://save.sqlite"
 
 [sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_qw7le"]
 noise_type = 4
@@ -128,7 +128,7 @@ library = SubResource("VoxelBlockyLibrary_50gmx")
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Terrain" type="VoxelLodTerrain" parent="."]
+[node name="VoxelLodTerrain" type="VoxelLodTerrain" parent="."]
 view_distance = 1024
 lod_distance = 60.0
 cache_generated_blocks = true
@@ -137,14 +137,7 @@ generator = SubResource("VoxelGeneratorGraph_m0emh")
 mesher = SubResource("VoxelMesherBlocky_qw7le")
 format = SubResource("VoxelFormat_5k46t")
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 314.8753, 0, 0.2592926)
-
-[node name="MenuManager" parent="Terrain" instance=ExtResource("2_qw7le")]
-layer = 3
-
-[node name="DebugConsole" parent="Terrain" instance=ExtResource("3_5k46t")]
-layer = 2
-
-[node name="Hud" parent="Terrain" instance=ExtResource("4_rwtwo")]
+script = ExtResource("1_5k46t")
 
 [node name="Player" parent="." instance=ExtResource("1_qjaue")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.44755, 59.13068, 35.161316)

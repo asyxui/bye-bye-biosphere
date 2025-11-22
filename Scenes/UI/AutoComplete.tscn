@@ -1,7 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bdcmrcsl10x5g"]
+[gd_scene load_steps=3 format=3 uid="uid://bdcmrcsl10x5g"]
 
 [ext_resource type="Script" uid="uid://dlf61kyvbn5rf" path="res://Scripts/UI/AutoCompleteList.gd" id="2_ekmgs"]
-[ext_resource type="Theme" uid="uid://d0jwc6ai43n1w" path="res://Assets/FactoryTheme.tres" id="3_theme"]
+[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/FactoryTheme.tres" id="3_theme"]
 
 [node name="AutoCompleteList" type="PanelContainer"]
 offset_right = 300.0
