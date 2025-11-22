@@ -53,6 +53,12 @@ func get_center_hit() -> Vector3:
 	else:
 		return Vector3.ZERO
 
+func get_origin() -> Vector3:
+	return camera.get_global_transform().origin
+	
+func get_direction() -> Vector3:
+	return - camera.get_global_transform_interpolated().basis.z.normalized()
+
 func _input(event):
 	# Don't process input when game is paused or modal is active
 	if GameStateManager.is_modal_active():
@@ -111,6 +117,10 @@ func _input(event):
 					preview_conveyor.queue_free()
 					preview_conveyor = null
 				start_pos = Vector3.ZERO
+				
+	if event.is_action_pressed("destroy_test"):
+		MapManager._destroy(get_origin(), get_direction())
+		
 
 func _process(_delta):
 	if waiting_for_second_press and preview_conveyor != null:

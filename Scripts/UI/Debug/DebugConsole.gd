@@ -240,6 +240,7 @@ func _cmd_clear(_args: Array) -> void:
 
 func _cmd_quit(_args: Array) -> void:
 	log_message("[color=orange]Quitting game...[/color]")
+	MapManager.save_map()
 	await get_tree().create_timer(0.5).timeout
 	get_tree().quit()
 
