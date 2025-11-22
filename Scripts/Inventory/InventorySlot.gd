@@ -129,7 +129,7 @@ func show_drag_preview() -> void:
 
 ## Show visual feedback for drag target
 func show_drag_target() -> void:
-	var stylebox = load("res://Scripts/Inventory/InventorySlotSelected.tres")
+	var stylebox = load("res://Resources/Inventory/InventorySlotSelected.tres")
 	if stylebox:
 		add_theme_stylebox_override("panel", stylebox)
 
