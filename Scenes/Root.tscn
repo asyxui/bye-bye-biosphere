@@ -142,7 +142,8 @@ transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 314.8753, 0, 0.25929
 layer = 3
 
 [node name="DebugConsole" parent="Terrain" instance=ExtResource("3_5k46t")]
-layer = 2
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Hud" parent="Terrain" instance=ExtResource("4_rwtwo")]
 
@@ -159,6 +160,7 @@ shape = SubResource("SeparationRayShape3D_qjaue")
 layer = 3
 
 [node name="DebugConsole" parent="." instance=ExtResource("3_5k46t")]
-layer = 2
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Hud" parent="." instance=ExtResource("4_rwtwo")]

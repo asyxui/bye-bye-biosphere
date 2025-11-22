@@ -3,7 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://dfchf2ldpehh" path="res://Scenes/Inventory/InventoryUI.tscn" id="1_inventory"]
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="2_debug"]
-[ext_resource type="Script" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
 
 [node name="Hud" type="CanvasLayer"]
 
@@ -47,8 +46,9 @@ offset_bottom = 30.0
 color = Color(0, 0, 0, 1)
 
 [node name="ActionBar" type="Control" parent="."]
+z_index = -1
 layout_mode = 3
-anchors_preset = 10
+anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -61,20 +61,18 @@ script = ExtResource("1_kqhfj")
 
 [node name="ActionGrid" type="GridContainer" parent="ActionBar"]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 560.0
 offset_bottom = 70.0
-columns = 10
 theme_override_constants/h_separation = 5
 theme_override_constants/v_separation = 5
+columns = 10
 
 [node name="ActionSlotTemplate" type="PanelContainer" parent="ActionBar/ActionGrid"]
-layout_mode = 2
 custom_minimum_size = Vector2(55, 65)
+layout_mode = 2
 
 [node name="ColorRect" type="ColorRect" parent="ActionBar/ActionGrid/ActionSlotTemplate"]
-layout_mode = 0
+layout_mode = 2
 color = Color(0.2, 0.2, 0.2, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ActionBar/ActionGrid/ActionSlotTemplate"]
@@ -82,19 +80,18 @@ layout_mode = 2
 theme_override_constants/separation = 0
 
 [node name="Label" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
+custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 size_flags_vertical = 2
+theme_override_font_sizes/font_size = 10
 text = "Tool"
 horizontal_alignment = 1
 vertical_alignment = 1
-custom_minimum_size = Vector2(0, 35)
 clip_text = true
-theme_override_font_sizes/font_size = 10
 
 [node name="Hotkey" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 size_flags_vertical = 2
 text = "[1]"
 horizontal_alignment = 1
-vertical_alignment = 0
-custom_minimum_size = Vector2(0, 20)
