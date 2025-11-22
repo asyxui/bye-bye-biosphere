@@ -27,6 +27,7 @@ mesh = SubResource("CapsuleMesh_gntrk")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.60367095, -0.20594597)
+cull_mask = 1048319
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
 transform = Transform3D(1.0000002, 0, 0, 0, -4.3711392e-08, -1.0000001, 0, 1.0000001, -4.3711392e-08, 0, 0, -1)
@@ -34,8 +35,10 @@ shape = SubResource("SeparationRayShape3D_kyqiw")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.17240953, 0, 0, 0, 0.14826003, 0, 0, 0, 0.104667045, 0.11500636, 0.63063323, -0.6374414)
+layers = 256
 mesh = SubResource("SphereMesh_gntrk")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.17240953, 0, 0, 0, 0.14826003, 0, 0, 0, 0.104667045, -0.115, 0.631, -0.637)
+layers = 256
 mesh = SubResource("SphereMesh_gntrk")
