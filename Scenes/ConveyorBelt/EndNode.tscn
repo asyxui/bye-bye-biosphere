@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://bmodpey6blh6e"]
+
+[node name="EndNode" type="Node3D"]
+
+[node name="Marker3D" type="Marker3D" parent="."]

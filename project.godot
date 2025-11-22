@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+ConveyorConnectionManager="*res://Scripts/ConveyorBelt/ConveyorConnectionManager.gd"
 InputManager="*res://Scripts/Managers/InputManager.gd"
 GameStateManager="*res://Scripts/Managers/GameStateManager.gd"
 
