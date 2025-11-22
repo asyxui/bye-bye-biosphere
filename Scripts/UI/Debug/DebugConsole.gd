@@ -48,7 +48,6 @@ func _ready() -> void:
 	log_message("[color=cyan]Debug Console initialized. Type 'help' for available commands.[/color]")
 
 func _input(event: InputEvent) -> void:
-	# Toggle console with ~ (backtick) key
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_K:
 			toggle_console()
@@ -79,7 +78,6 @@ func toggle_console() -> void:
 	console_panel.visible = is_console_open
 	
 	if is_console_open:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		input_line.grab_focus()
 		input_line.clear()
 		history_index = -1
@@ -87,7 +85,6 @@ func toggle_console() -> void:
 		autocomplete_active = false
 	else:
 		input_line.release_focus()
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _on_input_submitted(text: String) -> void:
 	if text.strip_edges().is_empty():

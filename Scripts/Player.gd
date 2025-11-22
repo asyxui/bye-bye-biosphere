@@ -14,9 +14,6 @@ var waiting_for_second_press := false
 var start_pos: Vector3
 var preview_conveyor: StaticBody3D
 
-func _ready():
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
 func spawn_conveyor(start: Vector3, end: Vector3):
 	var conveyor = conveyor_scene.instantiate()
 
@@ -60,18 +57,29 @@ func _input(event):
 	if get_tree().paused:
 		return
 		
+	if event.is_action_pressed("click"):
+		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			DebugConsole.instance.input_line.unedit()
+			DebugConsole.instance.input_line.release_focus()
+
+	if event.is_action_pressed("release_mouse"):
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			DebugConsole.instance.input_line.unedit()
+			DebugConsole.instance.input_line.release_focus()
+	if event.is_action_released("release_mouse"):
+		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+	# Ignore movement input if debug input bar is focused
+	if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
+		return
+		
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
-		
-	if event.is_action_pressed("click"):
-		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-			
-	if event.is_action_pressed("menu"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			
 	if event.is_action_pressed("place_conveyor"):
 		var hit_point = get_center_hit()
@@ -114,10 +122,14 @@ func _physics_process(delta: float) -> void:
 	# Don't process movement when game is paused
 	if get_tree().paused:
 		return
-		
+
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+
+	# Ignore movement input if debug input bar is focused
+	if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
+		return
 
 	# Handle jump.
 	if Input.is_action_just_pressed("jump") and is_on_floor():
@@ -128,9 +140,9 @@ func _physics_process(delta: float) -> void:
 	var is_sprinting = Input.is_action_pressed("sprint")
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	
+
 	var current_speed = SPEED if not is_sprinting else SPEED * SPRINTING_MODIFIER
-	
+
 	if direction:
 		velocity.x = direction.x * current_speed
 		velocity.z = direction.z * current_speed
