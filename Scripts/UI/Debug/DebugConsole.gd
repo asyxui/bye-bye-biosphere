@@ -1,4 +1,4 @@
-extends CanvasLayer
+extends Control
 class_name DebugConsole
 
 @onready var console_panel: Panel = $ConsolePanel
@@ -6,6 +6,7 @@ class_name DebugConsole
 
 @onready var input_line: LineEdit = $ConsolePanel/VBoxContainer/InputLine
 @onready var autocomplete_list: AutoCompleteList = $ConsolePanel/AutoCompleteList
+@onready var close_button: Button = $ConsolePanel/VBoxContainer/TitleBar/CloseButton
 var autocomplete_script := preload("res://Scripts/UI/AutoCompleteList.gd")
 
 
@@ -33,16 +34,15 @@ func _ready() -> void:
 	DebugConsole.instance = self
 
 	# Start hidden
+	visible = false
 	console_panel.visible = false
 	
 	# Connect signals
 	input_line.text_submitted.connect(_on_input_submitted)
 	autocomplete_list.suggestion_selected.connect(_on_autocomplete_selected)
 	input_line.text_changed.connect(_on_input_text_changed)
-	
-	# Connect to GameStateManager signals
-	GameStateManager.console_opened.connect(_on_console_opened)
-	GameStateManager.console_closed.connect(_on_console_closed)
+	visibility_changed.connect(_on_visibility_changed)
+	# close_button.pressed signal is already connected in the scene editor
 	
 	# Register commands
 	register_command("help", "Display all available commands", _cmd_help)
@@ -55,36 +55,25 @@ func _ready() -> void:
 	log_message("[color=cyan]Debug Console initialized. Type 'help' for available commands.[/color]")
 
 func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+	
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_K:
-			GameStateManager.toggle_console()
+		# Handle Escape to close console
+		if event.keycode == KEY_ESCAPE:
+			GameStateManager.close_console()
 			get_viewport().set_input_as_handled()
-		elif GameStateManager.is_console_open:
-			# Handle up/down for command history
-			if event.keycode == KEY_UP:
-				if autocomplete_active:
-					autocomplete_list.move_selection(-1)
-					get_viewport().set_input_as_handled()
-				else:
-					navigate_history(-1)
-					get_viewport().set_input_as_handled()
-			elif event.keycode == KEY_DOWN:
-				if autocomplete_active:
-					autocomplete_list.move_selection(1)
-					get_viewport().set_input_as_handled()
-				else:
-					navigate_history(1)
-					get_viewport().set_input_as_handled()
-			elif event.keycode == KEY_TAB:
-				if autocomplete_active:
-					autocomplete_list.accept_selected()
-					get_viewport().set_input_as_handled()
+		# Handle Tab for autocomplete
+		elif event.keycode == KEY_TAB and input_line.has_focus() and autocomplete_active:
+			autocomplete_list.accept_selected()
+			get_viewport().set_input_as_handled()
 
 func toggle_console() -> void:
 	is_console_open = !is_console_open
 	_update_console_ui()
 
 func _update_console_ui() -> void:
+	is_console_open = visible
 	console_panel.visible = is_console_open
 	
 	if is_console_open:
@@ -96,13 +85,11 @@ func _update_console_ui() -> void:
 	else:
 		input_line.release_focus()
 
-func _on_console_opened():
-	is_console_open = true
+func _on_visibility_changed() -> void:
 	_update_console_ui()
 
-func _on_console_closed():
-	is_console_open = false
-	_update_console_ui()
+func _on_close_button_pressed() -> void:
+	HUDManager.toggle_debug_console()
 
 func _on_input_submitted(text: String) -> void:
 	if text.strip_edges().is_empty():

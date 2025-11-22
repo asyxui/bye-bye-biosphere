@@ -4,11 +4,15 @@
 [ext_resource type="PackedScene" uid="uid://bdcmrcsl10x5g" path="res://Scenes/UI/AutoComplete.tscn" id="2_246ex"]
 [ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/FactoryTheme.tres" id="3_theme"]
 
-[node name="DebugConsole" type="CanvasLayer"]
-layer = 100
+[node name="DebugConsole" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 script = ExtResource("1_hn5yb")
 
 [node name="ConsolePanel" type="Panel" parent="."]
+layout_mode = 0
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 300.0
@@ -26,6 +30,21 @@ offset_right = -5.0
 offset_bottom = -5.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="TitleBar" type="HBoxContainer" parent="ConsolePanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="Title" type="Label" parent="ConsolePanel/VBoxContainer/TitleBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Debug Console"
+
+[node name="CloseButton" type="Button" parent="ConsolePanel/VBoxContainer/TitleBar"]
+layout_mode = 2
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(30, 30)
+text = "X"
 
 [node name="OutputLog" type="RichTextLabel" parent="ConsolePanel/VBoxContainer"]
 layout_mode = 2
@@ -53,4 +72,4 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[connection signal="focus_entered" from="ConsolePanel/VBoxContainer/InputLine" to="." method="_on_input_line_focus_entered"]
+[connection signal="pressed" from="ConsolePanel/VBoxContainer/TitleBar/CloseButton" to="." method="_on_close_button_pressed"]
