@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://c3gynxmj3suco"]
+[gd_scene load_steps=5 format=3 uid="uid://c3gynxmj3suco"]
 
 [ext_resource type="PackedScene" uid="uid://dfchf2ldpehh" path="res://Scenes/Inventory/InventoryUI.tscn" id="1_inventory"]
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="2_debug"]
+[ext_resource type="PackedScene" uid="uid://bsjr6j0kx6eg8" path="res://Scenes/UI/ToolPickerWheel.tscn" id="3_tool_wheel"]
 
 [node name="Hud" type="CanvasLayer"]
 
@@ -54,7 +55,8 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -280.0
-offset_top = -80.0
+offset_top = -98.0
+offset_bottom = -18.0
 grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("1_kqhfj")
@@ -79,8 +81,13 @@ color = Color(0.2, 0.2, 0.2, 1)
 layout_mode = 2
 theme_override_constants/separation = 0
 
+[node name="TextureRect" type="TextureRect" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
+custom_minimum_size = Vector2(55, 55)
+layout_mode = 2
+size_flags_vertical = 2
+stretch_mode = 5
+
 [node name="Label" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
-custom_minimum_size = Vector2(0, 35)
 layout_mode = 2
 size_flags_vertical = 2
 theme_override_font_sizes/font_size = 10
@@ -90,8 +97,10 @@ vertical_alignment = 1
 clip_text = true
 
 [node name="Hotkey" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
-custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 size_flags_vertical = 2
 text = "[1]"
 horizontal_alignment = 1
+
+[node name="ToolPickerWheel" parent="." instance=ExtResource("3_tool_wheel")]
+visible = false
