@@ -100,6 +100,7 @@ func configure_stream(slot_id: String) -> bool:
 	
 	# Create new stream with the correct path
 	voxel_stream = VoxelStreamSQLite.new()
+	voxel_stream.save_generator_output = true
 	voxel_stream.database_path = voxel_db_path
 	CustomLogger.log_info("Created new VoxelStreamSQLite with database_path: %s" % voxel_db_path)
 	
