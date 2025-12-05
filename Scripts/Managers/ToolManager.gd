@@ -79,16 +79,6 @@ func activate_tool(slot_index: int) -> void:
 	
 	var tool = hotbar_tools[slot_index]
 	if tool:
-		# Check if this tool is already active - if so, just call execute again
-		# This allows multi-click tools to maintain state between clicks
-		if active_tool_instance:
-			# Tool already active, call execute again (tool will use cached player)
-			# Don't pass player here - the tool has it cached
-			active_tool_instance.execute(null)
-		else:
-			# First activation - will be set by Player when it receives the signal
-			pass
-		
 		# Emit signal - Player will listen for this and activate the tool itself
 		tool_activated.emit(tool.id, slot_index)
 	else:

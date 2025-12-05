@@ -23,7 +23,7 @@ func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
 			active_tool.get_script().resource_path == tool.tool_script_path and
 			active_tool._is_active):  # Only reuse if tool is still active (multi-step)
 			# Same tool and still active, execute again (for multi-click tools like conveyor)
-			active_tool = ToolManager.active_tool_instance
+			active_tool.execute(null)  # Pass null since player is already cached
 		else:
 			# Different tool, no active tool, or tool finished (single-step), create a new instance
 			var tool_instance = ToolManager.tool_executor.execute_tool(tool, self)
