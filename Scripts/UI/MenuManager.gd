@@ -13,6 +13,16 @@ func _ready():
 	# Enable input processing
 	set_process_input(true)
 	
+	# Update current_save_slot from root meta if it was set during startup
+	var root = get_tree().root
+	if root.has_meta("current_save_slot"):
+		current_save_slot = root.get_meta("current_save_slot")
+	else:
+		# Also check VoxelStreamManager for the current slot
+		var voxel_stream_manager = get_node_or_null("/root/VoxelStreamManager")
+		if voxel_stream_manager:
+			current_save_slot = voxel_stream_manager.get_current_slot()
+	
 	# Hide menus initially
 	pause_menu.hide()
 	settings_menu.hide()
@@ -175,7 +185,12 @@ func _on_slot_selection_back() -> void:
 ## Handle save completion
 func _on_save_completed(success: bool, error_message: String) -> void:
 	if success:
-		CustomLogger.log_info("Game saved to slot: %s" % current_save_slot)
+		# Use the root meta as source of truth for current slot
+		var slot_id = current_save_slot
+		var tree = get_tree()
+		if tree and tree.root and tree.root.has_meta("current_save_slot"):
+			slot_id = tree.root.get_meta("current_save_slot")
+		CustomLogger.log_info("Game saved to slot: %s" % slot_id)
 	else:
 		push_error("Failed to save game: %s" % error_message)
 
