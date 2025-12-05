@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://bupxsdp2yg6r6"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aw8k8"]
+albedo_color = Color(0.34407577, 0.34407574, 0.34407574, 0.09019608)
+
+[sub_resource type="SphereMesh" id="SphereMesh_aw8k8"]
+material = SubResource("StandardMaterial3D_aw8k8")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_aw8k8"]
+
+[node name="Rock" type="Node3D"]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="."]
+mass = 1.673
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D"]
+transform = Transform3D(0.21, 0, 0, 0, 0.21, 0, 0, 0, 0.21, 0, 0, 0)
+mesh = SubResource("SphereMesh_aw8k8")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+transform = Transform3D(0.20500001, 0, 0, 0, 0.20500001, 0, 0, 0, 0.20500001, 0, 0, 0)
+shape = SubResource("SphereShape3D_aw8k8")
