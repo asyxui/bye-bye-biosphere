@@ -12,6 +12,11 @@ class_name BaseTool
 
 var player: Node = null
 var _is_active: bool = false
+var _tool_resource: ToolResource = null  # Reference to the tool resource for metadata
+
+## Set the tool resource for metadata access
+func set_tool_resource(tool_resource: ToolResource) -> void:
+	_tool_resource = tool_resource
 
 ## Called when the tool is first activated with a player
 func on_activate(p: Node) -> void:
@@ -32,7 +37,11 @@ func on_update(_delta: float) -> void:
 
 ## Return true for multi-step tools that need to maintain state between clicks
 ## Return false for single-action tools
+## Can be overridden or set via ToolResource.is_multi_step
 func is_multi_step() -> bool:
+	# If we have a tool resource reference, use its setting
+	if _tool_resource:
+		return _tool_resource.is_multi_step
 	return false
 
 ## Public execute method - handles state management automatically

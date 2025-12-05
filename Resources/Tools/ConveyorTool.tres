@@ -7,5 +7,6 @@ script = ExtResource("1_tool_res")
 id = "conveyor"
 name = "Conveyor"
 description = "Place conveyor belts"
-tool_script_path = "res://Scripts/Tools/ConveyorTool.gd"
 icon = null
+tool_script_path = "res://Scripts/Tools/ConveyorTool.gd"
+is_multi_step = true

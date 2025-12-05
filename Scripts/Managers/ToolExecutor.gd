@@ -6,7 +6,7 @@ var player: Node
 func _ready() -> void:
 	pass
 
-func execute_tool(tool, executor_player: Node) -> Object:
+func execute_tool(tool: ToolResource, executor_player: Node) -> Object:
 	player = executor_player
 	
 	if not tool or not tool.tool_script_path:
@@ -22,6 +22,9 @@ func execute_tool(tool, executor_player: Node) -> Object:
 	# Create an instance and call execute
 	var tool_instance = tool_script.new()
 	if tool_instance.has_method("execute"):
+		# Pass the tool resource to the instance so it can access metadata
+		if tool_instance.has_method("set_tool_resource"):
+			tool_instance.set_tool_resource(tool)
 		tool_instance.execute(player)
 		return tool_instance
 	else:

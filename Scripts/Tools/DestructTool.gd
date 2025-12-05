@@ -8,6 +8,3 @@ func on_execute(_p: Node) -> void:
 		player.try_destroy()
 	else:
 		push_error("DestructTool: Player does not have try_destroy method")
-
-func is_multi_step() -> bool:
-	return false

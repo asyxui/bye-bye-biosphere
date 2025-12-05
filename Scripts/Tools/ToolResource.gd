@@ -6,3 +6,4 @@ class_name ToolResource
 @export var description: String = ""
 @export var icon: Texture2D
 @export var tool_script_path: String
+@export var is_multi_step: bool = false

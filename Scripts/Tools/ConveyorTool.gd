@@ -37,13 +37,6 @@ func on_update(_delta: float) -> void:
 		
 		_update_preview_transform(start_pos, hit_point)
 
-func is_multi_step() -> bool:
-	return true
-
-## Called by Player during _process
-func update_preview(_player: Node, _delta: float) -> void:
-	on_update(_delta)
-
 func _reset_state() -> void:
 	waiting_for_second_press = false
 	conveyor_reversal = false
