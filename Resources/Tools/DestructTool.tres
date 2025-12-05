@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ToolResource" load_steps=1 format=3 uid="uid://bbqu1p21d1emb"]
+
+[ext_resource type="Script" path="res://Scripts/Tools/ToolResource.gd" id="1_tool_res"]
+
+[resource]
+script = ExtResource("1_tool_res")
+id = "destruct"
+name = "Destruct"
+description = "Destroy blocks"
+tool_script_path = "res://Scripts/Tools/DestructTool.gd"
+icon = null

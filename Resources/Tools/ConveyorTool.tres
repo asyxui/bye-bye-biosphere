@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ToolResource" load_steps=1 format=3 uid="uid://dquq06hqnmfum"]
+
+[ext_resource type="Script" path="res://Scripts/Tools/ToolResource.gd" id="1_tool_res"]
+
+[resource]
+script = ExtResource("1_tool_res")
+id = "conveyor"
+name = "Conveyor"
+description = "Place conveyor belts"
+tool_script_path = "res://Scripts/Tools/ConveyorTool.gd"
+icon = null

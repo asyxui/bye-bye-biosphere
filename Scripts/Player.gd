@@ -7,54 +7,32 @@ const SPEED = 5.0
 const SPRINTING_MODIFIER = 2
 const JUMP_VELOCITY = 7
 const MOUSE_SENSITIVITY = 0.002
-const CONVEYOR_SCENE_LENGTH = 20.0
 const RAY_LENGTH = 20.0
 
-var waiting_for_second_press := false
-var conveyor_reversal:= false
-var start_pos: Vector3
-var preview_conveyor: StaticBody3D
+var active_tool: Object = null  # Reference to the currently active tool script
 
-func spawn_conveyor(start: Vector3, end: Vector3):
-	var conveyor = conveyor_scene.instantiate()
+func _ready() -> void:
+	# Listen for tool activation
+	ToolManager.tool_activated.connect(_on_tool_activated)
 
-	var mid = (start + end) / 2.0
-	var direction = (end - start).normalized()
-	var length = start.distance_to(end)
-	
-	if direction.length() < 0.001:
-		direction = Vector3.FORWARD
-	
-	var basis = Basis()
-	basis.x = direction
-	basis.y = Vector3.UP
-	basis.z = basis.x.cross(basis.y).normalized()
-	basis = basis.orthonormalized()
+func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
+	var tool = ToolManager.get_tool_in_slot(slot_index)
+	if tool:
+		# Check if this is the same tool that's already active and still has state
+		if (ToolManager.active_tool_instance and active_tool and 
+			active_tool.get_script().resource_path == tool.tool_script_path and
+			active_tool._is_active):  # Only reuse if tool is still active (multi-step)
+			# Same tool and still active, execute again (for multi-click tools like conveyor)
+			active_tool = ToolManager.active_tool_instance
+		else:
+			# Different tool, no active tool, or tool finished (single-step), create a new instance
+			var tool_instance = ToolManager.tool_executor.execute_tool(tool, self)
+			if tool_instance:
+				active_tool = tool_instance
+				ToolManager.active_tool_instance = tool_instance
 
-	var transform = Transform3D(basis, mid)
-
-	conveyor.global_transform = transform
-	conveyor.scale.x = length / CONVEYOR_SCENE_LENGTH
-
-	get_tree().current_scene.add_child(conveyor)
-
-func get_center_hit() -> Vector3:
-	var center = get_viewport().size / 2
-	var from = camera.project_ray_origin(center)
-	var to = from + camera.project_ray_normal(center) * RAY_LENGTH
-	var space_state = get_world_3d().direct_space_state
-	
-	var exclude = [self]
-	if preview_conveyor:
-		exclude.append(preview_conveyor)
-	var query = PhysicsRayQueryParameters3D.create(from, to)
-	query.exclude = exclude
-	var result = space_state.intersect_ray(query)
-	
-	if result:
-		return result.position
-	else:
-		return Vector3.ZERO
+func try_destroy() -> void:
+	MapManager._destroy(get_origin(), get_direction())
 
 func get_origin() -> Vector3:
 	return camera.get_global_transform().origin
@@ -83,6 +61,19 @@ func _input(event):
 		# Only capture mouse if no UI is open
 		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and not HUDManager.is_inventory_open() and not HUDManager.is_debug_console_open():
 			InputManager.request_mouse_capture("gameplay")
+		# Activate the currently selected tool
+		var hud = get_tree().current_scene.get_node_or_null("Hud")
+		if hud:
+			var action_bar = hud.get_node_or_null("ActionBar")
+			if action_bar:
+				var current_slot = action_bar.current_slot
+				if current_slot >= 0:
+					ToolManager.activate_tool(current_slot)
+	
+	# Cancel tool preview with right-click
+	if event.is_action_pressed("right_click"):
+		if active_tool and active_tool.has_method("cancel"):
+			active_tool.cancel()
 
 	if event.is_action_pressed("release_mouse"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
@@ -97,77 +88,14 @@ func _input(event):
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
 			
-	if event.is_action_pressed("place_conveyor"):
-		var hit_point = get_center_hit()
-		if hit_point != Vector3.ZERO:
-			if !waiting_for_second_press:
-				waiting_for_second_press = true
-				var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
-				if snap_point:
-					hit_point = snap_point.global_position
-					if snap_point.point_type == ConnectionPoint.PointType.START:
-						conveyor_reversal = true
-				
-				start_pos = hit_point
-				# Instantiate preview conveyor
-				if preview_conveyor == null:
-					preview_conveyor = conveyor_scene.instantiate()
-					preview_conveyor.collision_layer = 0
-					(preview_conveyor.find_child("Belt") as StaticBody3D).collision_layer = 0
-					for cp in preview_conveyor.get_children():
-						if cp is ConnectionPoint:
-							cp.queue_free()
-					get_tree().current_scene.add_child(preview_conveyor)
-			else:
-				# Second click → finalize conveyor
-				waiting_for_second_press = false
-				
-				var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
-				if snap_point:
-					hit_point = snap_point.global_position
-				
-				if conveyor_reversal:
-					spawn_conveyor(hit_point, start_pos)
-				else:
-					spawn_conveyor(start_pos, hit_point)
-				
-				conveyor_reversal = false
-				if preview_conveyor:
-					preview_conveyor.queue_free()
-					preview_conveyor = null
-				start_pos = Vector3.ZERO
-				
 	if event.is_action_pressed("destroy_test"):
 		MapManager._destroy(get_origin(), get_direction())
 		
 
-func _process(_delta):
-	if waiting_for_second_press and preview_conveyor != null:
-		var hit_point = get_center_hit()
-		if hit_point == Vector3.ZERO:
-			return
-		
-		var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
-		if snap_point:
-			hit_point = snap_point.global_position
-		
-		var direction = (hit_point - start_pos).normalized()
-		var mid = (start_pos + hit_point) / 2.0
-		var length = start_pos.distance_to(hit_point)
-
-		if conveyor_reversal:
-			direction = -direction
-
-		# Build basis for rotation
-		var basis = Basis()
-		basis.x = direction
-		basis.y = Vector3.UP
-		basis.z = basis.x.cross(basis.y).normalized()
-		basis = basis.orthonormalized()
-
-		var transform = Transform3D(basis, mid)
-		preview_conveyor.global_transform = transform
-		preview_conveyor.scale.x = length / CONVEYOR_SCENE_LENGTH
+func _process(_delta: float) -> void:
+	# Update active tool preview if it has one (for conveyor tool, etc)
+	if active_tool and active_tool.has_method("on_update"):
+		active_tool.on_update(_delta)
 
 func _physics_process(delta: float) -> void:
 	# Don't process movement when game is paused
