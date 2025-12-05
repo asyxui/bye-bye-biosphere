@@ -136,7 +136,7 @@ library = SubResource("VoxelBlockyLibrary_50gmx")
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_qjaue"]
 
-[node name="Node3D" type="Node3D"]
+[node name="Node3D" type="Node3D" groups=["Collectibles"]]
 script = ExtResource("1_oss8w")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]

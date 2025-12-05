@@ -31,11 +31,8 @@ func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
 				active_tool = tool_instance
 				ToolManager.active_tool_instance = tool_instance
 
-func try_destroy() -> void:
-	MapManager._destroy(get_origin(), get_direction())
-
-func get_origin() -> Vector3:
-	return camera.get_global_transform().origin
+func get_player_transform() -> Transform3D:
+	return camera.get_global_transform()
 	
 func get_direction() -> Vector3:
 	return - camera.get_global_transform_interpolated().basis.z.normalized()
@@ -87,10 +84,6 @@ func _input(event):
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
-			
-	if event.is_action_pressed("destroy_test"):
-		MapManager._destroy(get_origin(), get_direction())
-		
 
 func _process(_delta: float) -> void:
 	# Update active tool preview if it has one (for conveyor tool, etc)

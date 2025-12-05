@@ -51,12 +51,20 @@ func sphere_coords(center: Vector3, radius: int) -> Array[Vector3]:
 	
 	
 func drop_item(type: int, coords: Vector3):
-	var newDrop: Node3D;
+	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
+	var mesh = newDrop.get_child(0).get_child(0)
+	var newMat = mesh.mesh.surface_get_material(0).duplicate()
+	
+	mesh.set_surface_override_material(0, newMat)
+	
 	match type:
 		1:
-			newDrop = preload("res://Assets/Items/Rock.tscn").instantiate()
-		2: 
-			newDrop = preload("res://Assets/Items/PurpleOre.tscn").instantiate()
+			newDrop.dropData = load("res://Resources/Items/Ore.tres")
+			newMat.albedo_color = newDrop.dropData.dropColor
+		2:
+			newDrop.dropData = load("res://Resources/Items/Apple.tres")
+			newMat.albedo_color = newDrop.dropData.dropColor
 	newDrop.global_position = coords
+	newDrop.get_child(0).add_to_group("Collectibles")
 	voxelTerrain.add_child(newDrop)
 	
