@@ -102,8 +102,8 @@ func _physics_process(delta: float) -> void:
 	if get_tree().paused:
 		return
 
-	# Add the gravity.
-	if not is_on_floor():
+	# Add the gravity (only if gravity is enabled)
+	if GameStateManager.gravity_enabled and not is_on_floor():
 		velocity += get_gravity() * delta
 
 	# Ignore movement input if debug input bar is focused

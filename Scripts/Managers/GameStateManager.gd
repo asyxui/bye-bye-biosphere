@@ -1,16 +1,20 @@
 extends Node
 
 ## Global game state manager
-## Tracks pause state, console state, menu state, and coordinates between systems
+## Tracks pause state, console state, menu state, loading state, and coordinates between systems
 
 signal console_opened
 signal console_closed
 signal menu_opened
 signal menu_closed
+signal loading_started
+signal loading_finished
 
 var is_paused: bool = false
 var is_console_open: bool = false
 var is_menu_open: bool = false
+var is_loading: bool = false
+var gravity_enabled: bool = true
 
 func _ready() -> void:
 	set_process_input(true)
@@ -102,7 +106,7 @@ func close_console() -> void:
 
 ## Check if any modal UI is active (blocks gameplay)
 func is_modal_active() -> bool:
-	return is_paused or is_console_open
+	return is_paused or is_console_open or is_loading
 
 ## Get current game state as string (for debugging)
 func get_state_summary() -> String:
@@ -113,6 +117,32 @@ func get_state_summary() -> String:
 		states.append("CONSOLE_OPEN")
 	if is_menu_open:
 		states.append("MENU_OPEN")
+	if is_loading:
+		states.append("LOADING")
 	if states.is_empty():
 		states.append("PLAYING")
 	return ", ".join(states)
+
+
+## Start loading state (locks player, prevents input, disables gravity)
+func start_loading() -> void:
+	if is_loading:
+		return
+	
+	is_loading = true
+	gravity_enabled = false
+	# Release mouse during loading
+	InputManager.request_mouse_release("")
+	loading_started.emit()
+
+
+## Finish loading state (unlocks player, re-enables gravity)
+func finish_loading() -> void:
+	if not is_loading:
+		return
+	
+	is_loading = false
+	gravity_enabled = true
+	# Return mouse to captured state
+	InputManager.request_mouse_capture("gameplay")
+	loading_finished.emit()
