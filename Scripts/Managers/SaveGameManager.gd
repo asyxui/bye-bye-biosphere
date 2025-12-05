@@ -122,6 +122,14 @@ func _perform_save(slot_id: String) -> void:
 	
 	save_progress.emit(0.9)
 	
+	# Save conveyor belts if any exist
+	var conveyor_belts = _gather_conveyor_belts()
+	if not data_manager.set_conveyor_belts(conveyor_belts):
+		_finish_save(false, "Failed to save conveyor belts")
+		return
+	
+	save_progress.emit(0.95)
+	
 	# Save voxels to the same path as other data (atomic save)
 	if voxel_stream_manager:
 		voxel_stream_manager.save_voxels_async()
@@ -215,6 +223,49 @@ func _setup_voxel_stream(slot_id: String) -> bool:
 	map_manager.set_meta("voxel_db_slot", slot_id)
 	
 	return true
+
+
+## Gather all conveyor belts from the scene and return as serializable data
+func _gather_conveyor_belts() -> Array:
+	var conveyor_data = []
+	
+	# Find all ConveyorBelt nodes in the scene
+	var root = get_tree().root.get_child(0)
+	if not root:
+		return conveyor_data
+	
+	# Recursively search for all ConveyorBelt nodes
+	_collect_conveyors_recursive(root, conveyor_data)
+	
+	return conveyor_data
+
+
+## Helper function to recursively collect conveyor belts
+func _collect_conveyors_recursive(node: Node, conveyor_data: Array) -> void:
+	# Check if this node's name is "ConveyorBelt" (the scene name)
+	if node.name == "ConveyorBelt" and node is Node3D:
+		var conveyor_info = {
+			"position": {
+				"x": node.global_position.x,
+				"y": node.global_position.y,
+				"z": node.global_position.z
+			},
+			"rotation": {
+				"x": node.rotation.x,
+				"y": node.rotation.y,
+				"z": node.rotation.z
+			},
+			"scale": {
+				"x": node.scale.x,
+				"y": node.scale.y,
+				"z": node.scale.z
+			}
+		}
+		conveyor_data.append(conveyor_info)
+	
+	# Recursively check children
+	for child in node.get_children():
+		_collect_conveyors_recursive(child, conveyor_data)
 
 
 ## Finish save operation

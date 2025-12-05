@@ -101,6 +101,57 @@ func wait_for_terrain_ready() -> void:
 	
 	CustomLogger.log_warn("Voxel stream took longer than expected to initialize")
 
+
+## Wait for minimum terrain to stabilize around the player
+## Uses raycasting to detect terrain as soon as it's solid under the player
+func wait_for_terrain_stabilization() -> void:
+	# Uncomment this next line to test faster loading
+	# return
+	var terrain = get_voxel_terrain()
+	if not terrain:
+		CustomLogger.log_warn("Cannot wait for stabilization: terrain not found")
+		return
+	
+	var player = get_tree().root.find_child("Player", true, false)
+	if not player:
+		CustomLogger.log_warn("Cannot wait for stabilization: player not found")
+		return
+	
+	var player_pos = player.global_position
+	var max_wait_time = 10.0
+	var elapsed = 0.0
+	
+	# Get a voxel tool to check terrain
+	var voxel_tool = terrain.get_voxel_tool()
+	if not voxel_tool:
+		CustomLogger.log_warn("Cannot check terrain: voxel tool unavailable")
+		return
+	
+	# Check multiple positions around player in expanding radius
+	var check_positions = [
+		Vector3(0, -10, 0),      # Straight down, close
+		Vector3(5, -10, 0),      # Offset down
+		Vector3(-5, -10, 0),     # Offset down
+		Vector3(0, -10, 5),      # Offset down
+		Vector3(0, -10, -5),     # Offset down
+	]
+	
+	while elapsed < max_wait_time:
+		# Check each position around player
+		for offset in check_positions:
+			var check_pos = player_pos + offset
+			var voxel = voxel_tool.get_voxel(check_pos)
+			
+			# Found solid terrain
+			if voxel != 0:
+				CustomLogger.log_success("Terrain detected after %.1fs at (%.0f, %.0f, %.0f), releasing player!" % [elapsed, check_pos.x, check_pos.y, check_pos.z])
+				return
+		
+		await get_tree().create_timer(0.05).timeout  # More frequent checks with less work per check
+		elapsed += 0.05
+	
+	CustomLogger.log_warn("Terrain check timed out after %.1f seconds" % [elapsed])
+
 func _destroy(origin: Vector3, direction: Vector3):
 	if not ensure_initialized():
 		return

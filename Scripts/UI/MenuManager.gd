@@ -111,8 +111,8 @@ func _on_reset_pressed():
 	CustomLogger.log_info("Resetting world: %s" % slot_id)
 	
 	if loading_screen:
-		# Step 1: Show loading screen
-		loading_screen.show_loading("Resetting World...")
+		# Step 1: Show loading screen and lock player
+		_start_loading("Resetting World...")
 		
 		# Step 2: Close menu
 		GameStateManager.close_menu()
@@ -129,9 +129,10 @@ func _on_reset_pressed():
 				get_tree().reload_current_scene()
 			else:
 				CustomLogger.log_error("Reset failed: %s" % reset_result[1])
-				loading_screen.hide_loading()
+				_finish_loading()
 		else:
 			push_error("VoxelStreamManager not found")
+			_finish_loading()
 	else:
 		push_error("LoadingScreen not found")
 
@@ -164,7 +165,7 @@ func _on_slot_selected(slot_id: String) -> void:
 	
 	if is_load:
 		if loading_screen and save_game_manager:
-			loading_screen.show_loading("Loading World...")
+			_start_loading("Loading World...")
 			GameStateManager.close_menu()
 			save_game_manager.load_game(slot_id)
 	else:
@@ -195,7 +196,21 @@ func _on_save_completed(success: bool, error_message: String) -> void:
 		push_error("Failed to save game: %s" % error_message)
 
 
-## Hide the loading screen
+## Start loading sequence - show loading screen and lock player input
+func _start_loading(operation_name: String) -> void:
+	if loading_screen:
+		loading_screen.show_loading(operation_name)
+	GameStateManager.start_loading()
+
+
+## Finish loading sequence - hide loading screen and unlock player input
+func _finish_loading() -> void:
+	GameStateManager.finish_loading()
+	if loading_screen:
+		loading_screen.hide_loading()
+
+
+## Hide the loading screen (deprecated - use _finish_loading instead)
 func hide_loading_screen() -> void:
 	if loading_screen:
 		loading_screen.hide_loading()

@@ -5,7 +5,8 @@
 ##   ├── world.sqlite (voxel terrain data)
 ##   ├── metadata.json (version, timestamp, player position/rotation)
 ##   ├── inventory.json (inventory slots and items)
-##   └── hotbar.json (hotbar configuration)
+##   ├── hotbar.json (hotbar configuration)
+##   └── conveyor_belts.json (conveyor belt placement data)
 class_name SaveDataManager
 
 var slot_dir: String
@@ -13,6 +14,7 @@ var voxel_db_path: String
 var metadata_path: String
 var inventory_path: String
 var hotbar_path: String
+var conveyor_belts_path: String
 
 
 func _init(slot_directory: String) -> void:
@@ -21,6 +23,7 @@ func _init(slot_directory: String) -> void:
 	metadata_path = slot_directory.path_join("metadata.json")
 	inventory_path = slot_directory.path_join("inventory.json")
 	hotbar_path = slot_directory.path_join("hotbar.json")
+	conveyor_belts_path = slot_directory.path_join("conveyor_belts.json")
 	
 	# Ensure directory exists
 	if not DirAccess.dir_exists_absolute(slot_dir):
@@ -114,7 +117,21 @@ func init_schema() -> bool:
 	success = success and set_metadata(_create_default_metadata())
 	success = success and set_inventory([])
 	success = success and set_hotbar([])
+	success = success and set_conveyor_belts([])
 	return success
+
+
+## Get conveyor belt data
+func get_conveyor_belts() -> Array:
+	var data = _load_json(conveyor_belts_path)
+	if data == null:
+		return []
+	return data if data is Array else []
+
+
+## Set conveyor belt data
+func set_conveyor_belts(conveyor_data: Array) -> bool:
+	return _save_json(conveyor_belts_path, conveyor_data)
 
 
 ## Create default metadata structure
