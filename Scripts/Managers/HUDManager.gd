@@ -5,41 +5,22 @@ extends Node
 signal inventory_toggled(is_open: bool)
 signal debug_console_toggled(is_open: bool)
 
-var inventory_ui: Control = null
-var debug_console: Control = null
-
 func _ready() -> void:
-	# Wait a frame for the scene to fully load
-	await get_tree().process_frame
-	_find_inventory_ui()
-	_find_debug_console()
+	pass
 
-## Find and cache the inventory UI
-func _find_inventory_ui() -> void:
+## Get the inventory UI (find it fresh each time since scene reloads invalidate cached refs)
+func _get_inventory_ui() -> Control:
 	var hud = get_tree().current_scene.get_node_or_null("Hud")
-	if hud:
-		inventory_ui = hud.get_node_or_null("InventoryUI")
-		if inventory_ui:
-			CustomLogger.log_info("HUDManager: Inventory UI found and cached")
-		else:
-			push_error("HUDManager: InventoryUI not found in Hud")
-	else:
-		push_error("HUDManager: Hud node not found in current scene")
+	return hud.get_node_or_null("InventoryUI") if hud else null
 
-## Find and cache the debug console
-func _find_debug_console() -> void:
+## Get the debug console (find it fresh each time since scene reloads invalidate cached refs)
+func _get_debug_console() -> Control:
 	var hud = get_tree().current_scene.get_node_or_null("Hud")
-	if hud:
-		debug_console = hud.get_node_or_null("DebugConsole")
-		if debug_console:
-			CustomLogger.log_info("HUDManager: Debug Console found and cached")
-		else:
-			push_error("HUDManager: DebugConsole not found in Hud")
-	else:
-		push_error("HUDManager: Hud node not found in current scene")
+	return hud.get_node_or_null("DebugConsole") if hud else null
 
 ## Toggle inventory UI visibility
 func toggle_inventory() -> void:
+	var inventory_ui = _get_inventory_ui()
 	if inventory_ui:
 		inventory_ui.visible = not inventory_ui.visible
 		inventory_toggled.emit(inventory_ui.visible)
@@ -55,6 +36,7 @@ func toggle_inventory() -> void:
 
 ## Set inventory visibility directly
 func set_inventory_visible(visible: bool) -> void:
+	var inventory_ui = _get_inventory_ui()
 	if inventory_ui:
 		inventory_ui.visible = visible
 		inventory_toggled.emit(visible)
@@ -82,16 +64,18 @@ func _handle_mouse_for_inventory(is_open: bool) -> void:
 
 ## Check if inventory is open
 func is_inventory_open() -> bool:
+	var inventory_ui = _get_inventory_ui()
 	if inventory_ui:
 		return inventory_ui.visible
 	return false
 
 ## Get the inventory UI (for direct access if needed)
 func get_inventory_ui() -> Control:
-	return inventory_ui
+	return _get_inventory_ui()
 
 ## Set debug console visibility directly
 func set_debug_console_visible(visible: bool) -> void:
+	var debug_console = _get_debug_console()
 	if debug_console:
 		debug_console.visible = visible
 		debug_console_toggled.emit(visible)
@@ -111,10 +95,11 @@ func _handle_mouse_for_debug_console(is_open: bool) -> void:
 
 ## Check if debug console is open
 func is_debug_console_open() -> bool:
+	var debug_console = _get_debug_console()
 	if debug_console:
 		return debug_console.visible
 	return false
 
 ## Get the debug console (for direct access if needed)
 func get_debug_console() -> Control:
-	return debug_console
+	return _get_debug_console()

@@ -21,7 +21,7 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="VoxelStreamSQLite" id="VoxelStreamSQLite_rwtwo"]
-database_path = "user://save.sqlite"
+database_path = "user://world.sqlite"
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
 
