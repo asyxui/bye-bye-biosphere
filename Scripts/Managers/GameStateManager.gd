@@ -14,6 +14,7 @@ var is_paused: bool = false
 var is_console_open: bool = false
 var is_menu_open: bool = false
 var is_loading: bool = false
+var gravity_enabled: bool = true
 
 func _ready() -> void:
 	set_process_input(true)
@@ -123,23 +124,25 @@ func get_state_summary() -> String:
 	return ", ".join(states)
 
 
-## Start loading state (locks player, prevents input)
+## Start loading state (locks player, prevents input, disables gravity)
 func start_loading() -> void:
 	if is_loading:
 		return
 	
 	is_loading = true
+	gravity_enabled = false
 	# Release mouse during loading
 	InputManager.request_mouse_release("")
 	loading_started.emit()
 
 
-## Finish loading state (unlocks player)
+## Finish loading state (unlocks player, re-enables gravity)
 func finish_loading() -> void:
 	if not is_loading:
 		return
 	
 	is_loading = false
+	gravity_enabled = true
 	# Return mouse to captured state
 	InputManager.request_mouse_capture("gameplay")
 	loading_finished.emit()

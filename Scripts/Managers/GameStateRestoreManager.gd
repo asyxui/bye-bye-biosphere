@@ -44,6 +44,20 @@ func restore_game_state(slot_id: String) -> void:
 		push_error("Save slot does not exist: %s" % slot_id)
 		_is_restoring = false
 		return
+		
+	# Step 6: Restore player position and rotation
+	var SaveDataManagerClass = load("res://Scripts/Managers/SaveDataManager.gd")
+	var data_manager = SaveDataManagerClass.new(slot_path)
+	var metadata = data_manager.get_metadata()
+	var player = get_tree().root.find_child("Player", true, false)
+	if player:
+		if "player_position" in metadata:
+			var pos_data = metadata["player_position"]
+			player.global_position = Vector3(pos_data["x"], pos_data["y"], pos_data["z"])
+		
+		if "player_rotation" in metadata:
+			var rot_data = metadata["player_rotation"]
+			player.rotation = Vector3(rot_data["x"], rot_data["y"], rot_data["z"])
 	
 	# Step 2: Configure voxel stream to load from this slot
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
@@ -53,9 +67,6 @@ func restore_game_state(slot_id: String) -> void:
 		return
 	
 	_update_loading_progress(10)  # Stream configured
-	
-	var SaveDataManagerClass = load("res://Scripts/Managers/SaveDataManager.gd")
-	var data_manager = SaveDataManagerClass.new(slot_path)
 	
 	# Step 3: Restore inventory
 	var inventory_data = data_manager.get_inventory()
@@ -92,9 +103,14 @@ func restore_game_state(slot_id: String) -> void:
 		await map_manager.wait_for_terrain_stabilization()
 	_update_loading_progress(85)  # Stabilization complete
 	
-	# Step 6: Restore player position and rotation
-	var metadata = data_manager.get_metadata()
-	var player = get_tree().root.find_child("Player", true, false)
+	# Step 7: Restore conveyor belts
+	var conveyor_data = data_manager.get_conveyor_belts()
+	if conveyor_data.size() > 0:
+		_restore_conveyor_belts(conveyor_data)
+	
+	_update_loading_progress(95)  # Conveyor belts restored
+	
+	# Step 8: Finalize loading - hide screen and unlock player
 	if player:
 		if "player_position" in metadata:
 			var pos_data = metadata["player_position"]
@@ -104,16 +120,6 @@ func restore_game_state(slot_id: String) -> void:
 			var rot_data = metadata["player_rotation"]
 			player.rotation = Vector3(rot_data["x"], rot_data["y"], rot_data["z"])
 	
-	_update_loading_progress(90)  # Player position restored
-	
-	# Step 7: Restore conveyor belts
-	var conveyor_data = data_manager.get_conveyor_belts()
-	if conveyor_data.size() > 0:
-		_restore_conveyor_belts(conveyor_data)
-	
-	_update_loading_progress(95)  # Conveyor belts restored
-	
-	# Step 8: Finalize loading - hide screen and unlock player
 	_finish_loading_sequence()
 	
 	_is_restoring = false
