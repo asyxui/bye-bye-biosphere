@@ -1,10 +1,23 @@
-[gd_scene load_steps=16 format=3 uid="uid://c6hhinca4hpbo"]
-
 [ext_resource type="VoxelGeneratorScript" uid="uid://dvlck5ivq5ecq" path="res://Scripts/VoxelGeneratorScript.tres" id="1_oss8w"]
+[gd_scene load_steps=23 format=3 uid="uid://c6hhinca4hpbo"]
+[ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
 [ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/UI/MenuManager.tscn" id="2_qw7le"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="3_5k46t"]
 [ext_resource type="PackedScene" uid="uid://c3gynxmj3suco" path="res://Scenes/UI/HUD.tscn" id="4_rwtwo"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_oss8w"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_pl8e4"]
+sky_material = SubResource("ProceduralSkyMaterial_oss8w")
+
+[sub_resource type="Environment" id="Environment_is6ib"]
+background_mode = 2
+sky = SubResource("Sky_pl8e4")
+tonemap_mode = 2
+glow_enabled = true
 
 [sub_resource type="VoxelStreamSQLite" id="VoxelStreamSQLite_rwtwo"]
 database_path = "user://save.sqlite"
@@ -37,6 +50,10 @@ library = SubResource("VoxelBlockyLibrary_50gmx")
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_qjaue"]
 
 [node name="Node3D" type="Node3D"]
+script = ExtResource("1_oss8w")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_is6ib")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)

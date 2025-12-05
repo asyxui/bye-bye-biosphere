@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bsjr6j0kx6eg8"]
+
+[ext_resource type="Script" path="res://Scripts/UI/ToolPickerWheel.gd" id="1_tool_wheel"]
+
+[node name="ToolPickerWheel" type="CanvasLayer"]
+script = ExtResource("1_tool_wheel")
