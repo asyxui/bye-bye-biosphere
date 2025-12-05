@@ -22,6 +22,9 @@ func spawn_conveyor(start: Vector3, end: Vector3):
 	var direction = (end - start).normalized()
 	var length = start.distance_to(end)
 	
+	if direction.length() < 0.001:
+		direction = Vector3.FORWARD
+	
 	var basis = Basis()
 	basis.x = direction
 	basis.y = Vector3.UP
@@ -109,14 +112,25 @@ func _input(event):
 				# Instantiate preview conveyor
 				if preview_conveyor == null:
 					preview_conveyor = conveyor_scene.instantiate()
+					preview_conveyor.collision_layer = 0
+					(preview_conveyor.find_child("Belt") as StaticBody3D).collision_layer = 0
+					for cp in preview_conveyor.get_children():
+						if cp is ConnectionPoint:
+							cp.queue_free()
 					get_tree().current_scene.add_child(preview_conveyor)
 			else:
 				# Second click → finalize conveyor
 				waiting_for_second_press = false
+				
+				var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
+				if snap_point:
+					hit_point = snap_point.global_position
+				
 				if conveyor_reversal:
 					spawn_conveyor(hit_point, start_pos)
 				else:
 					spawn_conveyor(start_pos, hit_point)
+				
 				conveyor_reversal = false
 				if preview_conveyor:
 					preview_conveyor.queue_free()
@@ -130,6 +144,13 @@ func _input(event):
 func _process(_delta):
 	if waiting_for_second_press and preview_conveyor != null:
 		var hit_point = get_center_hit()
+		if hit_point == Vector3.ZERO:
+			return
+		
+		var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
+		if snap_point:
+			hit_point = snap_point.global_position
+		
 		var direction = (hit_point - start_pos).normalized()
 		var mid = (start_pos + hit_point) / 2.0
 		var length = start_pos.distance_to(hit_point)
