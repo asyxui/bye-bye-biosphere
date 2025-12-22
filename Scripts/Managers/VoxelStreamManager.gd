@@ -2,7 +2,6 @@
 ## Handles all stream configuration and validation
 extends Node
 
-signal stream_ready
 signal stream_reconfigured  # Emitted after stream is reconfigured (for tool reinit)
 signal save_complete(success: bool, error_message: String)
 signal reset_complete(success: bool, error_message: String)
@@ -109,7 +108,6 @@ func configure_stream(slot_id: String) -> bool:
 	CustomLogger.log_info("Configured voxel stream for slot: %s" % slot_id)
 	
 	current_state = State.LOADED
-	stream_ready.emit()
 	stream_reconfigured.emit()  # Signal to reinit tools
 	return true
 
@@ -211,9 +209,11 @@ func reset_world_async() -> void:
 		reset_complete.emit(false, "Failed to configure stream")
 
 
-## Validate that the voxel database is valid and accessible
+## Validate that the voxel database exists and is accessible
+## Used to detect corrupt saves and handle gracefully
 func _validate_voxel_database(slot_id: String = "") -> bool:
 	if not voxel_stream:
+		CustomLogger.log_error("Cannot validate: voxel_stream not initialized")
 		return false
 	
 	# If no slot_id provided, use the currently configured one
@@ -228,27 +228,19 @@ func _validate_voxel_database(slot_id: String = "") -> bool:
 	var absolute_slot_dir = ProjectSettings.globalize_path(slot_dir)
 	var voxel_db_path = absolute_slot_dir.path_join("world.sqlite")
 	
-	CustomLogger.log_info("Validating voxel database at: %s" % voxel_db_path)
-	
-	# Check if file exists
+	# Check if file exists and is accessible
 	if not FileAccess.file_exists(voxel_db_path):
-		# Also check with user:// path in case it was saved there
-		var user_path = slot_dir.path_join("world.sqlite")
-		if FileAccess.file_exists(user_path):
-			CustomLogger.log_warn("Found database at user:// path: %s" % user_path)
-			return true
-		
-		CustomLogger.log_warn("Voxel database file does not exist at: %s" % voxel_db_path)
+		CustomLogger.log_error("Voxel database not found at: %s" % voxel_db_path)
 		return false
 	
-	# Try to open and close the database to verify it's valid
+	# Try to open the database to detect corruption
 	var test_file = FileAccess.open(voxel_db_path, FileAccess.READ)
 	if test_file == null:
-		CustomLogger.log_error("Cannot open voxel database: %s" % voxel_db_path)
+		CustomLogger.log_error("Cannot open voxel database (possibly corrupt): %s" % voxel_db_path)
 		return false
+	test_file.close()
 	
-	# If we can read it, it's valid
-	CustomLogger.log_success("Voxel database is valid: %s" % voxel_db_path)
+	CustomLogger.log_success("Voxel database validated: %s" % voxel_db_path)
 	return true
 
 

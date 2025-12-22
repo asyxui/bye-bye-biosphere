@@ -1,6 +1,3 @@
-## SaveManager - Unified save/load system
-## Consolidates SaveCoordinator, SaveGameManager, SaveSlotManager, and SaveDataManager
-## Handles slot CRUD, game data collection, progress signals, and directory utilities
 extends Node
 
 # Signals
@@ -16,11 +13,6 @@ const SAVES_DIR = "user://saves"
 
 # State
 var current_slot_id: String = ""
-
-
-## ============================================================================
-## SLOT MANAGEMENT (from SaveSlotManager)
-## ============================================================================
 
 ## Get list of all available save slots
 func get_save_slots() -> Array[Dictionary]:
@@ -111,30 +103,9 @@ func delete_slot(slot_id: String) -> bool:
 	return true
 
 
-## Check if a slot is valid (has game_data.json)
-func validate_slot(slot_id: String) -> bool:
-	var slot_path = get_slot_directory(slot_id)
-	
-	if not DirAccess.dir_exists_absolute(slot_path):
-		return false
-	
-	# Check for game_data.json
-	var data_file = slot_path.path_join("game_data.json")
-	return FileAccess.file_exists(data_file)
-
-
-## ============================================================================
-## DIRECTORY UTILITIES (from SaveDataManager)
-## ============================================================================
-
 ## Get save slot directory path
 func get_slot_directory(slot_id: String) -> String:
 	return SAVES_DIR.path_join(slot_id)
-
-
-## Get voxel database path for slot
-func get_voxel_db_path(slot_id: String) -> String:
-	return get_slot_directory(slot_id).path_join("world.sqlite")
 
 
 ## Ensure save slot directory exists
@@ -145,11 +116,6 @@ func ensure_slot_directory(slot_id: String) -> bool:
 			push_error("Failed to create slot directory: %s" % slot_dir)
 			return false
 	return true
-
-
-## ============================================================================
-## SAVE/LOAD GAME DATA (from SaveCoordinator)
-## ============================================================================
 
 ## Save game to slot
 func save_game(slot_id: String) -> void:
@@ -295,41 +261,6 @@ func clear_all_saveables() -> void:
 		if node.has_method("clear_save_data"):
 			node.clear_save_data()
 			CustomLogger.log_info("Cleared data for: %s" % node.get_save_key() if node.has_method("get_save_key") else "unknown")
-
-
-## Create a new game in a slot
-func create_new_game(slot_id: String) -> void:
-	# Ensure slot directory exists
-	if not ensure_slot_directory(slot_id):
-		var error = "Failed to create save slot directory: %s" % slot_id
-		push_error(error)
-		save_completed.emit(false, error)
-		return
-	
-	save_started.emit()
-	
-	# Configure voxel stream for new slot
-	var voxel_stream_manager = get_node_or_null("/root/VoxelStreamManager")
-	if voxel_stream_manager:
-		if not await voxel_stream_manager.configure_stream(slot_id):
-			var error = "Failed to configure voxel stream for new slot: %s" % slot_id
-			push_error(error)
-			save_completed.emit(false, error)
-			return
-	
-	save_progress.emit(0.5)
-	save_progress.emit(1.0)
-	
-	# Update current save slot meta
-	get_tree().root.set_meta("current_save_slot", slot_id)
-	CustomLogger.log_info("SaveManager: Created new slot: %s" % slot_id)
-	
-	save_completed.emit(true, "")
-
-
-## ============================================================================
-## PRIVATE HELPERS
-## ============================================================================
 
 ## Load metadata from a slot directory
 func _load_slot_metadata(slot_path: String) -> Dictionary:
