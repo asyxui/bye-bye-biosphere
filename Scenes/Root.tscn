@@ -1,7 +1,8 @@
-[gd_scene load_steps=23 format=3 uid="uid://c6hhinca4hpbo"]
+[gd_scene load_steps=20 format=3 uid="uid://c6hhinca4hpbo"]
 
 [ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
+[ext_resource type="VoxelGeneratorScript" uid="uid://dvlck5ivq5ecq" path="res://Scripts/Terrain/VoxelGeneratorScript.tres" id="2_pl8e4"]
 [ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/UI/MenuManager.tscn" id="2_qw7le"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="3_5k46t"]
 [ext_resource type="PackedScene" uid="uid://c3gynxmj3suco" path="res://Scenes/UI/HUD.tscn" id="4_rwtwo"]
@@ -20,97 +21,11 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="VoxelStreamSQLite" id="VoxelStreamSQLite_rwtwo"]
-database_path = "user://save.sqlite"
-save_generator_output = true
-
-[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_qw7le"]
-noise_type = 4
-period = 545.1001
-
-[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_qjaue"]
-period = 1166.9001
-
-[sub_resource type="ZN_FastNoiseLite" id="ZN_FastNoiseLite_50gmx"]
-
-[sub_resource type="VoxelGeneratorGraph" id="VoxelGeneratorGraph_m0emh"]
-graph_data = {
-"connections": [[10, 0, 22, 0], [11, 0, 12, 0], [12, 0, 10, 2], [13, 0, 11, 0], [22, 0, 28, 0], [14, 0, 13, 2], [14, 0, 6, 2], [31, 0, 33, 0], [33, 0, 22, 2], [6, 0, 9, 2], [7, 0, 6, 0], [7, 0, 13, 0], [8, 0, 13, 1], [8, 0, 6, 1], [8, 0, 12, 1], [9, 0, 10, 0]],
-"nodes": {
-"10": {
-"b": 0.0,
-"gui_position": Vector2(1674.6042, 395.7239),
-"threshold": 0.0,
-"type": "Select"
-},
-"11": {
-"b": 2500.0,
-"gui_position": Vector2(1234.6042, 455.7239),
-"type": "Multiply"
-},
-"12": {
-"gui_position": Vector2(1434.6042, 515.7239),
-"type": "Add"
-},
-"13": {
-"auto_connect": true,
-"gui_position": Vector2(1014.60425, 455.7239),
-"noise": SubResource("ZN_FastNoiseLite_qw7le"),
-"type": "FastNoise3D"
-},
-"14": {
-"gui_position": Vector2(500, 520),
-"type": "InputZ"
-},
-"22": {
-"b": 0.0,
-"gui_position": Vector2(1880, 560),
-"threshold": 0.0,
-"type": "Select"
-},
-"28": {
-"gui_position": Vector2(2134.6042, 515.7239),
-"type": "OutputType"
-},
-"31": {
-"auto_connect": true,
-"gui_position": Vector2(1140, 780),
-"noise": SubResource("ZN_FastNoiseLite_qjaue"),
-"type": "FastNoise3D",
-"x": 0.0,
-"y": 0.0,
-"z": 0.0
-},
-"33": {
-"b": 0.35,
-"gui_position": Vector2(1540, 740),
-"type": "Subtract"
-},
-"6": {
-"auto_connect": true,
-"gui_position": Vector2(1014.60425, 255.7239),
-"noise": SubResource("ZN_FastNoiseLite_50gmx"),
-"type": "FastNoise3D"
-},
-"7": {
-"gui_position": Vector2(540, 280),
-"type": "InputX"
-},
-"8": {
-"gui_position": Vector2(420, 700),
-"type": "InputY"
-},
-"9": {
-"a": 1.0,
-"b": 2.0,
-"gui_position": Vector2(1294.6042, 275.7239),
-"threshold": 0.0,
-"type": "Select"
-}
-},
-"version": 2
-}
+database_path = "user://world.sqlite"
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
+culls_neighbors = false
+lod_skirts_enabled = false
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xjdud"]
 vertex_color_use_as_albedo = true
@@ -118,6 +33,7 @@ vertex_color_use_as_albedo = true
 [sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_qjaue"]
 mesh_ortho_rotation_index = 1
 color = Color(0.15449801, 0.1709176, 0.15749583, 1)
+transparency_index = 1
 material_override_0 = SubResource("StandardMaterial3D_xjdud")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qjaue"]
@@ -125,6 +41,7 @@ vertex_color_use_as_albedo = true
 
 [sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_3auje"]
 color = Color(0.06631541, 0.023905009, 0.048508614, 1)
+transparency_index = 1
 material_override_0 = SubResource("StandardMaterial3D_qjaue")
 
 [sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_50gmx"]
@@ -134,6 +51,7 @@ models = Array[VoxelBlockyModel]([SubResource("VoxelBlockyModelEmpty_xjdud"), Su
 library = SubResource("VoxelBlockyLibrary_50gmx")
 
 [sub_resource type="VoxelFormat" id="VoxelFormat_5k46t"]
+_data = [0, 0, 1, 0, 1, 1, 0, 0, 0]
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_qjaue"]
 
@@ -149,10 +67,14 @@ shadow_enabled = true
 
 [node name="Terrain" type="VoxelLodTerrain" parent="."]
 view_distance = 1024
-lod_distance = 60.0
+lod_distance = 80.0
+secondary_lod_distance = 100.0
+run_stream_in_editor = false
 cache_generated_blocks = true
+threaded_update_enabled = true
+streaming_system = 1
 stream = SubResource("VoxelStreamSQLite_rwtwo")
-generator = SubResource("VoxelGeneratorGraph_m0emh")
+generator = ExtResource("2_pl8e4")
 mesher = SubResource("VoxelMesherBlocky_qw7le")
 format = SubResource("VoxelFormat_5k46t")
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
@@ -161,14 +83,13 @@ transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
 layer = 3
 
 [node name="DebugConsole" parent="Terrain" instance=ExtResource("3_5k46t")]
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Hud" parent="Terrain" instance=ExtResource("4_rwtwo")]
 
 [node name="Player" parent="." instance=ExtResource("1_qjaue")]
 
 [node name="VoxelViewer" type="VoxelViewer" parent="Player"]
+view_distance = 556
 
 [node name="CollisionShape3D3" type="CollisionShape3D" parent="Player"]
 transform = Transform3D(1.0000002, 0, 0, 0, -4.3711392e-08, -1.0000001, 0, 1.0000001, -4.3711392e-08, 0, 0, -1)
@@ -178,7 +99,5 @@ shape = SubResource("SeparationRayShape3D_qjaue")
 layer = 3
 
 [node name="DebugConsole" parent="." instance=ExtResource("3_5k46t")]
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Hud" parent="." instance=ExtResource("4_rwtwo")]

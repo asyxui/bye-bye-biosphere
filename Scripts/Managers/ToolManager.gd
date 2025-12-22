@@ -103,3 +103,32 @@ func activate_tool(slot_index: int) -> void:
 
 func get_hotbar_tools() -> Array[Resource]:
 	return hotbar_tools.duplicate()
+
+
+## Get hotbar save data (tool IDs only)
+func get_save_data() -> Array:
+	var save_data = []
+	for tool in hotbar_tools:
+		if tool:
+			save_data.append(tool.id)
+		else:
+			save_data.append(null)
+	return save_data
+
+
+## Load hotbar from save data
+func load_save_data(save_data: Array) -> void:
+	# Reset hotbar
+	hotbar_tools.clear()
+	hotbar_tools.resize(HOTBAR_SIZE)
+	for i in range(HOTBAR_SIZE):
+		hotbar_tools[i] = null
+	
+	# Load tools from save data
+	for slot_index in range(save_data.size()):
+		if slot_index >= HOTBAR_SIZE:
+			break
+		
+		var tool_id = save_data[slot_index]
+		if tool_id and tool_id != null:
+			equip_tool(tool_id, slot_index)

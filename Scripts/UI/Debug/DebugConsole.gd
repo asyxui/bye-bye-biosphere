@@ -18,6 +18,7 @@ var max_log_lines: int = 500
 
 var commands: Dictionary = {}
 var autocomplete_active: bool = false
+var save_game_manager: Node = null
 
 
 # Static instance for singleton pattern
@@ -47,12 +48,49 @@ func _ready() -> void:
 	# Register commands
 	register_command("help", "Display all available commands", _cmd_help)
 	register_command("clear", "Clear the console output", _cmd_clear)
+	register_command("save", "Save the current game. Usage: save [slot_name]", _cmd_save)
+	register_command("load", "Load a save game. Usage: load <slot_name>", _cmd_load)
 	register_command("quit", "Quit the game", _cmd_quit)
 	register_command("history", "Show command history", _cmd_history)
 	register_command("echo", "Echo text to console. Usage: echo <text>", _cmd_echo)
+	register_command("savegame", "Display current save game information", _cmd_savegame)
+	register_command("fps", "Display FPS information", _cmd_fps)
+	
+	# Get the save game manager from Main (same way MenuManager does it)
+	var main_node = get_tree().root.find_child("Main", true, false)
+	if main_node and main_node.has_meta("save_game_manager"):
+		save_game_manager = main_node.get_meta("save_game_manager")
+	else:
+		# Fallback: create our own if Main doesn't have one
+		save_game_manager = load("res://Scripts/Managers/SaveGameManager.gd").new()
+		add_child(save_game_manager)
 	
 	# Log welcome message
-	log_message("[color=cyan]Debug Console initialized. Type 'help' for available commands.[/color]")
+	log_message("[color=cyan]Debug Console ready. Type 'help' for commands.[/color]")
+
+
+func _get_save_slot_id(args: Array) -> String:
+	if not args.is_empty():
+		return args[0]
+	
+	var root = get_tree().root
+	if root.has_meta("current_save_slot"):
+		return root.get_meta("current_save_slot")
+	
+	return "default"
+
+
+func _save_and_quit() -> void:
+	var slot_id = _get_save_slot_id([])
+	if save_game_manager:
+		save_game_manager.save_completed.connect(func(success, error):
+			if not success:
+				log_message("[color=orange]Save failed: %s[/color]" % error)
+			get_tree().quit()
+		, CONNECT_ONE_SHOT)
+		save_game_manager.save_game(slot_id)
+	else:
+		get_tree().quit()
 
 func _input(event: InputEvent) -> void:
 	if not visible:
@@ -63,9 +101,16 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == KEY_ESCAPE:
 			GameStateManager.close_console()
 			get_viewport().set_input_as_handled()
+			return
 		# Handle Tab for autocomplete
 		elif event.keycode == KEY_TAB and input_line.has_focus() and autocomplete_active:
 			autocomplete_list.accept_selected()
+			get_viewport().set_input_as_handled()
+			return
+	
+	# Block scroll wheel events from reaching ActionBar when console is visible
+	if event is InputEventMouseButton:
+		if (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN) and event.pressed:
 			get_viewport().set_input_as_handled()
 
 func toggle_console() -> void:
@@ -227,9 +272,7 @@ func _cmd_clear(_args: Array) -> void:
 
 func _cmd_quit(_args: Array) -> void:
 	log_message("[color=orange]Quitting game...[/color]")
-	MapManager.save_map()
-	await get_tree().create_timer(0.5).timeout
-	get_tree().quit()
+	_save_and_quit()
 
 func _cmd_history(_args: Array) -> void:
 	if command_history.is_empty():
@@ -245,3 +288,114 @@ func _cmd_echo(args: Array) -> void:
 		log_message("[color=gray]Usage: echo <text>[/color]")
 	else:
 		log_message(" ".join(args))
+
+func _cmd_save(args: Array) -> void:
+	var slot_id = _get_save_slot_id(args)
+	log_message("[color=cyan]Saving to slot: %s...[/color]" % slot_id)
+	
+	if save_game_manager:
+		save_game_manager.save_completed.connect(func(success, error):
+			if success:
+				log_message("[color=green]Save completed: %s[/color]" % slot_id)
+			else:
+				log_message("[color=red]Save failed: %s[/color]" % error)
+		, CONNECT_ONE_SHOT)
+		save_game_manager.save_game(slot_id)
+	else:
+		log_message("[color=red]SaveGameManager not found[/color]")
+
+func _cmd_load(args: Array) -> void:
+	if args.is_empty():
+		log_message("[color=gray]Usage: load <slot_name>[/color]")
+		return
+	
+	var slot_id = args[0]
+	log_message("[color=cyan]Loading slot: %s...[/color]" % slot_id)
+	
+	if save_game_manager:
+		GameStateManager.close_console()
+		save_game_manager.save_completed.connect(func(success, error):
+			if not success:
+				log_message("[color=red]Load failed: %s[/color]" % error)
+		, CONNECT_ONE_SHOT)
+		save_game_manager.load_game(slot_id)
+	else:
+		log_message("[color=red]SaveGameManager not found[/color]")
+
+func _cmd_savegame(_args: Array) -> void:
+	# Get current save slot
+	var slot_id = "default"
+	var root = get_tree().root
+	if root.has_meta("current_save_slot"):
+		slot_id = root.get_meta("current_save_slot")
+	
+	log_message("[color=cyan]=== Save Game Information ===[/color]")
+	log_message("[color=yellow]Current Slot ID:[/color] %s" % slot_id)
+	
+	# Get save slot path
+	var slot_path = "user://saves".path_join(slot_id)
+	var absolute_slot_path = ProjectSettings.globalize_path(slot_path)
+	
+	log_message("[color=yellow]Save Directory:[/color] %s" % absolute_slot_path)
+	
+	if not DirAccess.dir_exists_absolute(slot_path):
+		log_message("[color=orange]Warning: Save slot directory does not exist yet[/color]")
+		return
+	
+	# Get metadata
+	var SaveDataManagerClass = load("res://Scripts/Managers/SaveDataManager.gd")
+	var data_manager = SaveDataManagerClass.new(slot_path)
+	var metadata = data_manager.get_metadata()
+	
+	if metadata.is_empty():
+		log_message("[color=red]No metadata found![/color]")
+		return
+	
+	# Display metadata info
+	log_message("[color=yellow]Version:[/color] %s" % metadata.get("version", "unknown"))
+	
+	# Convert timestamp to readable format
+	var timestamp_ms = metadata.get("timestamp", 0)
+	if timestamp_ms > 0:
+		var timestamp_sec = timestamp_ms / 1000
+		var datetime = Time.get_datetime_dict_from_unix_time(timestamp_sec)
+		var time_str = "%04d-%02d-%02d %02d:%02d:%02d" % [
+			datetime.year, datetime.month, datetime.day,
+			datetime.hour, datetime.minute, datetime.second
+		]
+		log_message("[color=yellow]Last Save:[/color] %s" % time_str)
+	else:
+		log_message("[color=yellow]Last Save:[/color] Never")
+	
+	# Player position
+	var player_pos = metadata.get("player_position", {})
+	if not player_pos.is_empty():
+		log_message("[color=yellow]Player Position:[/color] (%.1f, %.1f, %.1f)" % [
+			player_pos.get("x", 0.0),
+			player_pos.get("y", 0.0),
+			player_pos.get("z", 0.0)
+		])
+	
+	# Inventory info
+	var inventory = data_manager.get_inventory()
+	log_message("[color=yellow]Inventory Slots:[/color] %d" % inventory.size())
+	
+	# Hotbar info
+	var hotbar = data_manager.get_hotbar()
+	log_message("[color=yellow]Hotbar Slots:[/color] %d" % hotbar.size())
+	
+	# World database size
+	var voxel_db_path = absolute_slot_path.path_join("world.sqlite")
+	if FileAccess.file_exists(voxel_db_path):
+		var file = FileAccess.open(voxel_db_path, FileAccess.READ)
+		if file:
+			var file_size_bytes = file.get_length()
+			var file_size_mb = file_size_bytes / (1024.0 * 1024.0)
+			log_message("[color=yellow]World Database:[/color] %.2f MB (%d bytes)" % [file_size_mb, file_size_bytes])
+	else:
+		log_message("[color=yellow]World Database:[/color] Not found")
+	
+	log_message("[color=cyan]============================[/color]")
+
+func _cmd_fps(_args: Array) -> void:
+	HUDManager.toggle_fps_label()

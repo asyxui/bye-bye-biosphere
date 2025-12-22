@@ -25,6 +25,8 @@ ConveyorConnectionManager="*res://Scripts/ConveyorBelt/ConveyorConnectionManager
 MapManager="*res://Scripts/Managers/MapManager.gd"
 ToolManager="*res://Scripts/Managers/ToolManager.gd"
 ItemUtils="*res://Scripts/Util/ItemUtils.gd"
+VoxelStreamManager="*res://Scripts/Managers/VoxelStreamManager.gd"
+GameStateRestoreManager="*res://Scripts/Managers/GameStateRestoreManager.gd"
 
 [input]
 

@@ -1,0 +1,6 @@
+[gd_resource type="VoxelGeneratorScript" load_steps=2 format=3 uid="uid://dvlck5ivq5ecq"]
+
+[ext_resource type="Script" uid="uid://chxltctu5faty" path="res://Scripts/Terrain/VoxelGeneratorScript.gd" id="1_37xnd"]
+
+[resource]
+script = ExtResource("1_37xnd")
