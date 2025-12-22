@@ -202,4 +202,4 @@ func drop_item(type: int, coords: Vector3):
 	newMat.albedo_color = newDrop.dropData.dropColor
 	newDrop.global_position = coords
 	newDrop.get_child(0).add_to_group("Collectibles")
-	voxelTerrain.add_child(newDrop)
+	get_voxel_terrain().add_child(newDrop)
