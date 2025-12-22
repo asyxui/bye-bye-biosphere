@@ -21,11 +21,12 @@ InputManager="*res://Scripts/Managers/InputManager.gd"
 GameStateManager="*res://Scripts/Managers/GameStateManager.gd"
 InventoryManager="*res://Scripts/Inventory/InventoryManager.gd"
 HUDManager="*res://Scripts/Managers/HUDManager.gd"
-ConveyorConnectionManager="*res://Scripts/ConveyorBelt/ConveyorConnectionManager.gd"
+ConveyorConnectionManager="*res://Scripts/ConveyorBelt/ConveyorManager.gd"
 MapManager="*res://Scripts/Managers/MapManager.gd"
 ToolManager="*res://Scripts/Managers/ToolManager.gd"
 ItemUtils="*res://Scripts/Util/ItemUtils.gd"
 VoxelStreamManager="*res://Scripts/Managers/VoxelStreamManager.gd"
+SaveManager="*res://Scripts/Managers/SaveManager.gd"
 GameStateRestoreManager="*res://Scripts/Managers/GameStateRestoreManager.gd"
 
 [input]

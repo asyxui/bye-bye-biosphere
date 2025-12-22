@@ -1,19 +1,13 @@
 extends Node
 
-var save_game_manager: Node
-
 
 func _ready() -> void:
 	CustomLogger.log_info("Starting Bye Bye Biosphere!")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	set_process_input(true)
 	
-	# Initialize save game manager
-	if not save_game_manager:
-		save_game_manager = load("res://Scripts/Managers/SaveGameManager.gd").new()
-		add_child(save_game_manager)
-		save_game_manager.save_completed.connect(_on_save_completed)
-		set_meta("save_game_manager", save_game_manager)
+	# Connect to SaveManager signals
+	SaveManager.save_completed.connect(_on_save_completed)
 	
 	# Initialize game world state
 	var state_restore_manager = get_node_or_null("/root/GameStateRestoreManager")

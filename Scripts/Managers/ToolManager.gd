@@ -23,6 +23,9 @@ func _ready() -> void:
 	
 	# Discover and load all tools from Resources/Tools/
 	_load_tools()
+	
+	# Register as saveable
+	add_to_group("saveable")
 
 func _load_tools() -> void:
 	var dir = DirAccess.open(TOOLS_PATH)
@@ -105,24 +108,31 @@ func get_hotbar_tools() -> Array[Resource]:
 	return hotbar_tools.duplicate()
 
 
+## Saveable interface: get unique save key
+func get_save_key() -> String:
+	return "tools"
+
+
 ## Get hotbar save data (tool IDs only)
-func get_save_data() -> Array:
+func get_save_data() -> Dictionary:
 	var save_data = []
 	for tool in hotbar_tools:
 		if tool:
 			save_data.append(tool.id)
 		else:
 			save_data.append(null)
-	return save_data
+	return { "hotbar": save_data }
 
 
 ## Load hotbar from save data
-func load_save_data(save_data: Array) -> void:
+func load_save_data(data: Dictionary) -> void:
 	# Reset hotbar
 	hotbar_tools.clear()
 	hotbar_tools.resize(HOTBAR_SIZE)
 	for i in range(HOTBAR_SIZE):
 		hotbar_tools[i] = null
+	
+	var save_data = data.get("hotbar", [])
 	
 	# Load tools from save data
 	for slot_index in range(save_data.size()):
@@ -132,3 +142,10 @@ func load_save_data(save_data: Array) -> void:
 		var tool_id = save_data[slot_index]
 		if tool_id and tool_id != null:
 			equip_tool(tool_id, slot_index)
+
+## Clear tools/hotbar (called during world transitions)
+func clear_save_data() -> void:
+	hotbar_tools.clear()
+	hotbar_tools.resize(HOTBAR_SIZE)
+	for i in range(HOTBAR_SIZE):
+		hotbar_tools[i] = null

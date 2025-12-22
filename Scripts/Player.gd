@@ -14,6 +14,9 @@ var active_tool: Object = null  # Reference to the currently active tool script
 func _ready() -> void:
 	# Listen for tool activation
 	ToolManager.tool_activated.connect(_on_tool_activated)
+	
+	# Register as saveable
+	add_to_group("saveable")
 
 func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
 	var tool = ToolManager.get_tool_in_slot(slot_index)
@@ -123,3 +126,39 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0, current_speed)
 
 	move_and_slide()
+
+## Saveable interface: get unique save key
+func get_save_key() -> String:
+	return "player"
+
+
+## Get player save data
+func get_save_data() -> Dictionary:
+	return {
+		"position": {
+			"x": global_position.x,
+			"y": global_position.y,
+			"z": global_position.z
+		},
+		"rotation": {
+			"x": rotation.x,
+			"y": rotation.y,
+			"z": rotation.z
+		}
+	}
+
+
+## Load player from save data
+func load_save_data(data: Dictionary) -> void:
+	if data.has("position"):
+		var pos = data["position"]
+		global_position = Vector3(pos.get("x", 0), pos.get("y", 0), pos.get("z", 0))
+	
+	if data.has("rotation"):
+		var rot = data["rotation"]
+		rotation = Vector3(rot.get("x", 0), rot.get("y", 0), rot.get("z", 0))
+
+## Reset player position to origin (called during world transitions)
+func clear_save_data() -> void:
+	global_position = Vector3.ZERO
+	rotation = Vector3.ZERO

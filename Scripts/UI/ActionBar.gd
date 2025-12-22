@@ -31,9 +31,7 @@ func _ready():
 	# Wait for ToolManager to be ready
 	await get_tree().process_frame
 	
-	# Connect to ToolManager signals
-	if ToolManager:
-		ToolManager.tool_equipped.connect(_on_tool_equipped)
+	ToolManager.tool_equipped.connect(_on_tool_equipped)
 	
 	# Set up input handling
 	set_process_input(true)

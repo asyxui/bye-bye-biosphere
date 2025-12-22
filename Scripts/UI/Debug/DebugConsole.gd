@@ -18,7 +18,6 @@ var max_log_lines: int = 500
 
 var commands: Dictionary = {}
 var autocomplete_active: bool = false
-var save_game_manager: Node = null
 
 
 # Static instance for singleton pattern
@@ -56,15 +55,6 @@ func _ready() -> void:
 	register_command("savegame", "Display current save game information", _cmd_savegame)
 	register_command("fps", "Display FPS information", _cmd_fps)
 	
-	# Get the save game manager from Main (same way MenuManager does it)
-	var main_node = get_tree().root.find_child("Main", true, false)
-	if main_node and main_node.has_meta("save_game_manager"):
-		save_game_manager = main_node.get_meta("save_game_manager")
-	else:
-		# Fallback: create our own if Main doesn't have one
-		save_game_manager = load("res://Scripts/Managers/SaveGameManager.gd").new()
-		add_child(save_game_manager)
-	
 	# Log welcome message
 	log_message("[color=cyan]Debug Console ready. Type 'help' for commands.[/color]")
 
@@ -82,15 +72,12 @@ func _get_save_slot_id(args: Array) -> String:
 
 func _save_and_quit() -> void:
 	var slot_id = _get_save_slot_id([])
-	if save_game_manager:
-		save_game_manager.save_completed.connect(func(success, error):
-			if not success:
-				log_message("[color=orange]Save failed: %s[/color]" % error)
-			get_tree().quit()
-		, CONNECT_ONE_SHOT)
-		save_game_manager.save_game(slot_id)
-	else:
+	SaveManager.save_completed.connect(func(success, error):
+		if not success:
+			log_message("[color=orange]Save failed: %s[/color]" % error)
 		get_tree().quit()
+	, CONNECT_ONE_SHOT)
+	SaveManager.save_game(slot_id)
 
 func _input(event: InputEvent) -> void:
 	if not visible:
@@ -134,7 +121,7 @@ func _on_visibility_changed() -> void:
 	_update_console_ui()
 
 func _on_close_button_pressed() -> void:
-	HUDManager.toggle_debug_console()
+	GameStateManager.toggle_console()
 
 func _on_input_submitted(text: String) -> void:
 	if text.strip_edges().is_empty():
@@ -293,16 +280,13 @@ func _cmd_save(args: Array) -> void:
 	var slot_id = _get_save_slot_id(args)
 	log_message("[color=cyan]Saving to slot: %s...[/color]" % slot_id)
 	
-	if save_game_manager:
-		save_game_manager.save_completed.connect(func(success, error):
-			if success:
-				log_message("[color=green]Save completed: %s[/color]" % slot_id)
-			else:
-				log_message("[color=red]Save failed: %s[/color]" % error)
-		, CONNECT_ONE_SHOT)
-		save_game_manager.save_game(slot_id)
-	else:
-		log_message("[color=red]SaveGameManager not found[/color]")
+	SaveManager.save_completed.connect(func(success, error):
+		if success:
+			log_message("[color=green]Save completed: %s[/color]" % slot_id)
+		else:
+			log_message("[color=red]Save failed: %s[/color]" % error)
+	, CONNECT_ONE_SHOT)
+	SaveManager.save_game(slot_id)
 
 func _cmd_load(args: Array) -> void:
 	if args.is_empty():
@@ -312,15 +296,12 @@ func _cmd_load(args: Array) -> void:
 	var slot_id = args[0]
 	log_message("[color=cyan]Loading slot: %s...[/color]" % slot_id)
 	
-	if save_game_manager:
-		GameStateManager.close_console()
-		save_game_manager.save_completed.connect(func(success, error):
-			if not success:
-				log_message("[color=red]Load failed: %s[/color]" % error)
-		, CONNECT_ONE_SHOT)
-		save_game_manager.load_game(slot_id)
+	GameStateManager.close_console()
+	var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
+	if game_state_restore_manager:
+		await game_state_restore_manager.transition_to_world(slot_id)
 	else:
-		log_message("[color=red]SaveGameManager not found[/color]")
+		log_message("[color=red]GameStateRestoreManager not found[/color]")
 
 func _cmd_savegame(_args: Array) -> void:
 	# Get current save slot
@@ -333,7 +314,7 @@ func _cmd_savegame(_args: Array) -> void:
 	log_message("[color=yellow]Current Slot ID:[/color] %s" % slot_id)
 	
 	# Get save slot path
-	var slot_path = "user://saves".path_join(slot_id)
+	var slot_path = SaveManager.get_slot_directory(slot_id)
 	var absolute_slot_path = ProjectSettings.globalize_path(slot_path)
 	
 	log_message("[color=yellow]Save Directory:[/color] %s" % absolute_slot_path)
@@ -342,10 +323,8 @@ func _cmd_savegame(_args: Array) -> void:
 		log_message("[color=orange]Warning: Save slot directory does not exist yet[/color]")
 		return
 	
-	# Get metadata
-	var SaveDataManagerClass = load("res://Scripts/Managers/SaveDataManager.gd")
-	var data_manager = SaveDataManagerClass.new(slot_path)
-	var metadata = data_manager.get_metadata()
+	# Get metadata from SaveManager
+	var metadata = SaveManager.get_slot_metadata(slot_id)
 	
 	if metadata.is_empty():
 		log_message("[color=red]No metadata found![/color]")
@@ -376,14 +355,6 @@ func _cmd_savegame(_args: Array) -> void:
 			player_pos.get("z", 0.0)
 		])
 	
-	# Inventory info
-	var inventory = data_manager.get_inventory()
-	log_message("[color=yellow]Inventory Slots:[/color] %d" % inventory.size())
-	
-	# Hotbar info
-	var hotbar = data_manager.get_hotbar()
-	log_message("[color=yellow]Hotbar Slots:[/color] %d" % hotbar.size())
-	
 	# World database size
 	var voxel_db_path = absolute_slot_path.path_join("world.sqlite")
 	if FileAccess.file_exists(voxel_db_path):
@@ -394,6 +365,17 @@ func _cmd_savegame(_args: Array) -> void:
 			log_message("[color=yellow]World Database:[/color] %.2f MB (%d bytes)" % [file_size_mb, file_size_bytes])
 	else:
 		log_message("[color=yellow]World Database:[/color] Not found")
+	
+	# Game data file size
+	var game_data_path = absolute_slot_path.path_join("game_data.json")
+	if FileAccess.file_exists(game_data_path):
+		var file = FileAccess.open(game_data_path, FileAccess.READ)
+		if file:
+			var file_size_bytes = file.get_length()
+			var file_size_kb = file_size_bytes / 1024.0
+			log_message("[color=yellow]Game Data:[/color] %.2f KB (%d bytes)" % [file_size_kb, file_size_bytes])
+	else:
+		log_message("[color=yellow]Game Data:[/color] Not found")
 	
 	log_message("[color=cyan]============================[/color]")
 

@@ -5,7 +5,6 @@ extends CanvasLayer
 @onready var slot_selection_menu = $SlotSelectionMenu if has_node("SlotSelectionMenu") else null
 @onready var loading_screen = $LoadingScreen if has_node("LoadingScreen") else null
 
-var save_game_manager: Node
 var current_save_slot: String = "default"
 
 
@@ -42,17 +41,8 @@ func _ready():
 	GameStateManager.menu_opened.connect(_on_menu_opened)
 	GameStateManager.menu_closed.connect(_on_menu_closed)
 	
-	# Get the save game manager from Main
-	var main_node = get_tree().root.find_child("Main", true, false)
-	if main_node and main_node.has_meta("save_game_manager"):
-		save_game_manager = main_node.get_meta("save_game_manager")
-	else:
-		# Fallback: create our own if Main doesn't have one
-		save_game_manager = load("res://Scripts/Managers/SaveGameManager.gd").new()
-		add_child(save_game_manager)
-	
-	if save_game_manager:
-		save_game_manager.save_completed.connect(_on_save_completed)
+	# Connect to SaveManager signals
+	SaveManager.save_completed.connect(_on_save_completed)
 
 func _input(event: InputEvent) -> void:
 	# If menu is open, allow ESC to close it
@@ -142,16 +132,12 @@ func _on_quit_pressed():
 	if root.has_meta("current_save_slot"):
 		slot_id = root.get_meta("current_save_slot")
 	
-	if save_game_manager:
-		save_game_manager.save_completed.connect(func(success, error):
-			if not success:
-				push_error("Failed to save before quit: %s" % error)
-			get_tree().quit()
-		)
-		save_game_manager.save_game(slot_id)
-	else:
-		push_error("SaveGameManager not available")
+	SaveManager.save_completed.connect(func(success, error):
+		if not success:
+			push_error("Failed to save before quit: %s" % error)
 		get_tree().quit()
+	)
+	SaveManager.save_game(slot_id)
 
 func _on_back_pressed():
 	close_settings()
@@ -164,16 +150,16 @@ func _on_slot_selected(slot_id: String) -> void:
 	var is_load = DirAccess.dir_exists_absolute(slot_path) and not slot_selection_menu.is_save_mode
 	
 	if is_load:
-		if loading_screen and save_game_manager:
-			_start_loading("Loading World...")
-			GameStateManager.close_menu()
-			save_game_manager.load_game(slot_id)
+		# Use GameStateRestoreManager for world transitions (handles loading screen properly)
+		GameStateManager.close_menu()
+		var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
+		if game_state_restore_manager:
+			await game_state_restore_manager.transition_to_world(slot_id)
 	else:
-		if save_game_manager:
-			save_game_manager.save_game(slot_id)
-			pause_menu.show()
-			if slot_selection_menu:
-				slot_selection_menu.hide()
+		SaveManager.save_game(slot_id)
+		pause_menu.show()
+		if slot_selection_menu:
+			slot_selection_menu.hide()
 
 
 ## Handle back from slot selection
