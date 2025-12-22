@@ -11,9 +11,9 @@ const BLOCK_TYPE_FREQUENCY = 1.0 / 64.0
 const TERRAIN_FREQUENCY = 1.0 / 80.0
 const CAVE_FREQUENCY = 1.0 / 250
 
-const BLOCK_AIR := 0.0
-const BLOCK_GREY := 1.0
-const BLOCK_PURPLE := 2.0
+const BLOCK_AIR := 0
+const BLOCK_GREY := 1
+const BLOCK_PURPLE := 2
 
 
 func _ready():
@@ -29,7 +29,7 @@ func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> voi
 	
 	# Critical: At high LODs, use simplified generation
 	if lod >= 2:
-		_generate_block_simple(out_buffer, origin, lod, buffer_size, scale)
+		_generate_block_simple(out_buffer, origin, buffer_size, scale)
 		return
 	
 	# Pre-calculate heights to avoid redundant terrain noise calls
@@ -73,12 +73,12 @@ func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> voi
 					
 				if cave_val < 0.30:
 					var block_val = block_type_noise_gen.get_noise_3d(world_x, world_y, world_z)
-					var block_type = BLOCK_PURPLE if block_val > 0.0 else BLOCK_GREY
+					var block_type = BLOCK_PURPLE if block_val > 0 else BLOCK_GREY
 					if block_type != BLOCK_AIR:
 						out_buffer.set_voxel(block_type, x, y, z, VoxelBuffer.CHANNEL_TYPE)
 
 # Simplified generation for distant LODs (2+)
-func _generate_block_simple(out_buffer: VoxelBuffer, origin: Vector3i, lod: int, buffer_size: Vector3i, scale: int) -> void:
+func _generate_block_simple(out_buffer: VoxelBuffer, origin: Vector3i, buffer_size: Vector3i, scale: int) -> void:
 	# At high LODs, skip caves entirely and simplify block selection
 	
 	for z in buffer_size.z:
