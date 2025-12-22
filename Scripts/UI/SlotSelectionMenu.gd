@@ -14,12 +14,9 @@ signal slot_selected(slot_id: String)
 signal back_pressed
 
 var is_save_mode: bool = false
-var slot_manager
 
 
 func _ready() -> void:
-	var SaveSlotManagerClass = load("res://Scripts/Managers/SaveSlotManager.gd")
-	slot_manager = SaveSlotManagerClass.new()
 	
 	if back_button:
 		back_button.pressed.connect(_on_back_pressed)
@@ -57,7 +54,7 @@ func _refresh_slots() -> void:
 	for child in slot_list.get_children():
 		child.queue_free()
 	
-	var slots = slot_manager.get_save_slots()
+	var slots = SaveManager.get_save_slots()
 	
 	# Show existing slots
 	for slot in slots:
@@ -88,7 +85,7 @@ func _add_slot_button(display_name: String, slot_id: String) -> void:
 func _on_save_name_submitted(_text: String = "") -> void:
 	var slot_name = text_input.text.strip_edges()
 	if slot_name.is_empty():
-		slot_name = "world_%d" % (Time.get_ticks_msec() % 10000)
+		slot_name = "default"
 	
 	slot_selected.emit(slot_name)
 	hide()

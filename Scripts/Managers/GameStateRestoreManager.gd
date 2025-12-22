@@ -1,17 +1,14 @@
 ## Manages game state restoration and world initialization
-## Uses SaveCoordinator for loading game data after voxel stream is ready
+## Uses SaveManager for loading game data after voxel stream is ready
 extends Node
 
 signal world_loaded
 signal world_created
 
-var slot_manager
 var _is_restoring = false
 
 
 func _ready() -> void:
-	var SaveSlotManagerClass = load("res://Scripts/Managers/SaveSlotManager.gd")
-	slot_manager = SaveSlotManagerClass.new()
 	CustomLogger.log_info("GameStateRestoreManager initialized")
 
 
@@ -35,12 +32,11 @@ func transition_to_world(new_slot_id: String) -> void:
 	_start_loading_sequence("Loading World...")
 	
 	# Save current world first
-	var save_game_manager = get_node_or_null("/root/SaveGameManager")
 	var current_slot = get_tree().root.get_meta("current_save_slot") if get_tree().root.has_meta("current_save_slot") else null
-	if current_slot and save_game_manager:
+	if current_slot:
 		CustomLogger.log_info("Saving current world: %s" % current_slot)
-		save_game_manager.save_game(current_slot)
-		await save_game_manager.save_completed
+		SaveManager.save_game(current_slot)
+		await SaveManager.save_completed
 	
 	_update_loading_progress(20)  # Save complete
 	
@@ -56,7 +52,7 @@ func transition_to_world(new_slot_id: String) -> void:
 ## Unload current world - clear terrain and reset state
 func _unload_current_world() -> void:
 	# Clear all saveable components
-	SaveCoordinator.clear_all_saveables()
+	SaveManager.clear_all_saveables()
 	
 	# Clear the voxel terrain
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
@@ -87,8 +83,8 @@ func restore_game_state(slot_id: String) -> void:
 	
 	_update_loading_progress(10)  # Stream configured
 	
-	# Load save data using SaveCoordinator
-	var save_data = SaveCoordinator.load_game(slot_id)
+	# Load save data using SaveManager
+	var save_data = SaveManager.load_game_data(slot_id)
 	if save_data == null:
 		push_error("Failed to load save data for slot: %s" % slot_id)
 		_is_restoring = false
@@ -116,7 +112,7 @@ func restore_game_state(slot_id: String) -> void:
 	_update_loading_progress(85)  # Stabilization complete
 	
 	# Restore all game state from save data
-	if not SaveCoordinator.restore_game_state(save_data):
+	if not SaveManager.restore_game_state(save_data):
 		push_error("Failed to restore game state")
 		_is_restoring = false
 		return
@@ -141,8 +137,8 @@ func _restore_world(slot_id: String) -> void:
 	
 	_update_loading_progress(40)  # Stream configured
 	
-	# Load save data using SaveCoordinator
-	var save_data = SaveCoordinator.load_game(slot_id)
+	# Load save data using SaveManager
+	var save_data = SaveManager.load_game_data(slot_id)
 	if save_data == null:
 		push_error("Failed to load save data for slot: %s" % slot_id)
 		return
@@ -168,7 +164,7 @@ func _restore_world(slot_id: String) -> void:
 	_update_loading_progress(85)  # Stabilization complete
 	
 	# Restore all game state from save data
-	if not SaveCoordinator.restore_game_state(save_data):
+	if not SaveManager.restore_game_state(save_data):
 		push_error("Failed to restore game state")
 		return
 	
@@ -185,7 +181,7 @@ func _restore_world(slot_id: String) -> void:
 ## Auto-load the default world on startup
 func _auto_load_default_world() -> void:
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
-	var default_slot_path = SaveDataManager.get_slot_directory("default")
+	var default_slot_path = SaveManager.get_slot_directory("default")
 	var slot_exists = DirAccess.dir_exists_absolute(default_slot_path)
 	
 	# Check if stream was already configured (e.g., from a reset)
@@ -199,7 +195,7 @@ func _auto_load_default_world() -> void:
 		await restore_game_state("default")
 	else:
 		CustomLogger.log_info("Creating default world")
-		if slot_manager.create_slot("default") and await voxel_stream_manager.configure_stream("default"):
+		if SaveManager.create_slot("default") and await voxel_stream_manager.configure_stream("default"):
 			await _finalize_world_load()
 		else:
 			push_error("Failed to create default world")

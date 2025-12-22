@@ -15,9 +15,6 @@ signal wheel_opened
 signal wheel_closed
 
 func _ready() -> void:
-	# Wait for ToolManager to be ready
-	await get_tree().process_frame
-	
 	# Create the wheel container
 	wheel_container = Node2D.new()
 	add_child(wheel_container)
@@ -31,13 +28,7 @@ func _ready() -> void:
 	set_process_input(false)
 
 func _populate_wheel() -> void:
-	# ToolManager is an autoload, access directly
-	var tool_manager = get_node("/root/ToolManager")
-	if not tool_manager:
-		push_error("ToolManager not available")
-		return
-	
-	var all_tools = tool_manager.get_all_tools()
+	var all_tools = ToolManager.get_all_tools()
 	if all_tools.is_empty():
 		CustomLogger.log_info("No tools found to display in wheel")
 		return

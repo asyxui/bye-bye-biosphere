@@ -16,7 +16,7 @@ enum State {
 }
 
 var current_state: State = State.IDLE
-var current_slot_id: String = ""
+var current_slot_id: String = "default"
 var voxel_terrain: VoxelLodTerrain = null
 var voxel_stream: VoxelStreamSQLite = null
 
@@ -188,16 +188,13 @@ func reset_world_async() -> void:
 	
 	await get_tree().process_frame
 	
-	# Delete and recreate the save slot
-	var SaveSlotManagerClass = load("res://Scripts/Managers/SaveSlotManager.gd")
-	var slot_manager = SaveSlotManagerClass.new()
-	
-	if not slot_manager.delete_slot(current_slot_id):
+	# Delete and recreate the save slot using SaveManager
+	if not SaveManager.delete_slot(current_slot_id):
 		CustomLogger.log_error("Failed to delete slot for reset: %s" % current_slot_id)
 		reset_complete.emit(false, "Failed to delete slot")
 		return
 	
-	if not slot_manager.create_slot(current_slot_id):
+	if not SaveManager.create_slot(current_slot_id):
 		CustomLogger.log_error("Failed to recreate slot after reset: %s" % current_slot_id)
 		reset_complete.emit(false, "Failed to recreate slot")
 		return
