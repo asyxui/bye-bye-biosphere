@@ -1,5 +1,6 @@
 ## InventoryManager.gd
 ## Singleton manager for the player's inventory
+## Implements Saveable interface for persistence
 extends Node
 
 var inventory = null  # Inventory type
@@ -9,6 +10,9 @@ func _ready() -> void:
 	var inventory_class = load("res://Scripts/Inventory/Inventory.gd")
 	inventory = inventory_class.new(20)
 	inventory.max_weight = 100.0
+	
+	# Register as saveable
+	add_to_group("saveable")
 
 ## Add item to player inventory
 func add_item(item, quantity: int = 1) -> int:
@@ -35,8 +39,13 @@ func get_weight_percent() -> float:
 	return inventory.get_total_weight() / inventory.max_weight
 
 
+## Saveable interface: get unique save key
+func get_save_key() -> String:
+	return "inventory"
+
+
 ## Get inventory save data (serialize for saving)
-func get_save_data() -> Array:
+func get_save_data() -> Dictionary:
 	var save_data = []
 	for slot in inventory.slots:
 		if not slot.is_empty() and slot.item:
@@ -46,16 +55,18 @@ func get_save_data() -> Array:
 			})
 		else:
 			save_data.append(null)
-	return save_data
+	return { "slots": save_data }
 
 
 ## Load inventory from save data
-func load_save_data(save_data: Array) -> void:
+func load_save_data(data: Dictionary) -> void:
 	if not inventory:
 		return
 	
 	# Clear current inventory
 	inventory._initialize_slots()
+	
+	var save_data = data.get("slots", [])
 	
 	# Load items from save data
 	for slot_index in range(save_data.size()):
@@ -73,6 +84,12 @@ func load_save_data(save_data: Array) -> void:
 		var item = _load_item_by_id(item_id)
 		if item:
 			add_item(item, quantity)
+
+
+## Clear inventory (called during world transitions)
+func clear_save_data() -> void:
+	if inventory:
+		inventory._initialize_slots()
 
 
 ## Helper to load item by ID

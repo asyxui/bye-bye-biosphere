@@ -75,13 +75,6 @@ func create_slot(slot_id: String) -> bool:
 		push_error("Failed to create save slot directory: %s" % slot_path)
 		return false
 	
-	# Initialize slot with default data files
-	var SaveDataManagerClass = load("res://Scripts/Managers/SaveDataManager.gd")
-	var data_manager = SaveDataManagerClass.new(slot_path)
-	if not data_manager.init_schema():
-		push_error("Failed to initialize save slot: %s" % slot_id)
-		return false
-	
 	return true
 
 

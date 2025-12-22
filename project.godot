@@ -26,6 +26,7 @@ MapManager="*res://Scripts/Managers/MapManager.gd"
 ToolManager="*res://Scripts/Managers/ToolManager.gd"
 VoxelStreamManager="*res://Scripts/Managers/VoxelStreamManager.gd"
 GameStateRestoreManager="*res://Scripts/Managers/GameStateRestoreManager.gd"
+SaveCoordinator="*res://Scripts/Managers/SaveCoordinator.gd"
 
 [input]
 

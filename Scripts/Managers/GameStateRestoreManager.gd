@@ -1,5 +1,5 @@
 ## Manages game state restoration and world initialization
-## Handles loading saves, creating new worlds, and restoring player data
+## Uses SaveCoordinator for loading game data after voxel stream is ready
 extends Node
 
 signal world_loaded
@@ -29,7 +29,46 @@ func initialize_startup_world() -> void:
 		await _auto_load_default_world()
 
 
+## Transition from current world to a new one
+## Saves current world, unloads it, then loads the new one
+func transition_to_world(new_slot_id: String) -> void:
+	_start_loading_sequence("Loading World...")
+	
+	# Save current world first
+	var save_game_manager = get_node_or_null("/root/SaveGameManager")
+	var current_slot = get_tree().root.get_meta("current_save_slot") if get_tree().root.has_meta("current_save_slot") else null
+	if current_slot and save_game_manager:
+		CustomLogger.log_info("Saving current world: %s" % current_slot)
+		save_game_manager.save_game(current_slot)
+		await save_game_manager.save_completed
+	
+	_update_loading_progress(20)  # Save complete
+	
+	# Unload current world
+	await _unload_current_world()
+	
+	_update_loading_progress(30)  # Unload complete
+	
+	# Load new world (without starting a new loading sequence)
+	await _restore_world(new_slot_id)
+
+
+## Unload current world - clear terrain and reset state
+func _unload_current_world() -> void:
+	# Clear all saveable components
+	SaveCoordinator.clear_all_saveables()
+	
+	# Clear the voxel terrain
+	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
+	if voxel_stream_manager and voxel_stream_manager.voxel_terrain:
+		# Set stream to null to unload all chunks
+		voxel_stream_manager.voxel_terrain.stream = null
+	
+	await get_tree().process_frame  # Give a frame for cleanup
+
+
 ## Restore game state after loading a save
+## Assumes voxel stream is already configured
 func restore_game_state(slot_id: String) -> void:
 	if _is_restoring:
 		push_error("Game restore already in progress")
@@ -38,98 +77,115 @@ func restore_game_state(slot_id: String) -> void:
 	_is_restoring = true
 	_update_loading_progress(5)  # Initialize
 	
-	# Step 1: Ensure save slot is valid
-	var slot_path = "user://saves".path_join(slot_id)
-	if not DirAccess.dir_exists_absolute(slot_path):
-		push_error("Save slot does not exist: %s" % slot_id)
-		_is_restoring = false
-		return
-		
-	# Step 6: Restore player position and rotation
-	var SaveDataManagerClass = load("res://Scripts/Managers/SaveDataManager.gd")
-	var data_manager = SaveDataManagerClass.new(slot_path)
-	var metadata = data_manager.get_metadata()
-	var player = get_tree().root.find_child("Player", true, false)
-	if player:
-		if "player_position" in metadata:
-			var pos_data = metadata["player_position"]
-			player.global_position = Vector3(pos_data["x"], pos_data["y"], pos_data["z"])
-		
-		if "player_rotation" in metadata:
-			var rot_data = metadata["player_rotation"]
-			player.rotation = Vector3(rot_data["x"], rot_data["y"], rot_data["z"])
-	
-	# Step 2: Configure voxel stream to load from this slot
+	# Configure voxel stream for this slot (must do this before loading save data)
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
-	if not voxel_stream_manager or not await voxel_stream_manager.configure_stream(slot_id):
-		push_error("Failed to configure voxel stream for slot: %s" % slot_id)
-		_is_restoring = false
-		return
+	if voxel_stream_manager:
+		if not await voxel_stream_manager.configure_stream(slot_id):
+			push_error("Failed to configure voxel stream for slot: %s" % slot_id)
+			_is_restoring = false
+			return
 	
 	_update_loading_progress(10)  # Stream configured
 	
-	# Step 3: Restore inventory
-	var inventory_data = data_manager.get_inventory()
-	var inventory_manager = get_tree().root.find_child("InventoryManager", true, false)
-	if inventory_manager and inventory_manager.has_method("load_save_data"):
-		inventory_manager.load_save_data(inventory_data)
+	# Load save data using SaveCoordinator
+	var save_data = SaveCoordinator.load_game(slot_id)
+	if save_data == null:
+		push_error("Failed to load save data for slot: %s" % slot_id)
+		_is_restoring = false
+		return
 	
-	_update_loading_progress(20)  # Inventory restored
+	_update_loading_progress(15)  # Data loaded
 	
-	# Step 4: Restore hotbar
-	var hotbar_data = data_manager.get_hotbar()
-	var tool_manager = get_tree().root.find_child("ToolManager", true, false)
-	if tool_manager and tool_manager.has_method("load_save_data"):
-		tool_manager.load_save_data(hotbar_data)
-	
-	_update_loading_progress(30)  # Hotbar restored
-	
-	# Step 5: Wait for terrain to be ready
+	# Wait for terrain to be ready
 	var map_manager = get_tree().root.find_child("MapManager", true, false)
 	if map_manager and map_manager.has_method("wait_for_terrain_ready"):
 		await map_manager.wait_for_terrain_ready()
 	
 	_update_loading_progress(60)  # Terrain ready
 	
-	# Step 5b: Initialize MapManager voxel systems now that terrain exists
+	# Initialize MapManager voxel systems now that terrain exists
 	if map_manager and map_manager.has_method("initialize_voxel_systems"):
 		await map_manager.initialize_voxel_systems()
 	
 	_update_loading_progress(70)  # Voxel systems initialized
 	
-	# Step 5c: Wait for terrain to stabilize (only as long as needed)
+	# Wait for terrain to stabilize
 	_update_loading_progress(75)  # Starting stabilization
 	if map_manager and map_manager.has_method("wait_for_terrain_stabilization"):
 		await map_manager.wait_for_terrain_stabilization()
 	_update_loading_progress(85)  # Stabilization complete
 	
-	# Step 7: Restore conveyor belts
-	var conveyor_data = data_manager.get_conveyor_belts()
-	if conveyor_data.size() > 0:
-		_restore_conveyor_belts(conveyor_data)
+	# Restore all game state from save data
+	if not SaveCoordinator.restore_game_state(save_data):
+		push_error("Failed to restore game state")
+		_is_restoring = false
+		return
 	
-	_update_loading_progress(95)  # Conveyor belts restored
+	_update_loading_progress(95)  # Game state restored
 	
-	# Step 8: Finalize loading - hide screen and unlock player
-	if player:
-		if "player_position" in metadata:
-			var pos_data = metadata["player_position"]
-			player.global_position = Vector3(pos_data["x"], pos_data["y"], pos_data["z"])
-		
-		if "player_rotation" in metadata:
-			var rot_data = metadata["player_rotation"]
-			player.rotation = Vector3(rot_data["x"], rot_data["y"], rot_data["z"])
-	
+	# Finalize loading - hide screen and unlock player
 	_finish_loading_sequence()
 	
 	_is_restoring = false
 	world_loaded.emit()
 
 
+## Internal restore function for world transitions (doesn't start/end loading sequence)
+func _restore_world(slot_id: String) -> void:
+	# Configure voxel stream for this slot (must do this before loading save data)
+	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
+	if voxel_stream_manager:
+		if not await voxel_stream_manager.configure_stream(slot_id):
+			push_error("Failed to configure voxel stream for slot: %s" % slot_id)
+			return
+	
+	_update_loading_progress(40)  # Stream configured
+	
+	# Load save data using SaveCoordinator
+	var save_data = SaveCoordinator.load_game(slot_id)
+	if save_data == null:
+		push_error("Failed to load save data for slot: %s" % slot_id)
+		return
+	
+	_update_loading_progress(50)  # Data loaded
+	
+	# Wait for terrain to be ready
+	var map_manager = get_tree().root.find_child("MapManager", true, false)
+	if map_manager and map_manager.has_method("wait_for_terrain_ready"):
+		await map_manager.wait_for_terrain_ready()
+	
+	_update_loading_progress(70)  # Terrain ready
+	
+	# Initialize MapManager voxel systems now that terrain exists
+	if map_manager and map_manager.has_method("initialize_voxel_systems"):
+		await map_manager.initialize_voxel_systems()
+	
+	_update_loading_progress(80)  # Voxel systems initialized
+	
+	# Wait for terrain to stabilize
+	if map_manager and map_manager.has_method("wait_for_terrain_stabilization"):
+		await map_manager.wait_for_terrain_stabilization()
+	_update_loading_progress(85)  # Stabilization complete
+	
+	# Restore all game state from save data
+	if not SaveCoordinator.restore_game_state(save_data):
+		push_error("Failed to restore game state")
+		return
+	
+	_update_loading_progress(95)  # Game state restored
+	
+	# Finalize loading - hide screen and unlock player
+	_finish_loading_sequence()
+	
+	get_tree().root.set_meta("current_save_slot", slot_id)
+
+
+
+
 ## Auto-load the default world on startup
 func _auto_load_default_world() -> void:
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
-	var default_slot_path = "user://saves/default"
+	var default_slot_path = SaveDataManager.get_slot_directory("default")
 	var slot_exists = DirAccess.dir_exists_absolute(default_slot_path)
 	
 	# Check if stream was already configured (e.g., from a reset)

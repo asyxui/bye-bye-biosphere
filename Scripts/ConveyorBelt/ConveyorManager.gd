@@ -7,6 +7,10 @@ const CONVEYOR_SCENE_LENGTH = 20.0
 var belts: Array[ConveyorBeltObject] = []
 var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBelt.tscn")
 
+func _ready() -> void:
+	# Register as saveable
+	add_to_group("saveable")
+
 func register_point(p: Node3D):
 	points.append(p)
 
@@ -54,3 +58,31 @@ func spawn_conveyor(start: Vector3, end: Vector3) -> Node:
 
 	get_tree().current_scene.add_child(conveyor)
 	return conveyor
+
+## Saveable interface: get unique save key
+func get_save_key() -> String:
+	return "conveyors"
+
+
+## Get conveyor save data
+func get_save_data() -> Dictionary:
+	var conveyor_data = []
+	for belt in belts:
+		conveyor_data.append(belt.to_dict())
+	return { "belts": conveyor_data }
+
+
+## Load conveyor belts from save data
+func load_save_data(data: Dictionary) -> void:
+	# Clear current belts
+	belts.clear()
+	
+	var conveyor_data = data.get("belts", [])
+	for belt_dict in conveyor_data:
+		var belt = ConveyorBeltObject.from_dict(belt_dict)
+		if belt:
+			spawn_conveyor(belt.start, belt.end)
+
+## Clear conveyors (called during world transitions)
+func clear_save_data() -> void:
+	belts.clear()

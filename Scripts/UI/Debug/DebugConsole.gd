@@ -313,13 +313,13 @@ func _cmd_load(args: Array) -> void:
 	
 	if save_game_manager:
 		GameStateManager.close_console()
-		save_game_manager.save_completed.connect(func(success, error):
-			if not success:
-				log_message("[color=red]Load failed: %s[/color]" % error)
-		, CONNECT_ONE_SHOT)
-		save_game_manager.load_game(slot_id)
+		var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
+		if game_state_restore_manager:
+			await game_state_restore_manager.transition_to_world(slot_id)
+		else:
+			log_message("[color=red]GameStateRestoreManager not found[/color]")
 	else:
-		log_message("[color=red]SaveGameManager not found[/color]")
+		log_message("[color=red]Slot directory not found[/color]")
 
 func _cmd_savegame(_args: Array) -> void:
 	# Get current save slot

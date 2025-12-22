@@ -64,6 +64,7 @@ shadow_enabled = true
 view_distance = 1024
 lod_distance = 80.0
 secondary_lod_distance = 100.0
+run_stream_in_editor = false
 cache_generated_blocks = true
 threaded_update_enabled = true
 streaming_system = 1

@@ -164,10 +164,11 @@ func _on_slot_selected(slot_id: String) -> void:
 	var is_load = DirAccess.dir_exists_absolute(slot_path) and not slot_selection_menu.is_save_mode
 	
 	if is_load:
-		if loading_screen and save_game_manager:
-			_start_loading("Loading World...")
-			GameStateManager.close_menu()
-			save_game_manager.load_game(slot_id)
+		# Use GameStateRestoreManager for world transitions (handles loading screen properly)
+		GameStateManager.close_menu()
+		var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
+		if game_state_restore_manager:
+			await game_state_restore_manager.transition_to_world(slot_id)
 	else:
 		if save_game_manager:
 			save_game_manager.save_game(slot_id)
