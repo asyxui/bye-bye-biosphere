@@ -89,6 +89,7 @@ grow_vertical = 2
 [node name="Hud" parent="Terrain" instance=ExtResource("4_rwtwo")]
 
 [node name="Player" parent="." instance=ExtResource("1_qjaue")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 77, 0)
 
 [node name="VoxelViewer" type="VoxelViewer" parent="Player"]
 view_distance = 556
