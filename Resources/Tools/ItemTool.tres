@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ToolResource" load_steps=2 format=3 uid="uid://ygwoiykjg3tn"]
+
+[ext_resource type="Script" uid="uid://cod25okn0wnqc" path="res://Scripts/Tools/ToolResource.gd" id="1_k0yu3"]
+
+[resource]
+script = ExtResource("1_k0yu3")
+id = "item"
+name = "Item"
+description = "Hold and use Items"
+tool_script_path = "res://Scripts/Tools/ItemTool.gd"

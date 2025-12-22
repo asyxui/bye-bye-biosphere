@@ -2,7 +2,7 @@
 ## Singleton manager for the player's inventory
 extends Node
 
-var inventory = null  # Inventory type
+var inventory: Inventory = null  # Inventory type
 var is_inventory_open: bool = false
 
 func _ready() -> void:

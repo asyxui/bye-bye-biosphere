@@ -11,4 +11,5 @@ description = "Yummy!"
 max_stack_size = 64
 icon = ExtResource("1_jnbht")
 weight = 1.0
+dropColor = Color(0.73029524, 0.00015584737, 0.6477337, 1)
 metadata/_custom_type_script = "uid://dnsa8h5olxgbd"

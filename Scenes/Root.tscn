@@ -55,7 +55,7 @@ _data = [0, 0, 1, 0, 1, 1, 0, 0, 0]
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_qjaue"]
 
-[node name="Node3D" type="Node3D"]
+[node name="Node3D" type="Node3D" groups=["Collectibles"]]
 script = ExtResource("1_oss8w")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -77,17 +77,19 @@ stream = SubResource("VoxelStreamSQLite_rwtwo")
 generator = ExtResource("2_pl8e4")
 mesher = SubResource("VoxelMesherBlocky_qw7le")
 format = SubResource("VoxelFormat_5k46t")
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 314.8753, 0, 0.2592926)
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
 
 [node name="MenuManager" parent="Terrain" instance=ExtResource("2_qw7le")]
 layer = 3
 
 [node name="DebugConsole" parent="Terrain" instance=ExtResource("3_5k46t")]
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Hud" parent="Terrain" instance=ExtResource("4_rwtwo")]
 
 [node name="Player" parent="." instance=ExtResource("1_qjaue")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.44755, 59.13068, 35.161316)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 77, 0)
 
 [node name="VoxelViewer" type="VoxelViewer" parent="Player"]
 view_distance = 556
@@ -100,5 +102,7 @@ shape = SubResource("SeparationRayShape3D_qjaue")
 layer = 3
 
 [node name="DebugConsole" parent="." instance=ExtResource("3_5k46t")]
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Hud" parent="." instance=ExtResource("4_rwtwo")]

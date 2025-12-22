@@ -232,4 +232,3 @@ func _combine_single_item_type(item) -> bool:
 					break
 	
 	return combined
-
