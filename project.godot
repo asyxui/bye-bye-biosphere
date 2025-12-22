@@ -24,6 +24,7 @@ HUDManager="*res://Scripts/Managers/HUDManager.gd"
 ConveyorConnectionManager="*res://Scripts/ConveyorBelt/ConveyorConnectionManager.gd"
 MapManager="*res://Scripts/Managers/MapManager.gd"
 ToolManager="*res://Scripts/Managers/ToolManager.gd"
+ItemUtils="*res://Scripts/Util/ItemUtils.gd"
 
 [input]
 

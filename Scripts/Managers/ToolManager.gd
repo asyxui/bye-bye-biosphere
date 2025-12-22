@@ -60,6 +60,23 @@ func equip_tool(tool_id: String, slot_index: int) -> bool:
 	tool_equipped.emit(tool_id, slot_index)
 	return true
 
+func equip_item(inventory_slot_id: int, slot_index: int):
+	if slot_index < 0 or slot_index >= HOTBAR_SIZE:
+		push_error("Invalid slot index: %d" % slot_index)
+		return false
+
+	if inventory_slot_id < 0 or inventory_slot_id >= InventoryManager.inventory.inventory_size:
+		push_error("Invalid inventory index: %d" % slot_index)
+		return false
+
+	var item = InventoryManager.inventory.get_slot_item(inventory_slot_id).item
+	var itemTool = get_tool("item").duplicate()
+	itemTool.id = item.id
+
+	hotbar_tools[slot_index] = itemTool
+	tool_equipped.emit(item.id, slot_index)
+	return true
+
 func unequip_tool(slot_index: int) -> bool:
 	if slot_index < 0 or slot_index >= HOTBAR_SIZE:
 		push_error("Invalid slot index: %d" % slot_index)

@@ -7,7 +7,7 @@ func on_execute(_p: Node) -> void:
 	if player and player.has_method("get_player_transform"):
 		scan_area()
 	else:
-		push_error("DestructTool: Player does not have get_origin method")
+		push_error("CollectTool: Player does not have get_player_transform method")
 
 func scan_area():
 	var query = PhysicsShapeQueryParameters3D.new()

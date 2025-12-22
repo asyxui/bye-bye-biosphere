@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://c3gynxmj3suco"]
+[gd_scene load_steps=6 format=3 uid="uid://c3gynxmj3suco"]
 
 [ext_resource type="PackedScene" uid="uid://dfchf2ldpehh" path="res://Scenes/Inventory/InventoryUI.tscn" id="1_inventory"]
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="2_debug"]
 [ext_resource type="PackedScene" uid="uid://bsjr6j0kx6eg8" path="res://Scenes/UI/ToolPickerWheel.tscn" id="3_tool_wheel"]
+[ext_resource type="Texture2D" uid="uid://c55uafcnp1ntd" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
 
 [node name="Hud" type="CanvasLayer"]
 
@@ -85,6 +86,8 @@ theme_override_constants/separation = 0
 custom_minimum_size = Vector2(55, 55)
 layout_mode = 2
 size_flags_vertical = 2
+texture = ExtResource("4_ykvyr")
+expand_mode = 2
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]

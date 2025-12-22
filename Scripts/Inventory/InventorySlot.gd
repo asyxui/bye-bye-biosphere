@@ -8,6 +8,7 @@ signal slot_drag_started(slot_index: int)
 signal slot_drag_ended(from_slot: int, to_slot: int)
 signal split_requested(slot_index: int)
 signal combine_requested(slot_index: int)
+signal item_equipped(slot_index: int)
 
 @onready var icon_rect = $MarginContainer/VBoxContainer/IconRect
 @onready var quantity_label = $MarginContainer/VBoxContainer/TopBar/QuantityLabel
@@ -150,6 +151,9 @@ func _show_context_menu() -> void:
 	
 	# Always show drop option
 	menu.add_item("Drop Item", 2)
+
+	# Always show drop option
+	menu.add_item("Equip Item", 3)
 	
 	var menu_handler = func(id):
 		match id:
@@ -159,6 +163,8 @@ func _show_context_menu() -> void:
 				combine_requested.emit(slot_index)
 			2:  # Drop
 				item_dropped.emit(slot_index)
+			3:  # Equip
+				item_equipped.emit(slot_index)
 		menu.queue_free()
 	
 	menu.id_pressed.connect(menu_handler)
