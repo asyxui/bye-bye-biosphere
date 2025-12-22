@@ -5,6 +5,8 @@ extends Node
 signal inventory_toggled(is_open: bool)
 signal debug_console_toggled(is_open: bool)
 
+var fps_label: FPSLabel = null
+
 func _ready() -> void:
 	pass
 
@@ -103,3 +105,10 @@ func is_debug_console_open() -> bool:
 ## Get the debug console (for direct access if needed)
 func get_debug_console() -> Control:
 	return _get_debug_console()
+
+func register_fps_label(label_script: FPSLabel) -> void:
+	fps_label = label_script
+
+func toggle_fps_label():
+	if fps_label != null:
+		fps_label.toggle_label()

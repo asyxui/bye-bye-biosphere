@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
-[ext_resource type="VoxelGeneratorScript" uid="uid://dvlck5ivq5ecq" path="res://Scripts/VoxelGeneratorScript.tres" id="2_pl8e4"]
+[ext_resource type="VoxelGeneratorScript" uid="uid://dvlck5ivq5ecq" path="res://Scripts/Terrain/VoxelGeneratorScript.tres" id="2_pl8e4"]
 [ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/UI/MenuManager.tscn" id="2_qw7le"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="3_5k46t"]
 [ext_resource type="PackedScene" uid="uid://c3gynxmj3suco" path="res://Scenes/UI/HUD.tscn" id="4_rwtwo"]
@@ -24,6 +24,8 @@ glow_enabled = true
 database_path = "user://world.sqlite"
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
+culls_neighbors = false
+lod_skirts_enabled = false
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xjdud"]
 vertex_color_use_as_albedo = true
@@ -31,6 +33,7 @@ vertex_color_use_as_albedo = true
 [sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_qjaue"]
 mesh_ortho_rotation_index = 1
 color = Color(0.15449801, 0.1709176, 0.15749583, 1)
+transparency_index = 1
 material_override_0 = SubResource("StandardMaterial3D_xjdud")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qjaue"]
@@ -38,6 +41,7 @@ vertex_color_use_as_albedo = true
 
 [sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_3auje"]
 color = Color(0.06631541, 0.023905009, 0.048508614, 1)
+transparency_index = 1
 material_override_0 = SubResource("StandardMaterial3D_qjaue")
 
 [sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_50gmx"]
@@ -47,6 +51,7 @@ models = Array[VoxelBlockyModel]([SubResource("VoxelBlockyModelEmpty_xjdud"), Su
 library = SubResource("VoxelBlockyLibrary_50gmx")
 
 [sub_resource type="VoxelFormat" id="VoxelFormat_5k46t"]
+_data = [0, 0, 1, 0, 1, 1, 0, 0, 0]
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_qjaue"]
 
@@ -64,6 +69,7 @@ shadow_enabled = true
 view_distance = 1024
 lod_distance = 80.0
 secondary_lod_distance = 100.0
+run_stream_in_editor = false
 cache_generated_blocks = true
 threaded_update_enabled = true
 streaming_system = 1
@@ -77,8 +83,6 @@ transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 314.8753, 0, 0.25929
 layer = 3
 
 [node name="DebugConsole" parent="Terrain" instance=ExtResource("3_5k46t")]
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Hud" parent="Terrain" instance=ExtResource("4_rwtwo")]
 
@@ -96,7 +100,5 @@ shape = SubResource("SeparationRayShape3D_qjaue")
 layer = 3
 
 [node name="DebugConsole" parent="." instance=ExtResource("3_5k46t")]
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Hud" parent="." instance=ExtResource("4_rwtwo")]
