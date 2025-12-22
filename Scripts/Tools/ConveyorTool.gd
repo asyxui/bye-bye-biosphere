@@ -2,8 +2,8 @@
 ## Multi-step tool for placing conveyor belts with two-click placement and preview
 
 extends "res://Scripts/Tools/BaseTool.gd"
+class_name ConveyorTool
 
-const CONVEYOR_SCENE_LENGTH = 20.0
 const RAY_LENGTH = 20.0
 
 var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBelt.tscn")
@@ -129,30 +129,10 @@ func _update_preview_transform(start: Vector3, end: Vector3) -> void:
 
 	var transform = Transform3D(basis, mid)
 	preview_conveyor.global_transform = transform
-	preview_conveyor.scale.x = length / CONVEYOR_SCENE_LENGTH
+	preview_conveyor.scale.x = length / ConveyorConnectionManager.CONVEYOR_SCENE_LENGTH
 
 func _spawn_conveyor(start: Vector3, end: Vector3) -> void:
-	var length = start.distance_to(end)
-	
-	if length < 0.001:
-		return
-
-	var conveyor = conveyor_scene.instantiate()
-
-	var mid = (start + end) / 2.0
-	var direction = (end - start).normalized()
-	
-	var basis = Basis()
-	basis.x = direction
-	basis.y = Vector3.UP
-	basis.z = basis.x.cross(basis.y).normalized()
-	basis = basis.orthonormalized()
-
-	var transform = Transform3D(basis, mid)
-	conveyor.global_transform = transform
-	conveyor.scale.x = length / CONVEYOR_SCENE_LENGTH
-
-	player.get_tree().current_scene.add_child(conveyor)
+	ConveyorConnectionManager.spawn_conveyor(start, end)
 
 func _get_center_hit() -> Vector3:
 	if not player:

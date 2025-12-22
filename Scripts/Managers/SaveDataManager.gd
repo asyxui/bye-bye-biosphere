@@ -1,12 +1,4 @@
 ## Decoupled save data wrapper for direct file access
-## Any system can instantiate this to read/write save data without tight coupling to SaveGameManager
-## Folder structure:
-##   savegame_name/
-##   ├── world.sqlite (voxel terrain data)
-##   ├── metadata.json (version, timestamp, player position/rotation)
-##   ├── inventory.json (inventory slots and items)
-##   ├── hotbar.json (hotbar configuration)
-##   └── conveyor_belts.json (conveyor belt placement data)
 class_name SaveDataManager
 
 var slot_dir: String
@@ -122,16 +114,31 @@ func init_schema() -> bool:
 
 
 ## Get conveyor belt data
-func get_conveyor_belts() -> Array:
+func get_conveyor_belts() -> Array[ConveyorBeltObject]:
 	var data = _load_json(conveyor_belts_path)
 	if data == null:
 		return []
-	return data if data is Array else []
+		
+	var belts: Array[ConveyorBeltObject] = []
+	
+	for entry in data:
+		if entry is Dictionary:
+			var belt := ConveyorBeltObject.from_dict(entry)
+			if belt != null:
+				belts.append(belt)
+	
+	return belts
 
 
 ## Set conveyor belt data
-func set_conveyor_belts(conveyor_data: Array) -> bool:
-	return _save_json(conveyor_belts_path, conveyor_data)
+func set_conveyor_belts(conveyor_data: Array[ConveyorBeltObject]) -> bool:
+	var serialised: Array = []
+
+	for belt in conveyor_data:
+		if belt != null:
+			serialised.append(belt.to_dict())
+
+	return _save_json(conveyor_belts_path, serialised)
 
 
 ## Create default metadata structure

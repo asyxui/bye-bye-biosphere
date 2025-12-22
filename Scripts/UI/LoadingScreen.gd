@@ -59,4 +59,3 @@ func hide_loading() -> void:
 func set_progress(percentage: float) -> void:
 	_has_real_progress = true
 	progress_bar.value = clamp(percentage, 0, 100)
-

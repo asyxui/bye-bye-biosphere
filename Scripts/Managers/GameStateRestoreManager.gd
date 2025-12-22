@@ -150,40 +150,27 @@ func _auto_load_default_world() -> void:
 
 
 ## Restore conveyor belts from save data
-func _restore_conveyor_belts(conveyor_data: Array) -> void:
-	var root_scene = get_tree().root.get_child(0)
-	if not root_scene:
-		return
-	
-	var conveyor_scene = preload("res://Scenes/ConveyorBelt/ConveyorBelt.tscn")
-	if not conveyor_scene:
-		push_error("Failed to load ConveyorBelt scene")
-		return
-	
-	for conveyor_info in conveyor_data:
-		if not conveyor_info is Dictionary:
-			continue
-		
-		# Instantiate the conveyor belt
-		var conveyor = conveyor_scene.instantiate()
-		if not conveyor:
-			continue
-		
-		# Restore transform
-		if "position" in conveyor_info:
-			var pos = conveyor_info["position"]
-			conveyor.global_position = Vector3(pos["x"], pos["y"], pos["z"])
-		
-		if "rotation" in conveyor_info:
-			var rot = conveyor_info["rotation"]
-			conveyor.rotation = Vector3(rot["x"], rot["y"], rot["z"])
-		
-		if "scale" in conveyor_info:
-			var scl = conveyor_info["scale"]
-			conveyor.scale = Vector3(scl["x"], scl["y"], scl["z"])
-		
-		# Add to scene
-		root_scene.add_child(conveyor)
+func _restore_conveyor_belts(conveyor_data: Array[ConveyorBeltObject]) -> void:
+	for belt in conveyor_data:
+		ConveyorConnectionManager.spawn_conveyor(belt.start, belt.end)
+		#if not conveyor:
+			#continue
+		#
+		## Restore transform
+		#if "position" in conveyor_info:
+			#var pos = conveyor_info["position"]
+			#conveyor.global_position = Vector3(pos["x"], pos["y"], pos["z"])
+		#
+		#if "rotation" in conveyor_info:
+			#var rot = conveyor_info["rotation"]
+			#conveyor.rotation = Vector3(rot["x"], rot["y"], rot["z"])
+		#
+		#if "scale" in conveyor_info:
+			#var scl = conveyor_info["scale"]
+			#conveyor.scale = Vector3(scl["x"], scl["y"], scl["z"])
+		#
+		## Add to scene
+		#root_scene.add_child(conveyor)
 
 
 ## Finalize world load (common cleanup for both load and create paths)

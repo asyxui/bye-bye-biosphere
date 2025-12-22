@@ -133,7 +133,7 @@ func _on_visibility_changed() -> void:
 	_update_console_ui()
 
 func _on_close_button_pressed() -> void:
-	HUDManager.toggle_debug_console()
+	GameStateManager.toggle_console()
 
 func _on_input_submitted(text: String) -> void:
 	if text.strip_edges().is_empty():
