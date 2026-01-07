@@ -67,9 +67,10 @@ shadow_enabled = true
 
 [node name="Terrain" type="VoxelLodTerrain" parent="."]
 view_distance = 1024
-lod_distance = 80.0
+lod_distance = 120.0
 secondary_lod_distance = 100.0
 run_stream_in_editor = false
+mesh_block_size = 32
 cache_generated_blocks = true
 threaded_update_enabled = true
 streaming_system = 1
@@ -93,6 +94,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 77, 0)
 
 [node name="VoxelViewer" type="VoxelViewer" parent="Player"]
 view_distance = 556
+view_distance_vertical_ratio = 0.5
 
 [node name="CollisionShape3D3" type="CollisionShape3D" parent="Player"]
 transform = Transform3D(1.0000002, 0, 0, 0, -4.3711392e-08, -1.0000001, 0, 1.0000001, -4.3711392e-08, 0, 0, -1)
