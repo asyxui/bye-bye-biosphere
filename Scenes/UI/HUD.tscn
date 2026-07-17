@@ -45,23 +45,24 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -280.0
-offset_top = -98.0
-offset_bottom = -18.0
+offset_left = -400.0
+offset_top = -152.0
+offset_right = 400.0
+offset_bottom = -36.0
 grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("1_kqhfj")
 
 [node name="ActionGrid" type="GridContainer" parent="ActionBar"]
 layout_mode = 0
-offset_right = 560.0
-offset_bottom = 70.0
-theme_override_constants/h_separation = 5
-theme_override_constants/v_separation = 5
+offset_right = 800.0
+offset_bottom = 104.0
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
 columns = 10
 
 [node name="ActionSlotTemplate" type="PanelContainer" parent="ActionBar/ActionGrid"]
-custom_minimum_size = Vector2(55, 65)
+custom_minimum_size = Vector2(72, 104)
 layout_mode = 2
 
 [node name="ColorRect" type="ColorRect" parent="ActionBar/ActionGrid/ActionSlotTemplate"]
@@ -73,7 +74,7 @@ layout_mode = 2
 theme_override_constants/separation = 0
 
 [node name="TextureRect" type="TextureRect" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
-custom_minimum_size = Vector2(55, 55)
+custom_minimum_size = Vector2(72, 64)
 layout_mode = 2
 size_flags_vertical = 2
 texture = ExtResource("4_ykvyr")
@@ -83,7 +84,7 @@ stretch_mode = 5
 [node name="Label" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "Tool"
 horizontal_alignment = 1
 vertical_alignment = 1
