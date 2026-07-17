@@ -155,13 +155,13 @@ func _destroy(origin: Vector3, direction: Vector3):
 		
 		var drops: Array[int] = []
 		var coordsWithDrops: Array[Vector3] = []
-		var coords = sphere_coords(hit.position, 2)
+		var coordsWorld = sphere_coords(hit.position, 1, 2)
 		
-		for coord in coords: 
-			var type: int = voxelTool.get_voxel(coord)
+		for i in range(0, coordsWorld.size()): 
+			var type: int = voxelTool.get_voxel(coordsWorld[i])
 			if type != 0:	
 				drops.append(type)
-				coordsWithDrops.append(coord)
+				coordsWithDrops.append(coordsWorld[i])
 		
 		voxelTool.do_sphere(hit.position, 2)
 		await get_tree().create_timer(0.2).timeout 
@@ -179,27 +179,32 @@ func save_map() -> void:
 		voxel_stream_manager.save_voxels_async()
 
 
-func sphere_coords(center: Vector3, radius: int) -> Array[Vector3]:
-	# scale of the terrain
-	var cubeScale = 0.25
+func sphere_coords(center: Vector3, cubeScale: float, radius: int) -> Array[Vector3]:
 	var coords: Array[Vector3] = []
 	for x in range(-radius, radius):
 		for y in range(-radius, radius):
 			for z in range(-radius, radius):
 				var pos = Vector3(cubeScale * x, cubeScale * y, cubeScale * z)
-				if (pos.length() <= radius * cubeScale):
+				if (pos.length() <= radius * cubeScale -0.001):
 					coords.append(pos + center)
 	return coords
 	
 func drop_item(type: int, coords: Vector3):
 	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
-	var mesh = newDrop.get_child(0).get_child(0)
+	var mesh = newDrop.get_child(0)
 	var newMat = mesh.mesh.surface_get_material(0).duplicate()
 	
 	mesh.set_surface_override_material(0, newMat)
 	
 	newDrop.dropData = load("res://Resources/Items/%s.tres" % ItemUtils.item_name_by_type_id(type))
 	newMat.albedo_color = newDrop.dropData.dropColor
-	newDrop.global_position = coords
-	newDrop.get_child(0).add_to_group("Collectibles")
+	newDrop.add_to_group("Collectibles")
 	get_voxel_terrain().add_child(newDrop)
+	
+	
+	var offset = 0.5
+	coords.x += offset
+	coords.y += offset
+	coords.z += offset
+
+	newDrop.position = coords

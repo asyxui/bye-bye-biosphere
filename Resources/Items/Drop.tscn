@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://bupxsdp2yg6r6"]
+[gd_scene format=3 uid="uid://bupxsdp2yg6r6"]
 
 [ext_resource type="Script" uid="uid://ccckl8p3tjvas" path="res://Resources/Items/DropInfo.gd" id="1_vg37v"]
 
@@ -10,17 +10,11 @@ material = SubResource("StandardMaterial3D_aw8k8")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aw8k8"]
 
-[node name="Drop" type="Node3D"]
+[node name="Drop" type="Node3D" unique_id=1521668210]
 script = ExtResource("1_vg37v")
 
-[node name="RigidBody3D" type="RigidBody3D" parent="."]
-mass = 1.673
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D"]
-transform = Transform3D(0.21, 0, 0, 0, 0.21, 0, 0, 0, 0.21, 0, 0, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1592388893]
 mesh = SubResource("SphereMesh_aw8k8")
-skeleton = NodePath("../..")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
-transform = Transform3D(0.20500001, 0, 0, 0, 0.20500001, 0, 0, 0, 0.20500001, 0, 0, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1628893914]
 shape = SubResource("SphereShape3D_aw8k8")
