@@ -32,21 +32,17 @@ func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> voi
 	var buffer_size := out_buffer.get_size()
 	var scale = 1 << lod
 	
-	var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)	
-	
-	# At high LODs, use simplified generation
-	if lod >= 2:
-		_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
-		return
-	
 	for z in buffer_size.z:
 		for x in buffer_size.x:
 			var world_x = float(origin.x + x * scale)
 			var world_z = float(origin.z + z * scale)
 		
-			var height = terrain_noise_gen.get_noise_2d(world_x, world_z) * height_scale
-			# normalize biome heights
-			height += height_scale / 2
+			var biome = get_blended_biome(
+				world_x * BIOME_FREQUENCY,
+				world_z * BIOME_FREQUENCY
+			)
+
+			var height = biome["base_height"] + terrain_noise_gen.get_noise_2d(world_x, world_z) * biome["terrain_amplitude"]
 			
 			if origin.y >= height:
 				continue
@@ -62,30 +58,6 @@ func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> voi
 				var block_type = BLOCK_PURPLE if block_val > 0.0 else BLOCK_GREY
 				out_buffer.set_voxel(block_type, x, y, z, VoxelBuffer.CHANNEL_TYPE)
 
-# Simplified generation for distant LODs (2+)
-func _generate_block_simple(out_buffer: VoxelBuffer, origin: Vector3i, buffer_size: Vector3i, scale: int, height_scale: float) -> void:
-	# At high LODs, skip caves entirely and simplify block selection
-	
-	# Don't generate far and deep chunks
-	if origin.y + buffer_size.y * scale < 0:
-		return
-	
-	for z in buffer_size.z:
-		var world_z = float(origin.z + z * scale)
-		for x in buffer_size.x:
-			var world_x = float(origin.x + x * scale)
-			var height: float = terrain_noise_gen.get_noise_2d(world_x, world_z) * height_scale
-			height += height_scale / 2
-			
-			var max_y = int((height - float(origin.y)) / float(scale))
-			max_y = clamp(max_y, 0, buffer_size.y)
-			
-			var block_val = block_type_noise_gen.get_noise_2d(world_x, world_z)
-			var block_type = BLOCK_PURPLE if block_val > 0.0 else BLOCK_GREY
-
-			# Fill entire column below terrain (no caves)
-			out_buffer.fill_area(block_type, Vector3(x, 0, z) , Vector3(x + 1, max_y, z + 1), channel)
-
 func prepare_biome_cache():
 	if not biome_cache.is_empty():
 		return
@@ -94,13 +66,14 @@ func prepare_biome_cache():
 		biome_cache.append({
 			"id": biome,
 			"center": Biomes.get_property(biome, "threshold_center"),
-			"height_scale": Biomes.get_property(biome, "height_scale")
+			"base_height": Biomes.get_property(biome, "base_height"),
+			"terrain_amplitude": Biomes.get_property(biome, "terrain_amplitude")
 		})
 
-func get_blended_height_scale(x: float, z: float) -> float:
+func get_blended_biome(x: float, z: float) -> Dictionary:
 	prepare_biome_cache()
-	
-	var t = (biome_noise_gen.get_noise_2d(x, z) + 1.0) / 2.0
+
+	var t = (biome_noise_gen.get_noise_2d(x, z) + 1.0) * 0.5
 
 	var primary_biome = null
 	var secondary_biome = null
@@ -126,10 +99,16 @@ func get_blended_height_scale(x: float, z: float) -> float:
 	var ta = best_weight / total
 	var tb = secondary_weight / total
 
-	return (
-		primary_biome["height_scale"] * ta +
-		secondary_biome["height_scale"] * tb
-	)
+	return {
+		"base_height": (
+			primary_biome["base_height"] * ta +
+			secondary_biome["base_height"] * tb
+		),
+		"terrain_amplitude": (
+			primary_biome["terrain_amplitude"] * ta +
+			secondary_biome["terrain_amplitude"] * tb
+		)
+	}
 
 func prepare_noise():
 	# Block type noise
