@@ -51,6 +51,7 @@ func _initialize_slots() -> void:
 		
 		slot_scene.slot_selected.connect(_on_slot_selected)
 		slot_scene.item_dropped.connect(_on_slot_dropped)
+		slot_scene.item_equipped.connect(_on_slot_equipped)
 		slot_scene.slot_drag_started.connect(_on_slot_drag_started)
 		slot_scene.slot_drag_ended.connect(_on_slot_drag_ended)
 		slot_scene.split_requested.connect(_on_split_requested)
@@ -92,6 +93,15 @@ func _on_slot_dropped(slot_index: int) -> void:
 	var stack = inventory.get_slot_item(slot_index)
 	if stack and not stack.is_empty():
 		inventory.remove_item(stack.item, stack.quantity)
+
+## Handle slot right click (equip item)
+func _on_slot_equipped(slot_index: int): 
+	var hud = get_node_or_null("/root/Node3D/Hud")
+	if hud:
+		var action_bar = hud.get_node_or_null("ActionBar")
+		var current_slot = action_bar.current_slot
+		if ToolManager.equip_item(slot_index, current_slot):
+			CustomLogger.log_info("Item from slot %s equipped to slot %d" % [slot_index, current_slot])
 
 ## Show item info for selected slot
 func _on_slot_info_updated() -> void:

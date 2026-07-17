@@ -10,6 +10,7 @@ extends Resource
 @export var icon: Texture2D  ## Item icon for UI
 @export var weight: float = 0.0  ## Weight per item for encumbrance
 @export var rarity: String = "common"  ## Item rarity: common, uncommon, rare, epic, legendary
+@export var dropColor: Color = Color.BLACK ## Color of the drop (currently just a small ball
 
 func _init(p_id: String = "", p_name: String = "", p_max_stack: int = 1, p_icon: Texture2D = null) -> void:
 	id = p_id

@@ -11,4 +11,5 @@ description = "For processing and stuff"
 max_stack_size = 64
 icon = ExtResource("1_lq6ik")
 weight = 5.0
+dropColor = Color(0.24115604, 0.24115604, 0.24115604, 1)
 metadata/_custom_type_script = "uid://dnsa8h5olxgbd"

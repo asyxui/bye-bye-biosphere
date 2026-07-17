@@ -168,7 +168,7 @@ func _destroy(origin: Vector3, direction: Vector3):
 		
 		for i in range(coordsWithDrops.size()): 
 			var coord: Vector3 = coordsWithDrops[i]
-			coord.y += 1
+			# coord.y += 1
 			drop_item(drops[i], coord)
 
 func save_map() -> void:
@@ -180,30 +180,26 @@ func save_map() -> void:
 
 
 func sphere_coords(center: Vector3, radius: int) -> Array[Vector3]:
+	# scale of the terrain
+	var cubeScale = 0.25
 	var coords: Array[Vector3] = []
 	for x in range(-radius, radius):
 		for y in range(-radius, radius):
 			for z in range(-radius, radius):
-				var pos = Vector3(x, y, z)
-				if (pos.length() <= radius):
+				var pos = Vector3(cubeScale * x, cubeScale * y, cubeScale * z)
+				if (pos.length() <= radius * cubeScale):
 					coords.append(pos + center)
 	return coords
 	
+func drop_item(type: int, coords: Vector3):
+	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
+	var mesh = newDrop.get_child(0).get_child(0)
+	var newMat = mesh.mesh.surface_get_material(0).duplicate()
 	
-func drop_item(type: int, coords: Vector3) -> void:
-	var voxelTerrain = get_voxel_terrain()
-	if not voxelTerrain:
-		return
+	mesh.set_surface_override_material(0, newMat)
 	
-	var item: Node3D
-	match type:
-		1:
-			item = preload("res://Assets/Items/Rock.tscn").instantiate()
-		2:
-			item = preload("res://Assets/Items/PurpleOre.tscn").instantiate()
-		_:
-			return
-	
-	item.global_position = coords
-	voxelTerrain.add_child(item)
-	
+	newDrop.dropData = load("res://Resources/Items/%s.tres" % ItemUtils.item_name_by_type_id(type))
+	newMat.albedo_color = newDrop.dropData.dropColor
+	newDrop.global_position = coords
+	newDrop.get_child(0).add_to_group("Collectibles")
+	get_voxel_terrain().add_child(newDrop)

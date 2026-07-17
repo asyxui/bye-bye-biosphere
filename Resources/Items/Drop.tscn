@@ -1,14 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://civkycvkjiht6"]
+[gd_scene load_steps=5 format=3 uid="uid://bupxsdp2yg6r6"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vi2oc"]
-albedo_color = Color(0.24432752, 0.012035925, 0.17644987, 1)
+[ext_resource type="Script" uid="uid://ccckl8p3tjvas" path="res://Resources/Items/DropInfo.gd" id="1_vg37v"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aw8k8"]
+albedo_color = Color(0.34407577, 0.34407574, 0.34407574, 0.09019608)
 
 [sub_resource type="SphereMesh" id="SphereMesh_aw8k8"]
-material = SubResource("StandardMaterial3D_vi2oc")
+material = SubResource("StandardMaterial3D_aw8k8")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_aw8k8"]
 
-[node name="Rock" type="Node3D"]
+[node name="Drop" type="Node3D"]
+script = ExtResource("1_vg37v")
 
 [node name="RigidBody3D" type="RigidBody3D" parent="."]
 mass = 1.673

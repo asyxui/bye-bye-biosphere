@@ -91,4 +91,3 @@ func combine_all_items() -> bool:
 func combine_item_type(item) -> bool:
 	var inventory = InventoryManager.get_inventory()
 	return inventory.combine_items(item)
-
