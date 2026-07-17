@@ -64,6 +64,7 @@ columns = 10
 [node name="ActionSlotTemplate" type="PanelContainer" parent="ActionBar/ActionGrid"]
 custom_minimum_size = Vector2(64, 92)
 layout_mode = 2
+theme_type_variation = &"InventorySlot"
 
 [node name="ColorRect" type="ColorRect" parent="ActionBar/ActionGrid/ActionSlotTemplate"]
 layout_mode = 2
