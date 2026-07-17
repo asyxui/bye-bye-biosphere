@@ -86,7 +86,7 @@ func configure_stream(slot_id: String) -> bool:
 	var voxel_db_path = absolute_slot_dir.path_join("world.sqlite")
 
 	voxel_stream = VoxelStreamSQLite.new()
-	voxel_stream.save_generator_output = false
+	voxel_stream.save_generator_output = true
 	voxel_stream.database_path = voxel_db_path
 	CustomLogger.log_info("Created new VoxelStreamSQLite with database_path: %s" % voxel_db_path)
 
