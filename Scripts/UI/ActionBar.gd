@@ -22,8 +22,8 @@ func _ready():
 	# Generate dynamic slots from template
 	_generate_slots()
 	
-	# Hide template
-	template_slot.hide()
+	# The template must not participate in GridContainer layout after cloning.
+	template_slot.free()
 	
 	# Set default selection
 	select_tool(0)
@@ -56,8 +56,7 @@ func _refresh_display():
 		_update_slot_display(i)
 
 func _update_slot_display(slot_index: int) -> void:
-	# Get slot node (add 1 because template is at index 0)
-	var slot_node = action_grid.get_child(slot_index + 1)
+	var slot_node = action_grid.get_child(slot_index)
 	if not slot_node:
 		return
 	
@@ -108,16 +107,15 @@ func _highlight_selected_slot(slot_index: int) -> void:
 	if not action_grid:
 		return
 	
-	# Remove highlight from all slots (skip template at index 0)
-	for i in range(1, action_grid.get_child_count()):
+	# Clear the visual state from every live slot.
+	for i in range(action_grid.get_child_count()):
 		var slot_node = action_grid.get_child(i)
 		if slot_node:
 			var color_rect = slot_node.get_node_or_null("ColorRect")
 			if color_rect:
 				color_rect.color = Color(0.2, 0.2, 0.2, 1)
 	
-	# Highlight selected slot (add 1 because template is at index 0)
-	var selected_slot = action_grid.get_child(slot_index + 1)
+	var selected_slot = action_grid.get_child(slot_index)
 	if selected_slot:
 		var selected_color_rect = selected_slot.get_node_or_null("ColorRect")
 		if selected_color_rect:
