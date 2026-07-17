@@ -23,6 +23,7 @@ static var dragging_from_index: int = -1
 static var all_slots: Array = []
 
 func _ready() -> void:
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT
 	gui_input.connect(_on_gui_input)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
@@ -52,18 +53,18 @@ func clear_slot() -> void:
 	icon_rect.texture = null
 	quantity_label.text = ""
 	name_label.text = "Empty"
-	name_label.add_theme_color_override("font_color", Color.GRAY)
+	name_label.theme_type_variation = UIThemeTypes.STATUS_MUTED
 	current_stack = null
 
 ## Select this slot
 func select() -> void:
 	is_selected = true
-	theme_type_variation = &"InventorySlotSelected"
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT_SELECTED
 
 ## Deselect this slot
 func deselect() -> void:
 	is_selected = false
-	theme_type_variation = &"InventorySlot"
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT
 
 ## Get tooltip text
 func get_slot_tooltip() -> String:
@@ -119,9 +120,7 @@ func show_drag_preview() -> void:
 
 ## Show visual feedback for drag target
 func show_drag_target() -> void:
-	var stylebox = load("res://Resources/Inventory/InventorySlotSelected.tres")
-	if stylebox:
-		add_theme_stylebox_override("panel", stylebox)
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT_DROP_TARGET
 
 ## Show context menu for item operations
 func _show_context_menu() -> void:

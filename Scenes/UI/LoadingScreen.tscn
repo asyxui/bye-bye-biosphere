@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://c1n4g5mpal0x"]
 
-[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/FactoryTheme.tres" id="1_theme"]
+[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/GameTheme.tres" id="1_theme"]
 [ext_resource type="Script" path="res://Scripts/UI/LoadingScreen.gd" id="2_script"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/PerformanceDisplay.tscn" id="3_performance"]
 

@@ -20,17 +20,15 @@ func _on_loading_changed(active: bool, operation_name: String, progress: float) 
 		_fade_tween = null
 
 	if active:
-		modulate = Color.WHITE
+		UITransitions.open(self, Vector2(0, 4))
 		loading_label.text = operation_name
 		progress_bar.value = progress
 		show()
 		return
 
 	progress_bar.value = 100.0
-	_fade_tween = create_tween()
-	_fade_tween.tween_property(self, "modulate", Color(1, 1, 1, 0), 0.5)
+	_fade_tween = UITransitions.close(self)
 	_fade_tween.tween_callback(func():
-			hide()
 			modulate = Color.WHITE
 			_fade_tween = null
 	)

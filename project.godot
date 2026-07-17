@@ -36,7 +36,7 @@ PerformanceTracker="*res://Scripts/Managers/PerformanceTracker.gd"
 
 [gui]
 
-theme/custom="res://Assets/FactoryTheme.tres"
+theme/custom="res://Assets/GameTheme.tres"
 
 [input]
 

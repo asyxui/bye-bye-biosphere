@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c2vx7y8qbm3kl"]
 
-[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/FactoryTheme.tres" id="1_theme"]
+[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/GameTheme.tres" id="1_theme"]
 
 [node name="PauseMenu" type="Control"]
 layout_mode = 3
@@ -33,6 +33,7 @@ offset_right = 200.0
 offset_bottom = 175.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_type_variation = &"ModalPanel"
 
 [node name="MarginContainer" type="MarginContainer" parent="Panel"]
 layout_mode = 2
@@ -47,7 +48,7 @@ theme_override_constants/separation = 20
 
 [node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 52
+theme_type_variation = &"DisplayTitle"
 text = "PAUSED"
 horizontal_alignment = 1
 
@@ -58,38 +59,37 @@ layout_mode = 2
 [node name="ResumeButton" type="Button" parent="Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"PrimaryButton"
 text = "Resume"
 
 [node name="SaveButton" type="Button" parent="Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"SecondaryButton"
 text = "Save"
 
 [node name="LoadButton" type="Button" parent="Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"SecondaryButton"
 text = "Load"
 
 [node name="ResetButton" type="Button" parent="Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"DestructiveButton"
 text = "Reset World"
 
 [node name="SettingsButton" type="Button" parent="Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"SecondaryButton"
 text = "Settings"
 
 [node name="QuitButton" type="Button" parent="Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
-theme_override_colors/font_hover_color = Color(1, 0.4, 0.3, 1)
-theme_override_font_sizes/font_size = 24
+theme_type_variation = &"DestructiveButton"
 text = "Quit to Desktop"
 
 [node name="Spacer2" type="Control" parent="Panel/MarginContainer/VBoxContainer"]
