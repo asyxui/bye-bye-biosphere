@@ -161,14 +161,29 @@ func sphere_coords(center: Vector3, radius: int) -> Array[Vector3]:
 	return coords
 
 func drop_item(type: int, coords: Vector3):
+	var item = ItemUtils.item_object_by_type_id(type)
+	if item:
+		spawn_item_drop(item, coords)
+
+## Spawn a physical drop from an inventory item. This is shared by terrain,
+## inventory use, and machines so all drops behave identically on conveyors.
+func spawn_item_drop(item: InventoryItem, pos: Vector3, parent: Node = null) -> Node3D:
+	if item == null:
+		return null
 	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
 	var mesh = newDrop.get_child(0).get_child(0)
 	var newMat = mesh.mesh.surface_get_material(0).duplicate()
 
 	mesh.set_surface_override_material(0, newMat)
 
-	newDrop.dropData = load("res://Resources/Items/%s.tres" % ItemUtils.item_name_by_type_id(type))
+	newDrop.dropData = item
 	newMat.albedo_color = newDrop.dropData.dropColor
-	newDrop.global_position = coords
 	newDrop.get_child(0).add_to_group("Collectibles")
-	get_voxel_terrain().add_child(newDrop)
+	var drop_parent = parent if parent else get_voxel_terrain()
+	if drop_parent == null:
+		get_tree().current_scene.add_child(newDrop)
+	else:
+		drop_parent.add_child(newDrop)
+	# The drop must be inside the tree before assigning a global transform.
+	newDrop.global_position = pos
+	return newDrop
