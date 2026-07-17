@@ -35,19 +35,32 @@ jobs:
           use-dotnet: false
           include-templates: true
 
+      - name: Resolve Godot console executable
+        shell: pwsh
+        run: |
+          $godotConsole = Get-ChildItem -Path "$env:USERPROFILE/godot" -File `
+            -Filter "Godot*_console.exe" | Select-Object -First 1
+          if (-not $godotConsole) {
+            throw "Godot console executable was not found."
+          }
+
+          "GODOT_CONSOLE=$($godotConsole.FullName)" | Out-File `
+            -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Verify Godot version
         shell: pwsh
-        run: godot --version
+        run: '& $env:GODOT_CONSOLE --version'
 
       - name: Import and validate project
         shell: pwsh
-        run: godot --headless --path . --import
+        run: '& $env:GODOT_CONSOLE --headless --path . --import'
 
       - name: Export Windows release
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path build/windows | Out-Null
-          godot --headless --path . --export-release "Windows Desktop" build/windows/ByeByeBiosphere.exe
+          & $env:GODOT_CONSOLE --headless --path . `
+            --export-release "Windows Desktop" build/windows/ByeByeBiosphere.exe
 
       - name: Verify Windows build contents
         shell: pwsh
