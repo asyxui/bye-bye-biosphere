@@ -33,6 +33,7 @@ VoxelStreamManager="*res://Scripts/Managers/VoxelStreamManager.gd"
 SaveManager="*res://Scripts/Managers/SaveManager.gd"
 GameStateRestoreManager="*res://Scripts/Managers/GameStateRestoreManager.gd"
 PerformanceTracker="*res://Scripts/Managers/PerformanceTracker.gd"
+ThemeManager="*res://Scripts/UI/ThemeManager.gd"
 
 [gui]
 

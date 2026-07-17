@@ -1,7 +1,7 @@
 [gd_scene load_steps=2 format=3 uid="uid://bvqr6xk4t1oqc"]
 
 [ext_resource type="Script" path="res://Scripts/UI/SlotSelectionMenu.gd" id="1_7c4jk"]
-[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/FactoryTheme.tres" id="2_theme"]
+[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/GameTheme.tres" id="2_theme"]
 
 [node name="SlotSelectionMenu" type="Control"]
 layout_mode = 3

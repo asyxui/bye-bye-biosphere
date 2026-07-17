@@ -10,6 +10,7 @@ extends Control
 @onready var sfx_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Audio/VBoxContainer/SFXValue
 @onready var sensitivity_slider = $Panel/MarginContainer/VBoxContainer/TabContainer/Controls/VBoxContainer/SensitivitySlider
 @onready var sensitivity_value = $Panel/MarginContainer/VBoxContainer/TabContainer/Controls/VBoxContainer/SensitivityValue
+@onready var theme_option = $Panel/MarginContainer/VBoxContainer/TabContainer/Interface/VBoxContainer/ThemeOption
 
 const QUALITY_LABELS = ["Very Low", "Low", "Medium", "High", "Ultra"]
 
@@ -27,6 +28,10 @@ func _ready():
 	_on_music_changed(music_slider.value)
 	_on_sfx_changed(sfx_slider.value)
 	_on_sensitivity_changed(sensitivity_slider.value)
+	for theme_name in ThemeManager.get_theme_names():
+		theme_option.add_item(theme_name)
+	theme_option.select(ThemeManager.get_theme_names().find(ThemeManager.current_theme))
+	theme_option.item_selected.connect(_on_theme_selected)
 
 func _on_quality_changed(value: float):
 	var index = int(value) - 1
@@ -43,3 +48,6 @@ func _on_sfx_changed(value: float):
 
 func _on_sensitivity_changed(value: float):
 	sensitivity_value.text = str(snapped(value, 0.1)) + "x"
+
+func _on_theme_selected(index: int) -> void:
+	ThemeManager.apply_theme(theme_option.get_item_text(index))
