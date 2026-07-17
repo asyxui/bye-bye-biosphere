@@ -154,7 +154,8 @@ func _on_slot_selected(slot_id: String) -> void:
 		GameStateManager.close_menu()
 		var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
 		if game_state_restore_manager:
-			await game_state_restore_manager.transition_to_world(slot_id)
+			if not await game_state_restore_manager.transition_to_world(slot_id):
+				CustomLogger.log_error("World transition failed: %s" % slot_id)
 	else:
 		SaveManager.save_game(slot_id)
 		pause_menu.show()

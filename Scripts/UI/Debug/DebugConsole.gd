@@ -299,7 +299,8 @@ func _cmd_load(args: Array) -> void:
 	GameStateManager.close_console()
 	var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
 	if game_state_restore_manager:
-		await game_state_restore_manager.transition_to_world(slot_id)
+		if not await game_state_restore_manager.transition_to_world(slot_id):
+			log_message("[color=red]World load failed: %s[/color]" % slot_id)
 	else:
 		log_message("[color=red]GameStateRestoreManager not found[/color]")
 

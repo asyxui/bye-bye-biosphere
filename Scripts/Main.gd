@@ -12,7 +12,8 @@ func _ready() -> void:
 	# Initialize game world state
 	var state_restore_manager = get_node_or_null("/root/GameStateRestoreManager")
 	if state_restore_manager:
-		await state_restore_manager.initialize_startup_world()
+		if not await state_restore_manager.initialize_startup_world():
+			CustomLogger.log_error("Startup world initialization failed")
 	else:
 		push_error("GameStateRestoreManager not found in autoloads")
 

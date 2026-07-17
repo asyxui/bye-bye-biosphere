@@ -4,6 +4,7 @@ extends Node
 
 signal world_loaded
 signal world_created
+signal world_load_failed(error: String)
 
 var _is_restoring = false
 
@@ -13,7 +14,7 @@ func _ready() -> void:
 
 
 ## Initialize world on startup - either load saved slot or create default
-func initialize_startup_world() -> void:
+func initialize_startup_world() -> bool:
 	_start_loading_sequence("Starting World...")
 	
 	# Load saved slot or create default world
@@ -21,14 +22,14 @@ func initialize_startup_world() -> void:
 	if root.has_meta("current_save_slot"):
 		var slot_id = root.get_meta("current_save_slot")
 		CustomLogger.log_info("Loading save slot: %s" % slot_id)
-		await restore_game_state(slot_id)
+		return await restore_game_state(slot_id)
 	else:
-		await _auto_load_default_world()
+		return await _auto_load_default_world()
 
 
 ## Transition from current world to a new one
 ## Saves current world, unloads it, then loads the new one
-func transition_to_world(new_slot_id: String) -> void:
+func transition_to_world(new_slot_id: String) -> bool:
 	_start_loading_sequence("Loading World...")
 	
 	# Save current world first
@@ -36,7 +37,9 @@ func transition_to_world(new_slot_id: String) -> void:
 	if current_slot:
 		CustomLogger.log_info("Saving current world: %s" % current_slot)
 		SaveManager.save_game(current_slot)
-		await SaveManager.save_completed
+		var save_result = await SaveManager.save_completed
+		if not save_result[0]:
+			return _fail_restore("Failed to save current world: %s" % save_result[1])
 	
 	_update_loading_progress(20)  # Save complete
 	
@@ -46,7 +49,7 @@ func transition_to_world(new_slot_id: String) -> void:
 	_update_loading_progress(30)  # Unload complete
 	
 	# Load new world (without starting a new loading sequence)
-	await _restore_world(new_slot_id)
+	return await _restore_world(new_slot_id)
 
 
 ## Unload current world - clear terrain and reset state
@@ -65,10 +68,9 @@ func _unload_current_world() -> void:
 
 ## Restore game state after loading a save
 ## Assumes voxel stream is already configured
-func restore_game_state(slot_id: String) -> void:
+func restore_game_state(slot_id: String) -> bool:
 	if _is_restoring:
-		push_error("Game restore already in progress")
-		return
+		return _fail_restore("Game restore already in progress")
 	
 	_is_restoring = true
 	_update_loading_progress(5)  # Initialize
@@ -77,18 +79,14 @@ func restore_game_state(slot_id: String) -> void:
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
 	if voxel_stream_manager:
 		if not await voxel_stream_manager.configure_stream(slot_id):
-			push_error("Failed to configure voxel stream for slot: %s" % slot_id)
-			_is_restoring = false
-			return
+			return _fail_restore("Failed to configure voxel stream for slot: %s" % slot_id)
 	
 	_update_loading_progress(10)  # Stream configured
 	
 	# Load save data using SaveManager
 	var save_data = SaveManager.load_game_data(slot_id)
 	if save_data == null:
-		push_error("Failed to load save data for slot: %s" % slot_id)
-		_is_restoring = false
-		return
+		return _fail_restore("Failed to load save data for slot: %s" % slot_id)
 	
 	_update_loading_progress(15)  # Data loaded
 	
@@ -113,9 +111,7 @@ func restore_game_state(slot_id: String) -> void:
 	
 	# Restore all game state from save data
 	if not SaveManager.restore_game_state(save_data):
-		push_error("Failed to restore game state")
-		_is_restoring = false
-		return
+		return _fail_restore("Failed to restore game state for slot: %s" % slot_id)
 	
 	_update_loading_progress(95)  # Game state restored
 	
@@ -124,24 +120,23 @@ func restore_game_state(slot_id: String) -> void:
 	
 	_is_restoring = false
 	world_loaded.emit()
+	return true
 
 
 ## Internal restore function for world transitions (doesn't start/end loading sequence)
-func _restore_world(slot_id: String) -> void:
+func _restore_world(slot_id: String) -> bool:
 	# Configure voxel stream for this slot (must do this before loading save data)
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
 	if voxel_stream_manager:
 		if not await voxel_stream_manager.configure_stream(slot_id):
-			push_error("Failed to configure voxel stream for slot: %s" % slot_id)
-			return
+			return _fail_restore("Failed to configure voxel stream for slot: %s" % slot_id)
 	
 	_update_loading_progress(40)  # Stream configured
 	
 	# Load save data using SaveManager
 	var save_data = SaveManager.load_game_data(slot_id)
 	if save_data == null:
-		push_error("Failed to load save data for slot: %s" % slot_id)
-		return
+		return _fail_restore("Failed to load save data for slot: %s" % slot_id)
 	
 	_update_loading_progress(50)  # Data loaded
 	
@@ -165,8 +160,7 @@ func _restore_world(slot_id: String) -> void:
 	
 	# Restore all game state from save data
 	if not SaveManager.restore_game_state(save_data):
-		push_error("Failed to restore game state")
-		return
+		return _fail_restore("Failed to restore game state for slot: %s" % slot_id)
 	
 	_update_loading_progress(95)  # Game state restored
 	
@@ -174,12 +168,14 @@ func _restore_world(slot_id: String) -> void:
 	_finish_loading_sequence()
 	
 	get_tree().root.set_meta("current_save_slot", slot_id)
+	world_loaded.emit()
+	return true
 
 
 
 
 ## Auto-load the default world on startup
-func _auto_load_default_world() -> void:
+func _auto_load_default_world() -> bool:
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
 	var default_slot_path = SaveManager.get_slot_directory("default")
 	var slot_exists = DirAccess.dir_exists_absolute(default_slot_path)
@@ -187,18 +183,17 @@ func _auto_load_default_world() -> void:
 	# Check if stream was already configured (e.g., from a reset)
 	if slot_exists and voxel_stream_manager.get_state() == voxel_stream_manager.State.LOADED:
 		if voxel_stream_manager.current_slot_id == "default":
-			await _finalize_world_load()
-			return
+			return await _finalize_world_load()
 	
 	if slot_exists:
 		CustomLogger.log_info("Loading default world")
-		await restore_game_state("default")
+		return await restore_game_state("default")
 	else:
 		CustomLogger.log_info("Creating default world")
 		if SaveManager.create_slot("default") and await voxel_stream_manager.configure_stream("default"):
-			await _finalize_world_load()
+			return await _finalize_world_load()
 		else:
-			push_error("Failed to create default world")
+			return _fail_restore("Failed to create default world")
 
 
 ## Restore conveyor belts from save data
@@ -208,7 +203,7 @@ func _restore_conveyor_belts(conveyor_data: Array[ConveyorBeltObject]) -> void:
 
 
 ## Finalize world load (common cleanup for both load and create paths)
-func _finalize_world_load() -> void:
+func _finalize_world_load() -> bool:
 	_update_loading_progress(40)  # Terrain initialization starting
 	
 	var map_manager = get_tree().root.find_child("MapManager", true, false)
@@ -230,6 +225,7 @@ func _finalize_world_load() -> void:
 	_finish_loading_sequence()
 	
 	world_created.emit()
+	return true
 
 
 ## Start loading sequence - show loading screen and lock player
@@ -252,6 +248,17 @@ func _finish_loading_sequence() -> void:
 	var menu_manager = get_tree().root.find_child("MenuManager", true, false)
 	if menu_manager and menu_manager.has_method("hide_loading_screen"):
 		menu_manager.hide_loading_screen()
+
+
+func _fail_restore(error: String) -> bool:
+	_is_restoring = false
+	GameStateManager.finish_loading()
+	var menu_manager = get_tree().root.find_child("MenuManager", true, false)
+	if menu_manager and menu_manager.has_method("hide_loading_screen"):
+		menu_manager.hide_loading_screen()
+	push_error(error)
+	world_load_failed.emit(error)
+	return false
 
 
 ## Update the loading screen progress bar
