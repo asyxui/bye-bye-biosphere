@@ -3,7 +3,6 @@ extends CanvasLayer
 @onready var pause_menu = $PauseMenu
 @onready var settings_menu = $SettingsMenu
 @onready var slot_selection_menu = $SlotSelectionMenu if has_node("SlotSelectionMenu") else null
-@onready var loading_screen = $LoadingScreen if has_node("LoadingScreen") else null
 
 var current_save_slot: String = "default"
 
@@ -11,7 +10,7 @@ var current_save_slot: String = "default"
 func _ready():
 	# Enable input processing
 	set_process_input(true)
-	
+
 	# Update current_save_slot from root meta if it was set during startup
 	var root = get_tree().root
 	if root.has_meta("current_save_slot"):
@@ -21,26 +20,26 @@ func _ready():
 		var voxel_stream_manager = get_node_or_null("/root/VoxelStreamManager")
 		if voxel_stream_manager:
 			current_save_slot = voxel_stream_manager.get_current_slot()
-	
+
 	# Hide menus initially
 	pause_menu.hide()
 	settings_menu.hide()
 	if slot_selection_menu:
 		slot_selection_menu.hide()
-	
+
 	# Connect signals
 	connect_pause_menu_signals()
 	connect_settings_menu_signals()
-	
+
 	# Connect slot selection menu signals if they exist
 	if slot_selection_menu:
 		slot_selection_menu.slot_selected.connect(_on_slot_selected)
 		slot_selection_menu.back_pressed.connect(_on_slot_selection_back)
-	
+
 	# Connect to GameStateManager signals
 	GameStateManager.menu_opened.connect(_on_menu_opened)
 	GameStateManager.menu_closed.connect(_on_menu_closed)
-	
+
 	# Connect to SaveManager signals
 	SaveManager.save_completed.connect(_on_save_completed)
 
@@ -96,42 +95,19 @@ func _on_load_pressed():
 		slot_selection_menu.show()
 
 func _on_reset_pressed():
-	# Reset the current world to empty state
 	var slot_id = current_save_slot
 	CustomLogger.log_info("Resetting world: %s" % slot_id)
-	
-	if loading_screen:
-		# Step 1: Show loading screen and lock player
-		_start_loading("Resetting World...")
-		
-		# Step 2: Close menu
-		GameStateManager.close_menu()
-		
-		# Step 3: Perform reset via VoxelStreamManager
-		var voxel_stream_manager = get_node("/root/VoxelStreamManager")
-		if voxel_stream_manager:
-			voxel_stream_manager.reset_world_async()
-			
-			# Wait for reset to complete
-			var reset_result = await voxel_stream_manager.reset_complete
-			if reset_result[0]:  # reset_result[0] is success bool
-				# Step 4: Reload scene to show fresh world
-				get_tree().reload_current_scene()
-			else:
-				CustomLogger.log_error("Reset failed: %s" % reset_result[1])
-				_finish_loading()
-		else:
-			push_error("VoxelStreamManager not found")
-			_finish_loading()
-	else:
-		push_error("LoadingScreen not found")
+	GameStateManager.close_menu()
+	var restore_manager = get_node_or_null("/root/GameStateRestoreManager")
+	if restore_manager and not await restore_manager.reset_current_world():
+		CustomLogger.log_error("Reset failed: %s" % slot_id)
 
 func _on_quit_pressed():
 	var slot_id = current_save_slot
 	var root = get_tree().root
 	if root.has_meta("current_save_slot"):
 		slot_id = root.get_meta("current_save_slot")
-	
+
 	SaveManager.save_completed.connect(func(success, error):
 		if not success:
 			push_error("Failed to save before quit: %s" % error)
@@ -143,14 +119,12 @@ func _on_back_pressed():
 	close_settings()
 
 
-## Handle slot selected
 func _on_slot_selected(slot_id: String) -> void:
 	current_save_slot = slot_id
 	var slot_path = "user://saves".path_join(slot_id)
 	var is_load = DirAccess.dir_exists_absolute(slot_path) and not slot_selection_menu.is_save_mode
-	
+
 	if is_load:
-		# Use GameStateRestoreManager for world transitions (handles loading screen properly)
 		GameStateManager.close_menu()
 		var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
 		if game_state_restore_manager:
@@ -163,14 +137,12 @@ func _on_slot_selected(slot_id: String) -> void:
 			slot_selection_menu.hide()
 
 
-## Handle back from slot selection
 func _on_slot_selection_back() -> void:
 	pause_menu.show()
 	if slot_selection_menu:
 		slot_selection_menu.hide()
 
 
-## Handle save completion
 func _on_save_completed(success: bool, error_message: String) -> void:
 	if success:
 		# Use the root meta as source of truth for current slot
@@ -181,23 +153,3 @@ func _on_save_completed(success: bool, error_message: String) -> void:
 		CustomLogger.log_info("Game saved to slot: %s" % slot_id)
 	else:
 		push_error("Failed to save game: %s" % error_message)
-
-
-## Start loading sequence - show loading screen and lock player input
-func _start_loading(operation_name: String) -> void:
-	if loading_screen:
-		loading_screen.show_loading(operation_name)
-	GameStateManager.start_loading()
-
-
-## Finish loading sequence - hide loading screen and unlock player input
-func _finish_loading() -> void:
-	GameStateManager.finish_loading()
-	if loading_screen:
-		loading_screen.hide_loading()
-
-
-## Hide the loading screen (deprecated - use _finish_loading instead)
-func hide_loading_screen() -> void:
-	if loading_screen:
-		loading_screen.hide_loading()

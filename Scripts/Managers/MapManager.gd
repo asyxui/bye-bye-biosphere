@@ -1,25 +1,22 @@
-## Manages voxel terrain operations and modifications
 extends Node3D
 
 var _initialized: bool = false
 
 
-## Get a fresh voxel tool from the current terrain
 func get_fresh_voxel_tool() -> VoxelTool:
 	var terrain = get_voxel_terrain()
 	if not terrain:
 		CustomLogger.log_error("Cannot get voxel tool: terrain not found")
 		return null
-	
+
 	var tool = terrain.get_voxel_tool()
 	if not tool:
 		CustomLogger.log_error("Terrain failed to provide voxel tool")
 		return null
-	
+
 	return tool
 
 
-## Get the voxel terrain node (find it fresh each time)
 func get_voxel_terrain() -> VoxelLodTerrain:
 	var terrain = get_tree().root.find_child("Terrain", true, false)
 	if not terrain:
@@ -28,152 +25,124 @@ func get_voxel_terrain() -> VoxelLodTerrain:
 	return terrain
 
 
-## Force initialization of voxel systems (called after terrain is guaranteed to exist)
-func initialize_voxel_systems() -> void:
+func ensure_voxel_systems_initialized() -> bool:
 	if _initialized:
-		return
-	
+		return true
+
 	_init_voxel_systems()
+	return _initialized
 
 
 func _init_voxel_systems() -> void:
 	if _initialized:
 		return
-	
+
 	# Find terrain and verify we can get a tool
 	var voxelTerrain = get_voxel_terrain()
 	if not voxelTerrain:
 		CustomLogger.log_error("Terrain not found")
 		return
-	
+
 	if not voxelTerrain.get_voxel_tool():
 		CustomLogger.log_error("Failed to get voxel tool from terrain")
 		return
-	
-	# Connect to stream reconfiguration signal
-	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
-	if voxel_stream_manager and not voxel_stream_manager.stream_reconfigured.is_connected(_on_stream_reconfigured):
-		voxel_stream_manager.stream_reconfigured.connect(_on_stream_reconfigured)
-	
+
 	_initialized = true
 	CustomLogger.log_info("Voxel systems initialized")
 
 
-## Ensure voxel systems are initialized before use
 func ensure_initialized() -> bool:
 	if not _initialized:
 		return false
-	
-	# Verify terrain still exists (might be invalid after scene reload)
+
 	var terrain = get_voxel_terrain()
 	if not terrain:
 		_initialized = false
 		return false
-	
-	# Verify we can get a fresh tool from terrain
+
 	if not terrain.get_voxel_tool():
 		return false
-	
+
 	return true
 
 
-
-## Reinitialize voxel tool when stream is reconfigured
-func _on_stream_reconfigured() -> void:
-	CustomLogger.log_info("Stream reconfigured signal received - voxel tools will be freshly generated on next use")
-
-
-## Wait for terrain to be ready (stream configured)
-func wait_for_terrain_ready() -> void:
-	# Simple wait for stream to be configured
-	# Chunks will stream in naturally as the scene renders
-	var max_wait_time = 3.0
-	var elapsed_time = 0.0
-	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
-	
-	while elapsed_time < max_wait_time:
-		if voxel_stream_manager and voxel_stream_manager.get_state() == voxel_stream_manager.State.LOADED:
-			CustomLogger.log_info("Voxel stream ready")
-			return
-		
-		await get_tree().create_timer(0.1).timeout
-		elapsed_time += 0.1
-	
-	CustomLogger.log_warn("Voxel stream took longer than expected to initialize")
-
-
-## Wait for minimum terrain to stabilize around the player
-## Uses raycasting to detect terrain as soon as it's solid under the player
-func wait_for_terrain_stabilization() -> void:
-	# Uncomment this next line to test faster loading
-	# return
+## Wait for the player's terrain area to finish meshing.
+func wait_for_terrain_ready() -> bool:
 	var terrain = get_voxel_terrain()
 	if not terrain:
-		CustomLogger.log_warn("Cannot wait for stabilization: terrain not found")
-		return
+		CustomLogger.log_error("Cannot wait for terrain: terrain not found")
+		return false
 	
 	var player = get_tree().root.find_child("Player", true, false)
 	if not player:
-		CustomLogger.log_warn("Cannot wait for stabilization: player not found")
-		return
+		CustomLogger.log_error("Cannot wait for terrain: player not found")
+		return false
 	
 	var player_pos = player.global_position
-	var max_wait_time = 100.0
-	var elapsed = 0.0
-	
-	while elapsed < max_wait_time:
-		# Use Physics3D raycast with proper distance limit
-		var query = PhysicsRayQueryParameters3D.create(player_pos, player_pos + Vector3.DOWN * 200)
-		query.collide_with_areas = false
-		query.exclude = [player]
-		var result = get_world_3d().direct_space_state.intersect_ray(query)
-		
-		if result:
-			var check_pos = result.position
-			
-			CustomLogger.log_info("Terrain detected after %.1fs at (%.0f, %.0f, %.0f), releasing player!" % [elapsed, check_pos.x, check_pos.y, check_pos.z])
-			break
-		
-		await get_tree().create_timer(0.05).timeout  # More frequent checks with less work per check
-		elapsed += 0.05
-	
-	CustomLogger.log_warn("Terrain check timed out after %.1f seconds" % [elapsed])
+	var player_local = terrain.to_local(player_pos)
+	var local_half_extent = Vector3(16, 16, 16)
+	var local_min = player_local - local_half_extent
+	var local_max = player_local + local_half_extent
+	var player_area = AABB(local_min, local_max - local_min)
+	var fall_distance_world = 200.0
+	var fall_area = AABB(
+		terrain.to_local(player_pos + Vector3(-4, -fall_distance_world, -4)),
+		terrain.to_local(player_pos + Vector3(4, 0, 4)) - terrain.to_local(player_pos + Vector3(-4, -fall_distance_world, -4))
+	)
+	var safety_lod = maxi(0, terrain.lod_count - 1)
+	var deadline = Time.get_ticks_msec() + 100000
+	var last_performance_snapshot_msec := 0
+	CustomLogger.log_info("Waiting for terrain areas: player=%s local=%s nearby=%s fall_corridor=%s lod=%d" % [player_pos, player_local, player_area, fall_area, safety_lod])
+
+	while Time.get_ticks_msec() < deadline:
+		var now_msec := Time.get_ticks_msec()
+		if PerformanceTracker.is_display_enabled() and now_msec - last_performance_snapshot_msec >= 250:
+			VoxelStreamManager.update_generator_performance_for_timer(PerformanceTracker.get_latest_timer("Loading").get("id", 0))
+			last_performance_snapshot_msec = now_msec
+		if terrain.is_area_meshed(player_area, 0) and terrain.is_area_meshed(fall_area, safety_lod):
+			VoxelStreamManager.update_generator_performance_for_timer(PerformanceTracker.get_latest_timer("Loading").get("id", 0))
+			CustomLogger.log_info("Terrain area around player is ready")
+			return true
+		await get_tree().process_frame
+
+	CustomLogger.log_warn("Terrain area did not finish meshing before the 100 second deadline. Statistics: %s" % terrain.get_statistics())
+	VoxelStreamManager.update_generator_performance_for_timer(PerformanceTracker.get_latest_timer("Loading").get("id", 0))
+	return false
 
 func _destroy(origin: Vector3, direction: Vector3):
 	if not ensure_initialized():
 		return
-	
+
 	var voxelTool = get_fresh_voxel_tool()
 	if not voxelTool:
 		return
-	
+
 	var hit = voxelTool.raycast(origin, direction, 100)
-	
+
 	if hit != null:
 		voxelTool.channel = VoxelBuffer.CHANNEL_TYPE
 		voxelTool.value = 0
-		
+
 		var drops: Array[int] = []
 		var coordsWithDrops: Array[Vector3] = []
 		var coords = sphere_coords(hit.position, 2)
-		
-		for coord in coords: 
+
+		for coord in coords:
 			var type: int = voxelTool.get_voxel(coord)
-			if type != 0:	
+			if type != 0:
 				drops.append(type)
 				coordsWithDrops.append(coord)
-		
+
 		voxelTool.do_sphere(hit.position, 2)
-		await get_tree().create_timer(0.2).timeout 
-		
-		for i in range(coordsWithDrops.size()): 
+		await get_tree().create_timer(0.2).timeout
+
+		for i in range(coordsWithDrops.size()):
 			var coord: Vector3 = coordsWithDrops[i]
 			# coord.y += 1
 			drop_item(drops[i], coord)
 
 func save_map() -> void:
 	# Delegate voxel save to VoxelStreamManager
-	# This is now async and will emit save_complete signal when done
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
 	if voxel_stream_manager:
 		voxel_stream_manager.save_voxels_async()
@@ -190,14 +159,14 @@ func sphere_coords(center: Vector3, radius: int) -> Array[Vector3]:
 				if (pos.length() <= radius * cubeScale):
 					coords.append(pos + center)
 	return coords
-	
+
 func drop_item(type: int, coords: Vector3):
 	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
 	var mesh = newDrop.get_child(0).get_child(0)
 	var newMat = mesh.mesh.surface_get_material(0).duplicate()
-	
+
 	mesh.set_surface_override_material(0, newMat)
-	
+
 	newDrop.dropData = load("res://Resources/Items/%s.tres" % ItemUtils.item_name_by_type_id(type))
 	newMat.albedo_color = newDrop.dropData.dropColor
 	newDrop.global_position = coords

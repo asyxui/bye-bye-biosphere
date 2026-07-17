@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://c6hhinca4hpbo"]
+[gd_scene format=3 uid="uid://c6hhinca4hpbo"]
 
 [ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
@@ -19,9 +19,6 @@ background_mode = 2
 sky = SubResource("Sky_pl8e4")
 tonemap_mode = 2
 glow_enabled = true
-
-[sub_resource type="VoxelStreamSQLite" id="VoxelStreamSQLite_rwtwo"]
-database_path = "user://world.sqlite"
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
 culls_neighbors = false
@@ -55,17 +52,17 @@ _data = [0, 0, 1, 0, 1, 1, 0, 0, 0]
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_qjaue"]
 
-[node name="Node3D" type="Node3D" groups=["Collectibles"]]
+[node name="Node3D" type="Node3D" unique_id=401323680 groups=["Collectibles"]]
 script = ExtResource("1_oss8w")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1075148557]
 environment = SubResource("Environment_is6ib")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=402873290]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Terrain" type="VoxelLodTerrain" parent="."]
+[node name="Terrain" type="VoxelLodTerrain" parent="." unique_id=1377358795]
 view_distance = 1024
 lod_distance = 120.0
 secondary_lod_distance = 100.0
@@ -74,37 +71,27 @@ mesh_block_size = 32
 cache_generated_blocks = true
 threaded_update_enabled = true
 streaming_system = 1
-stream = SubResource("VoxelStreamSQLite_rwtwo")
 generator = ExtResource("2_pl8e4")
 mesher = SubResource("VoxelMesherBlocky_qw7le")
 format = SubResource("VoxelFormat_5k46t")
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
 
-[node name="MenuManager" parent="Terrain" instance=ExtResource("2_qw7le")]
-layer = 3
-
-[node name="DebugConsole" parent="Terrain" instance=ExtResource("3_5k46t")]
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Hud" parent="Terrain" instance=ExtResource("4_rwtwo")]
-
-[node name="Player" parent="." instance=ExtResource("1_qjaue")]
+[node name="Player" parent="." unique_id=1795958652 instance=ExtResource("1_qjaue")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 77, 0)
 
-[node name="VoxelViewer" type="VoxelViewer" parent="Player"]
+[node name="VoxelViewer" type="VoxelViewer" parent="Player" unique_id=1247748129]
 view_distance = 556
 view_distance_vertical_ratio = 0.5
 
-[node name="CollisionShape3D3" type="CollisionShape3D" parent="Player"]
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="Player" unique_id=1974886394]
 transform = Transform3D(1.0000002, 0, 0, 0, -4.3711392e-08, -1.0000001, 0, 1.0000001, -4.3711392e-08, 0, 0, -1)
 shape = SubResource("SeparationRayShape3D_qjaue")
 
-[node name="MenuManager" parent="." instance=ExtResource("2_qw7le")]
+[node name="MenuManager" parent="." unique_id=1334449997 instance=ExtResource("2_qw7le")]
 layer = 3
 
-[node name="DebugConsole" parent="." instance=ExtResource("3_5k46t")]
+[node name="DebugConsole" parent="." unique_id=1564078773 instance=ExtResource("3_5k46t")]
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Hud" parent="." instance=ExtResource("4_rwtwo")]
+[node name="Hud" parent="." unique_id=871983295 instance=ExtResource("4_rwtwo")]

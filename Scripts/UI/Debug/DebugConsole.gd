@@ -54,6 +54,7 @@ func _ready() -> void:
 	register_command("echo", "Echo text to console. Usage: echo <text>", _cmd_echo)
 	register_command("savegame", "Display current save game information", _cmd_savegame)
 	register_command("fps", "Display FPS information", _cmd_fps)
+	register_command("performance", "Show loading timings. Usage: performance [on|off]", _cmd_performance)
 	
 	# Log welcome message
 	log_message("[color=cyan]Debug Console ready. Type 'help' for commands.[/color]")
@@ -382,3 +383,24 @@ func _cmd_savegame(_args: Array) -> void:
 
 func _cmd_fps(_args: Array) -> void:
 	HUDManager.toggle_fps_label()
+
+func _cmd_performance(args: Array) -> void:
+	if args.size() > 1 or (args.size() == 1 and args[0].to_lower() not in ["on", "off"]):
+		log_message("[color=gray]Usage: performance [on|off][/color]")
+		return
+	if args.size() == 1:
+		var enabled: bool = args[0].to_lower() == "on"
+		PerformanceTracker.set_display_enabled(enabled)
+		log_message("[color=cyan]Performance display %s.[/color]" % ("enabled" if enabled else "disabled"))
+		return
+	var timer := PerformanceTracker.get_latest_timer("Loading")
+	if timer.is_empty():
+		log_message("[color=gray]No loading performance data collected yet.[/color]")
+		return
+	log_message("[color=cyan]=== Loading Performance (%.3fs, %s) ===[/color]" % [timer.total_elapsed, timer.status])
+	for checkpoint in timer.checkpoints:
+		log_message("%s %.3fs (%.3fs total)" % [checkpoint.label, checkpoint.split, checkpoint.cumulative])
+		for substep in checkpoint.get("substeps", []):
+			log_message("  ↳ %s ×%d: Σ %.3fs, avg %.3fms, max %.3fms" % [substep.label, substep.count, substep.total, substep.average * 1000.0, substep.max * 1000.0])
+	if timer.status == "active":
+		log_message("▶ %s %.3fs" % [timer.current_label, timer.current_elapsed])

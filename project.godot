@@ -32,6 +32,7 @@ ItemUtils="*res://Scripts/Util/ItemUtils.gd"
 VoxelStreamManager="*res://Scripts/Managers/VoxelStreamManager.gd"
 SaveManager="*res://Scripts/Managers/SaveManager.gd"
 GameStateRestoreManager="*res://Scripts/Managers/GameStateRestoreManager.gd"
+PerformanceTracker="*res://Scripts/Managers/PerformanceTracker.gd"
 
 [input]
 
