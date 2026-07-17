@@ -1,0 +1,78 @@
+name: Godot CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    name: Validate and build Windows
+    runs-on: windows-2025
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Godot
+        uses: chickensoft-games/setup-godot@f166999204a4f2722c6fe042fbaa3b3ea0d9c789 # v2.4.1
+        with:
+          version: 4.7.0
+          use-dotnet: false
+          include-templates: true
+
+      - name: Verify Godot version
+        shell: pwsh
+        run: godot --version
+
+      - name: Import and validate project
+        shell: pwsh
+        run: godot --headless --path . --import
+
+      - name: Export Windows release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path build/windows | Out-Null
+          godot --headless --path . --export-release "Windows Desktop" build/windows/ByeByeBiosphere.exe
+
+      - name: Verify Windows build contents
+        shell: pwsh
+        run: |
+          $requiredFiles = @(
+            "build/windows/ByeByeBiosphere.exe",
+            "build/windows/ByeByeBiosphere.pck"
+          )
+
+          foreach ($file in $requiredFiles) {
+            if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+              throw "Expected build output is missing: $file"
+            }
+          }
+
+          $voxelRuntime = Get-ChildItem -Path build/windows -Recurse -File `
+            -Filter "libvoxel.windows.template_release.x86_64.dll"
+          if (-not $voxelRuntime) {
+            throw "The Windows voxel GDExtension runtime is missing from the build."
+          }
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ByeByeBiosphere-Windows-${{ github.sha }}
+          path: build/windows/
+          if-no-files-found: error
+          retention-days: 14
