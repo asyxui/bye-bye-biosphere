@@ -123,9 +123,8 @@ func _highlight_selected_slot(slot_index: int) -> void:
 		if selected_color_rect:
 			selected_color_rect.color = Color(0.4, 0.6, 0.2, 1)  # Green highlight
 
-func _input(event: InputEvent) -> void:
-	# Don't process input when menu is open or console is open
-	if GameStateManager.is_menu_open or GameStateManager.is_console_open:
+func _unhandled_input(event: InputEvent) -> void:
+	if not UIManager.allows_gameplay_input():
 		return
 	
 	# Check for scroll wheel to change selected slot

@@ -1,5 +1,5 @@
 ## Loading screen for world transitions
-extends Control
+extends UIScreen
 
 class_name LoadingScreen
 

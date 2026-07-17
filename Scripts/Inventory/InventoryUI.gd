@@ -1,6 +1,6 @@
 ## InventoryUI.gd
 ## UI controller for the inventory display
-extends Control
+extends UIScreen
 
 @onready var grid_container = $Panel/MarginContainer/VBoxContainer/ScrollContainer/GridContainer
 @onready var weight_label = $Panel/MarginContainer/VBoxContainer/StatsContainer/WeightLabel
@@ -96,12 +96,10 @@ func _on_slot_dropped(slot_index: int) -> void:
 
 ## Handle slot right click (equip item)
 func _on_slot_equipped(slot_index: int): 
-	var hud = get_node_or_null("/root/Node3D/Hud")
-	if hud:
-		var action_bar = hud.get_node_or_null("ActionBar")
-		var current_slot = action_bar.current_slot
-		if ToolManager.equip_item(slot_index, current_slot):
-			CustomLogger.log_info("Item from slot %s equipped to slot %d" % [slot_index, current_slot])
+	var action_bar = UIManager._root.get_action_bar()
+	var current_slot = action_bar.current_slot
+	if ToolManager.equip_item(slot_index, current_slot):
+		CustomLogger.log_info("Item from slot %s equipped to slot %d" % [slot_index, current_slot])
 
 ## Show item info for selected slot
 func _on_slot_info_updated() -> void:
@@ -114,11 +112,7 @@ func _show_slot_info(_slot_index: int) -> void:
 
 ## Close inventory
 func _on_close_pressed() -> void:
-	var hud_mgr = get_node_or_null("/root/HUDManager")
-	if hud_mgr:
-		hud_mgr.toggle_inventory()
-	else:
-		hide()
+	UIManager.pop_screen(UIManager.ScreenId.INVENTORY)
 
 ## Refresh when inventory changes
 func _on_inventory_changed() -> void:
