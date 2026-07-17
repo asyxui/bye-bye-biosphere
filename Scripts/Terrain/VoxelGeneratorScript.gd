@@ -70,9 +70,12 @@ func _generate_block_detailed(out_buffer: VoxelBuffer, origin: Vector3i, buffer_
 			var world_x = float(origin.x + x * scale)
 			var world_z = float(origin.z + z * scale)
 		
-			var height = terrain_noise_gen.get_noise_2d(world_x, world_z) * height_scale
-			# normalize biome heights
-			height += height_scale / 2
+			var biome = get_blended_biome(
+				world_x * BIOME_FREQUENCY,
+				world_z * BIOME_FREQUENCY
+			)
+
+			var height = biome["base_height"] + terrain_noise_gen.get_noise_2d(world_x, world_z) * biome["terrain_amplitude"]
 			
 			if origin.y >= height:
 				continue
@@ -167,13 +170,14 @@ func prepare_biome_cache():
 		biome_cache.append({
 			"id": biome,
 			"center": Biomes.get_property(biome, "threshold_center"),
-			"height_scale": Biomes.get_property(biome, "height_scale")
+			"base_height": Biomes.get_property(biome, "base_height"),
+			"terrain_amplitude": Biomes.get_property(biome, "terrain_amplitude")
 		})
 
-func get_blended_height_scale(x: float, z: float) -> float:
+func get_blended_biome(x: float, z: float) -> Dictionary:
 	prepare_biome_cache()
-	
-	var t = (biome_noise_gen.get_noise_2d(x, z) + 1.0) / 2.0
+
+	var t = (biome_noise_gen.get_noise_2d(x, z) + 1.0) * 0.5
 
 	var primary_biome = null
 	var secondary_biome = null
@@ -199,10 +203,16 @@ func get_blended_height_scale(x: float, z: float) -> float:
 	var ta = best_weight / total
 	var tb = secondary_weight / total
 
-	return (
-		primary_biome["height_scale"] * ta +
-		secondary_biome["height_scale"] * tb
-	)
+	return {
+		"base_height": (
+			primary_biome["base_height"] * ta +
+			secondary_biome["base_height"] * tb
+		),
+		"terrain_amplitude": (
+			primary_biome["terrain_amplitude"] * ta +
+			secondary_biome["terrain_amplitude"] * tb
+		)
+	}
 
 func prepare_noise():
 	# Block type noise

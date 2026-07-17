@@ -3,3 +3,4 @@
 /android/
 /build/
 .vscode
+/addons/godot_voxel/godot-cpp

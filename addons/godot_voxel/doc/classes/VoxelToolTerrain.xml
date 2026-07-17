@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="VoxelToolTerrain" inherits="VoxelTool" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Implementation of [VoxelTool] specialized for uses on [VoxelTerrain].
+	</brief_description>
+	<description>
+		Functions in this class are specific to [VoxelTerrain]. For generic functions, you may also check [VoxelTool].
+		It's not a class to instantiate alone, you may get it from [VoxelTerrain] using the `get_voxel_tool()` method.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="do_hemisphere">
+			<return type="void" />
+			<param index="0" name="center" type="Vector3" />
+			<param index="1" name="radius" type="float" />
+			<param index="2" name="flat_direction" type="Vector3" />
+			<param index="3" name="smoothness" type="float" default="0.0" />
+			<description>
+				Operates on a hemisphere, where [code]flat_direction[/code] is pointing away from the flat surface (like a normal). [code]smoothness[/code] determines how the flat part blends with the rounded part, with higher values producing softer more rounded edge.
+			</description>
+		</method>
+		<method name="for_each_voxel_metadata_in_area">
+			<return type="void" />
+			<param index="0" name="voxel_area" type="AABB" />
+			<param index="1" name="callback" type="Callable" />
+			<description>
+				Executes a function for each voxel holding metadata in the given area.
+				The given callback takes two arguments: voxel position (Vector3i), voxel metadata (Variant).
+				IMPORTANT: inserting new or removing metadata from inside this function is not allowed.
+			</description>
+		</method>
+		<method name="run_blocky_random_tick">
+			<return type="void" />
+			<param index="0" name="area" type="AABB" />
+			<param index="1" name="voxel_count" type="int" />
+			<param index="2" name="callback" type="Callable" />
+			<param index="3" name="batch_count" type="int" default="16" />
+			<param index="4" name="tags_mask" type="int" default="4294967295" />
+			<description>
+				Picks random voxels within the specified area. If voxel models have [member VoxelBlockyModel.random_tickable] set to [code]true[/code] and [member VoxelBlockyModel.tags_mask] matches any bit in [code]tags_mask[/code], executes a function on them. This only works for terrains using [VoxelMesherBlocky].
+				The given callback takes two arguments: voxel position (Vector3i), voxel value (int).
+
+				The purpose of [code]batch_count[/code] is to optimize the picking process through the internal data structure. The algorithm goes as follows: [code]voxel_count[/code] is divided in batches of length [code]batch_count[/code]. For each batch, a random block intersecting [code]area[/code] is chosen, and [code]batch_count[/code] voxels are picked at random inside of it. If [code]voxel_count[/code] is not divisible by [code]batch_count[/code], an extra block will be picked to do the remainder.
+				[code]batch[/code] can bias randomness by concentrating picks in specific blocks, but if this function is used every frame over time, that bias should average out. If you want no bias at all, set [code]batch_count[/code] to 1.
+			</description>
+		</method>
+	</methods>
+</class>
