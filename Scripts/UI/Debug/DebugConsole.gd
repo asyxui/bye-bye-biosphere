@@ -52,7 +52,11 @@ func _ready() -> void:
 	register_command("savegame", "Display current save game information", _cmd_savegame)
 	register_command("fps", "Display FPS information", _cmd_fps)
 	register_command("performance", "Show loading timings. Usage: performance [on|off]", _cmd_performance)
+<< << << < HEAD
 
+== == == =
+
+>> >> >> > 103dffd(chore: betterinitialhandlingofworldsnapshot and loadingperformance)
 	# Log welcome message
 	log_message("[color=cyan]Debug Console ready. Type 'help' for commands.[/color]")
 

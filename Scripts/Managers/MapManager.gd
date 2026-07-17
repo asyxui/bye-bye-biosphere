@@ -72,12 +72,12 @@ func wait_for_terrain_ready() -> bool:
 	if not terrain:
 		CustomLogger.log_error("Cannot wait for terrain: terrain not found")
 		return false
-	
+
 	var player = get_tree().root.find_child("Player", true, false)
 	if not player:
 		CustomLogger.log_error("Cannot wait for terrain: player not found")
 		return false
-	
+
 	var player_pos = player.global_position
 	var player_local = terrain.to_local(player_pos)
 	var local_half_extent = Vector3(16, 16, 16)
