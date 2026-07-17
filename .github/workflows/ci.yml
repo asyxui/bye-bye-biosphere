@@ -34,6 +34,7 @@ jobs:
           version: 4.7.0
           use-dotnet: false
           include-templates: true
+          cache: false
 
       - name: Resolve Godot console executable
         shell: pwsh
