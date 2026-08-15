@@ -17,8 +17,6 @@ static inline float lerp(float a, float b, float t)
 	return a + (b - a) * t;
 }
 
-#define BIOME_PERIOD 120.0f
-
 VoxelGenerator::Result VoxelGeneratorFast::generate_block(
 	VoxelQueryData input
 )
@@ -41,8 +39,8 @@ VoxelGenerator::Result VoxelGeneratorFast::generate_block(
 
 			Vector2 biome =
 				get_blended_biome(
-					world_x / BIOME_PERIOD,
-					world_z / BIOME_PERIOD
+					world_x / biome_period,
+					world_z / biome_period
 				);
 
 			float terrain_height =
@@ -57,7 +55,7 @@ VoxelGenerator::Result VoxelGeneratorFast::generate_block(
 				const int world_y =	origin.y + y * lod_scale;
 				if (world_y > terrain_height) continue;
 
-				if (cave_noise->get_noise_3d(world_x, world_y, world_z) >= 0.3f) continue;
+				if (cave_noise->get_noise_3d(world_x, world_y, world_z) >= cave_cutoff) continue;
 
 				float block_val = block_type_noise->get_noise_3d(world_x, world_y, world_z);
 				out_buffer.set_voxel(block_val > 0.0 ? 2 : 1, x, y, z, VoxelBuffer::CHANNEL_TYPE);
@@ -81,7 +79,7 @@ void VoxelGeneratorFast::prepare_noise()
 	);
 
 	block_type_noise->set_seed(0);
-	block_type_noise->set_period(64.0f);
+	block_type_noise->set_period(block_type_period);
 
 
 
@@ -90,7 +88,7 @@ void VoxelGeneratorFast::prepare_noise()
 	);
 
 	terrain_noise->set_seed(0);
-	terrain_noise->set_period(80.0f);
+	terrain_noise->set_period(terrain_period);
 
 	terrain_noise->set_fractal_type(
 		ZN_FastNoiseLite::FRACTAL_FBM
@@ -107,7 +105,7 @@ void VoxelGeneratorFast::prepare_noise()
 	);
 
 	cave_noise->set_seed(0);
-	cave_noise->set_period(250.0f);
+	cave_noise->set_period(cave_period);
 
 	cave_noise->set_fractal_type(
 		ZN_FastNoiseLite::FRACTAL_FBM
@@ -124,7 +122,7 @@ void VoxelGeneratorFast::prepare_noise()
 	);
 
 	biome_noise->set_seed(0);
-	biome_noise->set_period(BIOME_PERIOD);
+	biome_noise->set_period(biome_period);
 }
 
 
@@ -211,6 +209,72 @@ void VoxelGeneratorFast::set_biomes(Array value)
 	biomes = value;
 }
 
+void VoxelGeneratorFast::set_block_type_period(float value)
+{
+	block_type_period = value;
+
+	if (block_type_noise.is_valid())
+		block_type_noise->set_period(value);
+}
+
+float VoxelGeneratorFast::get_block_type_period() const
+{
+	return block_type_period;
+}
+
+
+void VoxelGeneratorFast::set_terrain_period(float value)
+{
+	terrain_period = value;
+
+	if (terrain_noise.is_valid())
+		terrain_noise->set_period(value);
+}
+
+float VoxelGeneratorFast::get_terrain_period() const
+{
+	return terrain_period;
+}
+
+
+void VoxelGeneratorFast::set_cave_period(float value)
+{
+	cave_period = value;
+
+	if (cave_noise.is_valid())
+		cave_noise->set_period(value);
+}
+
+float VoxelGeneratorFast::get_cave_period() const
+{
+	return cave_period;
+}
+
+
+void VoxelGeneratorFast::set_biome_period(float value)
+{
+	biome_period = value;
+
+	if (biome_noise.is_valid())
+		biome_noise->set_period(value);
+}
+
+float VoxelGeneratorFast::get_biome_period() const
+{
+	return biome_period;
+}
+
+float VoxelGeneratorFast::get_cave_cutoff() const
+{
+	return cave_cutoff;
+}
+
+
+void VoxelGeneratorFast::set_cave_cutoff(float value)
+{
+	cave_cutoff = value;
+}
+
 void VoxelGeneratorFast::_bind_methods()
 {
 	ClassDB::bind_method(
@@ -223,6 +287,55 @@ void VoxelGeneratorFast::_bind_methods()
 		&VoxelGeneratorFast::get_biomes
 	);
 
+	ClassDB::bind_method(
+	D_METHOD("set_block_type_period", "value"),
+	&VoxelGeneratorFast::set_block_type_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("get_block_type_period"),
+		&VoxelGeneratorFast::get_block_type_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("set_terrain_period", "value"),
+		&VoxelGeneratorFast::set_terrain_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("get_terrain_period"),
+		&VoxelGeneratorFast::get_terrain_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("set_cave_period", "value"),
+		&VoxelGeneratorFast::set_cave_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("get_cave_period"),
+		&VoxelGeneratorFast::get_cave_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("set_biome_period", "value"),
+		&VoxelGeneratorFast::set_biome_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("get_biome_period"),
+		&VoxelGeneratorFast::get_biome_period
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("set_cave_cutoff", "value"),
+		&VoxelGeneratorFast::set_cave_cutoff
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("get_cave_cutoff"),
+		&VoxelGeneratorFast::get_cave_cutoff
+	);
 
 	ADD_PROPERTY(
 		PropertyInfo(
@@ -233,6 +346,63 @@ void VoxelGeneratorFast::_bind_methods()
 		),
 		"set_biomes",
 		"get_biomes"
+	);
+
+	ADD_GROUP("Noise Parameters", "noise_");
+
+	ADD_PROPERTY(
+		PropertyInfo(
+			Variant::FLOAT,
+			"noise_block_type_period",
+			PROPERTY_HINT_RANGE,
+			"1.0,500.0,1.0"
+		),
+		"set_block_type_period",
+		"get_block_type_period"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(
+			Variant::FLOAT,
+			"noise_terrain_period",
+			PROPERTY_HINT_RANGE,
+			"1.0,500.0,1.0"
+		),
+		"set_terrain_period",
+		"get_terrain_period"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(
+			Variant::FLOAT,
+			"noise_cave_period",
+			PROPERTY_HINT_RANGE,
+			"1.0,1000.0,1.0"
+		),
+		"set_cave_period",
+		"get_cave_period"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(
+			Variant::FLOAT,
+			"noise_biome_period",
+			PROPERTY_HINT_RANGE,
+			"1.0,500.0,1.0"
+		),
+		"set_biome_period",
+		"get_biome_period"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(
+			Variant::FLOAT,
+			"noise_cave_cutoff",
+			PROPERTY_HINT_RANGE,
+			"0.01,1.0,0.01"
+		),
+		"set_cave_cutoff",
+		"get_cave_cutoff"
 	);
 }
 

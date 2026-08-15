@@ -1,3 +1,0 @@
-[submodule "addons/godot_voxel/godot-cpp"]
-	path = addons/godot_voxel/godot-cpp
-	url = https://github.com/godotengine/godot-cpp.git
