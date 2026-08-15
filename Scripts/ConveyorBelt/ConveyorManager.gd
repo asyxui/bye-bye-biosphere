@@ -98,6 +98,9 @@ func get_belt_for_scene(scene_node: Node) -> ConveyorBeltObject:
 			return belt
 	return null
 
+func get_construction_cost() -> Dictionary:
+	return ConstructionCosts.get_cost("conveyor")
+
 ## A downstream belt is connected when its start endpoint meets this belt's end
 ## endpoint. Endpoint matching is reconstructed from saved geometry, so the
 ## logical connection survives scene reloads without a visual dependency.
@@ -182,7 +185,7 @@ func _allocate_belt_id() -> String:
 
 ## Returns an empty string when placement is valid, otherwise a player-facing
 ## reason for the invalid preview state.
-func get_conveyor_placement_error(start: Vector3, end: Vector3) -> String:
+func get_conveyor_placement_error(start: Vector3, end: Vector3, check_cost: bool = false) -> String:
 	var delta := end - start
 	var length: float = delta.length()
 	if length < MIN_CONVEYOR_LENGTH:
@@ -207,13 +210,17 @@ func get_conveyor_placement_error(start: Vector3, end: Vector3) -> String:
 			continue
 		if _segments_overlap(start, end, belt.start, belt.end):
 			return "Overlaps another conveyor"
+	if check_cost:
+		var missing: Dictionary = ConstructionCosts.get_missing(get_construction_cost(), InventoryManager.get_inventory())
+		if not missing.is_empty():
+			return ConstructionCosts.format_missing(missing)
 	return ""
 
 ## Placement validation shared by the conveyor tool and the manager. A
 ## touching endpoint is allowed so belts can connect to an existing port, but
 ## the spans themselves may not overlap an existing structure.
-func can_place_conveyor(start: Vector3, end: Vector3) -> bool:
-	return get_conveyor_placement_error(start, end).is_empty()
+func can_place_conveyor(start: Vector3, end: Vector3, check_cost: bool = false) -> bool:
+	return get_conveyor_placement_error(start, end, check_cost).is_empty()
 
 func _segment_has_machine_port_endpoint(machine: Node, start: Vector3, end: Vector3) -> bool:
 	for point in points:
@@ -276,8 +283,13 @@ func _segment_progress(point: Vector2, start: Vector2, end: Vector2) -> float:
 	return clampf((point - start).dot(end - start) / (end - start).length_squared(), 0.0, 1.0)
 
 ## Spawn a conveyor belt at the given positions and register it for saving
-func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "") -> Node:
-	if not can_place_conveyor(start, end):
+func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "", charge_cost: bool = true) -> Node:
+	var is_loading: bool = not saved_belt_id.is_empty()
+	if not can_place_conveyor(start, end, false):
+		return null
+	var construction_cost: Dictionary = get_construction_cost()
+	var inventory: Inventory = InventoryManager.get_inventory()
+	if charge_cost and not is_loading and not ConstructionCosts.can_afford(construction_cost, inventory):
 		return null
 	var length = start.distance_to(end)
 
@@ -303,11 +315,14 @@ func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "") ->
 	get_tree().current_scene.add_child(conveyor)
 	belt.scene_node = conveyor
 	register_belt(belt)
+	if charge_cost and not is_loading and not ConstructionCosts.consume(construction_cost, inventory):
+		remove_conveyor(belt, false, false)
+		return null
 	return conveyor
 
 ## Remove a belt from the live world and registry. Contents are converted to
 ## world pickups before the scene node is freed.
-func remove_conveyor(target, drop_contents: bool = true) -> bool:
+func remove_conveyor(target, drop_contents: bool = true, return_materials: bool = true) -> bool:
 	var belt := _resolve_belt(target)
 	if belt == null:
 		return false
@@ -317,6 +332,8 @@ func remove_conveyor(target, drop_contents: bool = true) -> bool:
 	_disconnect_scene_ports(belt.scene_node)
 	if drop_contents:
 		_drop_belt_contents(belt)
+	if return_materials:
+		ConstructionCosts.refund(get_construction_cost(), InventoryManager.get_inventory(), belt.start.lerp(belt.end, 0.5))
 	if is_instance_valid(belt.scene_node):
 		belt.scene_node.remove_from_group("structures")
 		belt.scene_node.queue_free()
@@ -404,4 +421,4 @@ func _restore_saved_connections(pending_connections: Array[Dictionary]) -> void:
 ## Clear conveyors (called during world transitions)
 func clear_save_data() -> void:
 	for belt in belts.duplicate():
-		remove_conveyor(belt, false)
+		remove_conveyor(belt, false, false)

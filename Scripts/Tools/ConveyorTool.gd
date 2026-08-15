@@ -83,14 +83,14 @@ func _finalize_conveyor(hit_point: Vector3) -> void:
 	
 	var actual_start := hit_point if conveyor_reversal else start_pos
 	var actual_end := start_pos if conveyor_reversal else hit_point
-	var placement_error: String = ConveyorConnectionManager.get_conveyor_placement_error(actual_start, actual_end)
+	var placement_error: String = ConveyorConnectionManager.get_conveyor_placement_error(actual_start, actual_end, true)
 	if not placement_error.is_empty():
 		preview_is_valid = false
 		_set_preview_color(false, placement_error)
 		return
 
 	# Spawn the actual conveyor only after the same validation used by the preview.
-	var spawned = _spawn_conveyor(actual_start, actual_end)
+	var spawned = _spawn_conveyor(actual_start, actual_end, false)
 	if spawned == null:
 		preview_is_valid = false
 		_set_preview_color(false, "Cannot place conveyor here")
@@ -100,9 +100,15 @@ func _finalize_conveyor(hit_point: Vector3) -> void:
 	var actual_end_port: ConnectionPoint = preview_port if not conveyor_reversal else first_port
 	if created_belt == null or (actual_start_port != null and not ConveyorConnectionManager.connect_belt_endpoint(created_belt, ConnectionPoint.PointType.START, actual_start_port)) or (actual_end_port != null and not ConveyorConnectionManager.connect_belt_endpoint(created_belt, ConnectionPoint.PointType.END, actual_end_port)):
 		if created_belt != null:
-			ConveyorConnectionManager.remove_conveyor(created_belt, false)
+			ConveyorConnectionManager.remove_conveyor(created_belt, false, false)
 		preview_is_valid = false
 		_set_preview_color(false, "Ports are incompatible or occupied")
+		return
+	var construction_cost: Dictionary = ConveyorConnectionManager.get_construction_cost()
+	if not ConstructionCosts.consume(construction_cost, InventoryManager.get_inventory()):
+		ConveyorConnectionManager.remove_conveyor(created_belt, false, false)
+		preview_is_valid = false
+		_set_preview_color(false, ConstructionCosts.format_missing(ConstructionCosts.get_missing(construction_cost, InventoryManager.get_inventory())))
 		return
 	
 	_cleanup_preview()
@@ -164,12 +170,12 @@ func _update_preview_transform(start: Vector3, end: Vector3) -> void:
 	preview_conveyor.scale.x = length / ConveyorConnectionManager.CONVEYOR_SCENE_LENGTH
 	var validation_start: Vector3 = start if not conveyor_reversal else end
 	var validation_end: Vector3 = end if not conveyor_reversal else start
-	var placement_error: String = ConveyorConnectionManager.get_conveyor_placement_error(validation_start, validation_end)
+	var placement_error: String = ConveyorConnectionManager.get_conveyor_placement_error(validation_start, validation_end, true)
 	preview_is_valid = placement_error.is_empty()
 	_set_preview_color(preview_is_valid, placement_error)
 
-func _spawn_conveyor(start: Vector3, end: Vector3) -> Node:
-	return ConveyorConnectionManager.spawn_conveyor(start, end)
+func _spawn_conveyor(start: Vector3, end: Vector3, charge_cost: bool = true) -> Node:
+	return ConveyorConnectionManager.spawn_conveyor(start, end, "", charge_cost)
 
 func _set_preview_color(valid: bool, reason: String = "") -> void:
 	if not is_instance_valid(preview_conveyor):

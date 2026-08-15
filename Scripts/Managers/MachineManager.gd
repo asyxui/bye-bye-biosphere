@@ -17,19 +17,42 @@ func get_machine_scene(machine_type: String) -> PackedScene:
 		"smelter": return SMELTER_SCENE
 	return null
 
+func get_construction_cost(machine_type: String) -> Dictionary:
+	return ConstructionCosts.get_cost(machine_type)
+
 func can_place(machine_type: String, position: Vector3, _rotation_y: float) -> bool:
+	return _get_structure_placement_error(machine_type, position).is_empty()
+
+## Returns a player-facing placement error, including missing construction
+## materials when requested by the placement preview.
+func get_placement_error(machine_type: String, position: Vector3, _rotation_y: float, check_cost: bool = true) -> String:
+	var structure_error: String = _get_structure_placement_error(machine_type, position)
+	if not structure_error.is_empty():
+		return structure_error
+	if check_cost:
+		var missing: Dictionary = ConstructionCosts.get_missing(get_construction_cost(machine_type), InventoryManager.get_inventory())
+		if not missing.is_empty():
+			return ConstructionCosts.format_missing(missing)
+	return ""
+
+func _get_structure_placement_error(machine_type: String, position: Vector3) -> String:
 	if get_machine_scene(machine_type) == null:
-		return false
+		return "Unknown structure"
 	for machine in machines:
 		if is_instance_valid(machine) and _boxes_overlap(position, machine.global_position):
-			return false
+			return "Too close to another machine"
 	for structure in get_tree().get_nodes_in_group(STRUCTURE_GROUP):
 		if structure is Node3D and _point_near_structure(position, structure):
-			return false
-	return true
+			return "Too close to another structure"
+	return ""
 
 func place_machine(machine_type: String, position: Vector3, rotation_y: float, state: Dictionary = {}, saved_structure_id: String = "") -> Node3D:
-	if not can_place(machine_type, position, rotation_y):
+	var is_loading: bool = not saved_structure_id.is_empty()
+	if not _get_structure_placement_error(machine_type, position).is_empty():
+		return null
+	var construction_cost: Dictionary = get_construction_cost(machine_type)
+	var inventory: Inventory = InventoryManager.get_inventory()
+	if not is_loading and not ConstructionCosts.can_afford(construction_cost, inventory):
 		return null
 	var scene = get_machine_scene(machine_type)
 	var machine = scene.instantiate() as Node3D
@@ -43,6 +66,9 @@ func place_machine(machine_type: String, position: Vector3, rotation_y: float, s
 	_configure_machine_ports(machine, structure_id)
 	if machine.has_method("load_machine_state"):
 		machine.load_machine_state(state)
+	if not is_loading and not ConstructionCosts.consume(construction_cost, inventory):
+		remove_machine(machine, false)
+		return null
 	return machine
 
 func get_machine_by_id(saved_structure_id: String) -> Node3D:
@@ -73,7 +99,8 @@ func remove_machine(machine: Node3D, return_materials: bool = true) -> bool:
 	machines.erase(machine)
 	_disconnect_ports(machine)
 	if return_materials:
-		_return_construction_materials(machine)
+		var machine_type: String = str(machine.get("machine_type"))
+		ConstructionCosts.refund(get_construction_cost(machine_type), InventoryManager.get_inventory(), machine.global_position)
 	machine.remove_from_group("machines")
 	machine.remove_from_group(STRUCTURE_GROUP)
 	machine.queue_free()
@@ -84,18 +111,6 @@ func _disconnect_ports(machine: Node) -> void:
 		ConveyorConnectionManager.disconnect_port(child)
 		if child.has_method("disconnect_port"):
 			child.clear_connections()
-
-func _return_construction_materials(machine: Node3D) -> void:
-	if not machine.has_method("get_construction_cost"):
-		return
-	var cost = machine.get_construction_cost()
-	if not cost is Dictionary:
-		return
-	for item_id in cost:
-		var item = ItemUtils.item_object_by_id(str(item_id))
-		var quantity := int(cost[item_id])
-		if item != null and quantity > 0:
-			MapManager.spawn_item_drop(item, machine.global_position + Vector3.UP * 1.5, null, quantity)
 
 func _boxes_overlap(a: Vector3, b: Vector3) -> bool:
 	return absf(a.x - b.x) < 2.2 and absf(a.z - b.z) < 2.2

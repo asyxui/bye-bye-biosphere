@@ -19,8 +19,13 @@ func on_execute(_p: Node) -> void:
 	if not waiting_for_confirmation:
 		waiting_for_confirmation = true
 		_create_preview(hit)
-	elif preview_is_valid and MachineManager.place_machine(_tool_resource.id, preview_position, preview_rotation_y):
-		_cleanup_preview()
+	elif preview_is_valid:
+		var placed_machine: Node3D = MachineManager.place_machine(_tool_resource.id, preview_position, preview_rotation_y)
+		if placed_machine != null:
+			_cleanup_preview()
+		else:
+			var placement_error: String = MachineManager.get_placement_error(_tool_resource.id, preview_position, preview_rotation_y)
+			_set_preview_color(false, placement_error if not placement_error.is_empty() else "Cannot place structure")
 
 func on_cancel() -> void:
 	_cleanup_preview()
@@ -52,11 +57,11 @@ func _update_preview(position: Vector3) -> void:
 		preview_rotation_y = atan2(-direction.x, -direction.z)
 	preview.global_position = preview_position
 	preview.rotation.y = preview_rotation_y
-	var valid = MachineManager.can_place(_tool_resource.id, preview_position, preview_rotation_y)
-	preview_is_valid = valid
-	_set_preview_color(valid)
+	var placement_error: String = MachineManager.get_placement_error(_tool_resource.id, preview_position, preview_rotation_y)
+	preview_is_valid = placement_error.is_empty()
+	_set_preview_color(preview_is_valid, placement_error)
 
-func _set_preview_color(valid: bool) -> void:
+func _set_preview_color(valid: bool, reason: String = "") -> void:
 	var color = Color(0.3, 1.0, 0.4, 0.5) if valid else Color(1.0, 0.2, 0.2, 0.5)
 	for child in preview.find_children("*", "MeshInstance3D", true, false):
 		var mesh = child as MeshInstance3D
@@ -65,13 +70,15 @@ func _set_preview_color(valid: bool) -> void:
 			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			material.albedo_color = color
 			mesh.material_override = material
+	UIManager.set_placement_status("READY - click to place" if valid else reason, valid)
 
 func _cleanup_preview() -> void:
 	waiting_for_confirmation = false
 	preview_is_valid = false
 	if is_instance_valid(preview):
 		preview.queue_free()
-	preview = null
+		preview = null
+	UIManager.clear_placement_status()
 
 func _get_center_hit() -> Vector3:
 	var camera = player.get_node_or_null("Camera3D") as Camera3D
