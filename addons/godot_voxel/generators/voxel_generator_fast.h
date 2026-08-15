@@ -31,7 +31,11 @@ private:
 	float biome_period = 100.0f;
 	
 	float cave_cutoff = 0.3f;
-	
+
+	int block_type_seed = 0;
+	int terrain_seed = 0;
+	int cave_seed = 0;
+	int biome_seed = 0;	
 	
 	static constexpr int BLOCK_GREY = 1;
 	static constexpr int BLOCK_PURPLE = 2;
@@ -50,6 +54,18 @@ private:
 
 	void set_cave_cutoff(float value);
 	float get_cave_cutoff() const;
+
+	void set_block_type_seed(int value);
+	int get_block_type_seed() const;
+
+	void set_terrain_seed(int value);
+	int get_terrain_seed() const;
+
+	void set_cave_seed(int value);
+	int get_cave_seed() const;
+
+	void set_biome_seed(int value);
+	int get_biome_seed() const;
 	
 	struct Biome
 	{

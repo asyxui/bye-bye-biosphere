@@ -78,7 +78,7 @@ void VoxelGeneratorFast::prepare_noise()
 		ZN_FastNoiseLite::TYPE_OPEN_SIMPLEX_2
 	);
 
-	block_type_noise->set_seed(0);
+	block_type_noise->set_seed(block_type_seed);
 	block_type_noise->set_period(block_type_period);
 
 
@@ -87,7 +87,7 @@ void VoxelGeneratorFast::prepare_noise()
 		ZN_FastNoiseLite::TYPE_VALUE_CUBIC
 	);
 
-	terrain_noise->set_seed(0);
+	terrain_noise->set_seed(terrain_seed);
 	terrain_noise->set_period(terrain_period);
 
 	terrain_noise->set_fractal_type(
@@ -104,7 +104,7 @@ void VoxelGeneratorFast::prepare_noise()
 		ZN_FastNoiseLite::TYPE_OPEN_SIMPLEX_2
 	);
 
-	cave_noise->set_seed(0);
+	cave_noise->set_seed(cave_seed);
 	cave_noise->set_period(cave_period);
 
 	cave_noise->set_fractal_type(
@@ -121,7 +121,7 @@ void VoxelGeneratorFast::prepare_noise()
 		ZN_FastNoiseLite::TYPE_OPEN_SIMPLEX_2
 	);
 
-	biome_noise->set_seed(0);
+	biome_noise->set_seed(biome_seed);
 	biome_noise->set_period(biome_period);
 }
 
@@ -275,6 +275,58 @@ void VoxelGeneratorFast::set_cave_cutoff(float value)
 	cave_cutoff = value;
 }
 
+void VoxelGeneratorFast::set_block_type_seed(int value)
+{
+	block_type_seed = value;
+
+	if (block_type_noise.is_valid())
+		block_type_noise->set_seed(value);
+}
+
+int VoxelGeneratorFast::get_block_type_seed() const
+{
+	return block_type_seed;
+}
+
+void VoxelGeneratorFast::set_terrain_seed(int value)
+{
+	terrain_seed = value;
+
+	if (terrain_noise.is_valid())
+		terrain_noise->set_seed(value);
+}
+
+int VoxelGeneratorFast::get_terrain_seed() const
+{
+	return terrain_seed;
+}
+
+void VoxelGeneratorFast::set_cave_seed(int value)
+{
+	cave_seed = value;
+
+	if (cave_noise.is_valid())
+		cave_noise->set_seed(value);
+}
+
+int VoxelGeneratorFast::get_cave_seed() const
+{
+	return cave_seed;
+}
+
+void VoxelGeneratorFast::set_biome_seed(int value)
+{
+	biome_seed = value;
+
+	if (biome_noise.is_valid())
+		biome_noise->set_seed(value);
+}
+
+int VoxelGeneratorFast::get_biome_seed() const
+{
+	return biome_seed;
+}
+
 void VoxelGeneratorFast::_bind_methods()
 {
 	ClassDB::bind_method(
@@ -337,6 +389,18 @@ void VoxelGeneratorFast::_bind_methods()
 		&VoxelGeneratorFast::get_cave_cutoff
 	);
 
+	ClassDB::bind_method(D_METHOD("set_block_type_seed", "value"), &VoxelGeneratorFast::set_block_type_seed);
+	ClassDB::bind_method(D_METHOD("get_block_type_seed"), &VoxelGeneratorFast::get_block_type_seed);
+
+	ClassDB::bind_method(D_METHOD("set_terrain_seed", "value"), &VoxelGeneratorFast::set_terrain_seed);
+	ClassDB::bind_method(D_METHOD("get_terrain_seed"), &VoxelGeneratorFast::get_terrain_seed);
+
+	ClassDB::bind_method(D_METHOD("set_cave_seed", "value"), &VoxelGeneratorFast::set_cave_seed);
+	ClassDB::bind_method(D_METHOD("get_cave_seed"), &VoxelGeneratorFast::get_cave_seed);
+
+	ClassDB::bind_method(D_METHOD("set_biome_seed", "value"), &VoxelGeneratorFast::set_biome_seed);
+	ClassDB::bind_method(D_METHOD("get_biome_seed"), &VoxelGeneratorFast::get_biome_seed);
+
 	ADD_PROPERTY(
 		PropertyInfo(
 			Variant::ARRAY,
@@ -351,45 +415,53 @@ void VoxelGeneratorFast::_bind_methods()
 	ADD_GROUP("Noise Parameters", "noise_");
 
 	ADD_PROPERTY(
-		PropertyInfo(
-			Variant::FLOAT,
-			"noise_block_type_period",
-			PROPERTY_HINT_RANGE,
-			"1.0,500.0,1.0"
-		),
+		PropertyInfo(Variant::INT, "noise_block_type_seed"),
+		"set_block_type_seed",
+		"get_block_type_seed"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(Variant::FLOAT, "noise_block_type_period",
+			PROPERTY_HINT_RANGE, "1.0,500.0,1.0"),
 		"set_block_type_period",
 		"get_block_type_period"
 	);
 
 	ADD_PROPERTY(
-		PropertyInfo(
-			Variant::FLOAT,
-			"noise_terrain_period",
-			PROPERTY_HINT_RANGE,
-			"1.0,500.0,1.0"
-		),
+		PropertyInfo(Variant::INT, "noise_terrain_seed"),
+		"set_terrain_seed",
+		"get_terrain_seed"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(Variant::FLOAT, "noise_terrain_period",
+			PROPERTY_HINT_RANGE, "1.0,500.0,1.0"),
 		"set_terrain_period",
 		"get_terrain_period"
 	);
 
 	ADD_PROPERTY(
-		PropertyInfo(
-			Variant::FLOAT,
-			"noise_cave_period",
-			PROPERTY_HINT_RANGE,
-			"1.0,1000.0,1.0"
-		),
+		PropertyInfo(Variant::INT, "noise_cave_seed"),
+		"set_cave_seed",
+		"get_cave_seed"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(Variant::FLOAT, "noise_cave_period",
+			PROPERTY_HINT_RANGE, "1.0,1000.0,1.0"),
 		"set_cave_period",
 		"get_cave_period"
 	);
 
 	ADD_PROPERTY(
-		PropertyInfo(
-			Variant::FLOAT,
-			"noise_biome_period",
-			PROPERTY_HINT_RANGE,
-			"1.0,500.0,1.0"
-		),
+		PropertyInfo(Variant::INT, "noise_biome_seed"),
+		"set_biome_seed",
+		"get_biome_seed"
+	);
+
+	ADD_PROPERTY(
+		PropertyInfo(Variant::FLOAT, "noise_biome_period",
+			PROPERTY_HINT_RANGE, "1.0,500.0,1.0"),
 		"set_biome_period",
 		"get_biome_period"
 	);
@@ -404,6 +476,8 @@ void VoxelGeneratorFast::_bind_methods()
 		"set_cave_cutoff",
 		"get_cave_cutoff"
 	);
+
+	
 }
 
 } // namespace voxel
