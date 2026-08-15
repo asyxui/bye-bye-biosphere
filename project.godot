@@ -48,6 +48,10 @@ theme/custom="res://Assets/GameTheme.tres"
 
 debug_start_in_normal_mode=false
 
+[gui]
+
+theme/custom="res://Assets/GameTheme.tres"
+
 [input]
 
 move_left={

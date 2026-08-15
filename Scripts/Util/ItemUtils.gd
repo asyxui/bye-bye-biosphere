@@ -1,34 +1,33 @@
 ## ItemUtils.gd
 extends Node
 
+var _items_by_id: Dictionary = {}
+var _items_index_initialized := false
+
+func _ready() -> void:
+	_ensure_item_index()
+
 ## Resolve item resources by their stable identifier. Resource filenames and
 ## display names are only an asset lookup detail.
 func item_object_by_id(item_id: String) -> InventoryItem:
-	for resource_name in ["Apple", "Ore", "IronIngot"]:
-		var item = load("res://Resources/Items/%s.tres" % resource_name)
-		if item != null and str(item.id) == item_id:
-			return item
-	return null
+	_ensure_item_index()
+	return _items_by_id.get(str(item_id), null) as InventoryItem
 
-func item_object_by_type_id(id: int):
-	return item_object_by_id(str(id))
+func _ensure_item_index() -> void:
+	if _items_index_initialized:
+		return
+	_items_index_initialized = true
 
+	var items_dir := DirAccess.open("res://Resources/Items")
+	if items_dir == null:
+		return
 
-func item_name_by_type_id(id: int):
-	match id:
-		0:
-			return "Rock"
-		1:
-			return "Apple"
-		2:
-			return "Ore"
-		3:
-			return "Dirt"
-		4:
-			return "Iron Ore"
-		5:
-			return "Iron Ingot"
-		6:
-			return "Copper Ore"
-		7:
-			return "Copper Ingot"
+	items_dir.list_dir_begin()
+	var filename := items_dir.get_next()
+	while not filename.is_empty():
+		if not items_dir.current_is_dir() and filename.ends_with(".tres"):
+			var item = load("res://Resources/Items/%s" % filename)
+			if item is InventoryItem:
+				_items_by_id[str(item.id)] = item
+		filename = items_dir.get_next()
+	items_dir.list_dir_end()

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("2_a3gco")
-id = "1"
+id = "8"
 name = "Rock"
 description = "Rock-Solid"
 max_stack_size = 64

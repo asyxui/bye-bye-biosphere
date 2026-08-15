@@ -5,10 +5,10 @@ extends "res://Scripts/Tools/BaseTool.gd"
 class_name ItemTool
 
 func on_execute(_p: Node) -> void:
-	var tool_resource_id = int(self._tool_resource.id)
+	var tool_resource_id := str(self._tool_resource.id)
 
-	if InventoryManager.inventory.remove_item(ItemUtils.item_object_by_type_id(tool_resource_id), 1) > 0:
+	if InventoryManager.inventory.remove_item(ItemUtils.item_object_by_id(tool_resource_id), 1) > 0:
 		var spawnPosition = player.global_position * 4 + player.get_direction() * 7
 		spawnPosition.y += 1.2
 
-		MapManager.drop_item(int(self._tool_resource.id), spawnPosition)
+		MapManager.drop_item(str(self._tool_resource.id), spawnPosition)

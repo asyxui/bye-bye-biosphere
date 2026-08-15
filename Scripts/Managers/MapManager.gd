@@ -139,7 +139,7 @@ func _destroy(origin: Vector3, direction: Vector3):
 		for i in range(coordsWithDrops.size()):
 			var coord: Vector3 = coordsWithDrops[i]
 			# coord.y += 1
-			drop_item(drops[i], coord)
+			drop_voxel_material(drops[i], coord)
 		BiosphereManager.record_raw_material_extracted(drops.size())
 
 func save_map() -> void:
@@ -184,8 +184,16 @@ func _find_structure_ancestor(node: Node) -> Node3D:
 		current = current.get_parent()
 	return null
 
-func drop_item(type: int, coords: Vector3):
-	var item = ItemUtils.item_object_by_type_id(type)
+func drop_item(item_id: String, coords: Vector3):
+	var item = ItemUtils.item_object_by_id(str(item_id))
+	if item:
+		spawn_item_drop(item, coords)
+
+func drop_voxel_material(voxel_type: int, coords: Vector3):
+	var material := VoxelMaterialCatalog.get_definition(voxel_type)
+	if material == null:
+		return
+	var item := material.get_mined_item()
 	if item:
 		spawn_item_drop(item, coords)
 

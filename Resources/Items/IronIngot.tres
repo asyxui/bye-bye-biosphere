@@ -1,11 +1,11 @@
-[gd_resource type="Resource" script_class="InventoryItem" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://dpxke1jm8sugp"]
 
 [ext_resource type="Texture2D" uid="uid://bum34hcsfrp04" path="res://Assets/Items/IronIngot.png" id="1_kw2gc"]
-[ext_resource type="Script" path="res://Scripts/Inventory/InventoryItem.gd" id="2_item_script"]
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="2_item_script"]
 
 [resource]
 script = ExtResource("2_item_script")
-id = "1"
+id = "5"
 name = "Iron Ingot"
 description = "Slab of Solidity"
 max_stack_size = 64
