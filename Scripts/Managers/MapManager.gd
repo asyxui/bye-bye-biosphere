@@ -191,14 +191,14 @@ func sphere_coords(center: Vector3, cubeScale: float, radius: int) -> Array[Vect
 	
 func drop_item(type: int, coords: Vector3):
 	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
-	var mesh = newDrop.get_child(0)
+	var mesh = newDrop.get_child(0).get_child(0)
 	var newMat = mesh.mesh.surface_get_material(0).duplicate()
 	
 	mesh.set_surface_override_material(0, newMat)
 	
 	newDrop.dropData = load("res://Resources/Items/%s.tres" % ItemUtils.item_name_by_type_id(type))
 	newMat.albedo_color = newDrop.dropData.dropColor
-	newDrop.add_to_group("Collectibles")
+	newDrop.get_child(0).add_to_group("Collectibles")
 	get_voxel_terrain().add_child(newDrop)
 	
 	

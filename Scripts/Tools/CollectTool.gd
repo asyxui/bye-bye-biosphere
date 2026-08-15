@@ -13,6 +13,7 @@ func scan_area():
 	var query = PhysicsShapeQueryParameters3D.new()
 	query.transform = player.get_player_transform()
 	query.shape = SphereShape3D.new()
+	query.collide_with_areas = true
 	query.shape.radius = 2.0
 	
 	var space = player.get_world_3d().direct_space_state

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bupxsdp2yg6r6"]
 
-[ext_resource type="Script" uid="uid://ccckl8p3tjvas" path="res://Resources/Items/DropInfo.gd" id="1_vg37v"]
+[ext_resource type="Script" uid="uid://ccckl8p3tjvas" path="res://Resources/Items/DropInfo.gd" id="1_rvi76"]
+[ext_resource type="Script" uid="uid://c5j1xpgsayo4s" path="res://Scripts/Fall.gd" id="1_vg37v"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aw8k8"]
 albedo_color = Color(0.34407577, 0.34407574, 0.34407574, 0.09019608)
@@ -11,10 +12,16 @@ material = SubResource("StandardMaterial3D_aw8k8")
 [sub_resource type="SphereShape3D" id="SphereShape3D_aw8k8"]
 
 [node name="Drop" type="Node3D" unique_id=1521668210]
-script = ExtResource("1_vg37v")
+script = ExtResource("1_rvi76")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1592388893]
+[node name="Area3D" type="Area3D" parent="." unique_id=351516349]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D" unique_id=1592388893]
 mesh = SubResource("SphereMesh_aw8k8")
+skeleton = NodePath("../..")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1628893914]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1628893914]
 shape = SubResource("SphereShape3D_aw8k8")
+
+[node name="Node3D" type="Node3D" parent="." unique_id=1909051954]
+script = ExtResource("1_vg37v")
