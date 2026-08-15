@@ -4,7 +4,7 @@ extends Label
 var enabled := false
 
 func _ready() -> void:
-	HUDManager.register_fps_label(self)
+	hide()
 
 func _process(_delta: float) -> void:
 	if not enabled:

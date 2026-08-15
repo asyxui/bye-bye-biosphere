@@ -34,12 +34,13 @@ func find_closest_connection(hit_pos: Vector3) -> ConnectionPoint:
 
 ## Spawn a conveyor belt at the given positions and register it for saving
 func spawn_conveyor(start: Vector3, end: Vector3) -> Node:
-	register_belt(ConveyorBeltObject.new(start, end))
-	
 	var length = start.distance_to(end)
 	
 	if length < 0.001:
 		return null
+
+	var belt = ConveyorBeltObject.new(start, end)
+	register_belt(belt)
 
 	var conveyor = conveyor_scene.instantiate()
 
@@ -57,6 +58,7 @@ func spawn_conveyor(start: Vector3, end: Vector3) -> Node:
 	conveyor.scale.x = length / CONVEYOR_SCENE_LENGTH
 
 	get_tree().current_scene.add_child(conveyor)
+	belt.scene_node = conveyor
 	return conveyor
 
 ## Saveable interface: get unique save key
@@ -75,7 +77,7 @@ func get_save_data() -> Dictionary:
 ## Load conveyor belts from save data
 func load_save_data(data: Dictionary) -> void:
 	# Clear current belts
-	belts.clear()
+	clear_save_data()
 	
 	var conveyor_data = data.get("belts", [])
 	for belt_dict in conveyor_data:
@@ -85,4 +87,7 @@ func load_save_data(data: Dictionary) -> void:
 
 ## Clear conveyors (called during world transitions)
 func clear_save_data() -> void:
+	for belt in belts:
+		if is_instance_valid(belt.scene_node):
+			belt.scene_node.queue_free()
 	belts.clear()

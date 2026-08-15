@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ToolResource" format=3 uid="uid://5jftv4pl58qn"]
+
+[ext_resource type="Script" uid="uid://cod25okn0wnqc" path="res://Scripts/Tools/ToolResource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "producer"
+name = "Producer"
+description = "Place an ore producer"
+tool_script_path = "res://Scripts/Tools/MachinePlacementTool.gd"
+is_multi_step = true

@@ -5,6 +5,8 @@
 [ext_resource type="PackedScene" uid="uid://caj87l6awn6h4" path="res://Scenes/UI/MenuManager.tscn" id="2_qw7le"]
 [ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="3_5k46t"]
 [ext_resource type="PackedScene" uid="uid://c3gynxmj3suco" path="res://Scenes/UI/HUD.tscn" id="4_rwtwo"]
+[ext_resource type="VoxelGeneratorScript" uid="uid://dvlck5ivq5ecq" path="res://Scripts/Terrain/VoxelGeneratorScript.tres" id="2_pl8e4"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_uiroot"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_oss8w"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -76,17 +78,17 @@ _data = [0, 0, 1, 0, 1, 1, 0, 0, 0]
 
 [sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_qjaue"]
 
-[node name="Node3D" type="Node3D" unique_id=1364206257 groups=["Collectibles"]]
+[node name="Node3D" type="Node3D" unique_id=401323680 groups=["Collectibles"]]
 script = ExtResource("1_oss8w")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2144193489]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1075148557]
 environment = SubResource("Environment_is6ib")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1506484155]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=402873290]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Terrain" type="VoxelLodTerrain" parent="." unique_id=791563612]
+[node name="Terrain" type="VoxelLodTerrain" parent="." unique_id=1377358795]
 view_distance = 1024
 lod_distance = 120.0
 secondary_lod_distance = 100.0
@@ -97,6 +99,7 @@ threaded_update_enabled = true
 streaming_system = 1
 stream = SubResource("VoxelStreamSQLite_rwtwo")
 generator = SubResource("VoxelGeneratorFast_pl8e4")
+generator = ExtResource("2_pl8e4")
 mesher = SubResource("VoxelMesherBlocky_qw7le")
 format = SubResource("VoxelFormat_5k46t")
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)

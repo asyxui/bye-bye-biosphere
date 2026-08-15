@@ -25,7 +25,6 @@ func _ready() -> void:
 	
 	# Initially hidden
 	hide()
-	set_process_input(false)
 
 func _populate_wheel() -> void:
 	var all_tools = ToolManager.get_all_tools()
@@ -56,10 +55,10 @@ func _create_tool_item(tool, index: int, position: Vector2) -> Control:
 	container.mouse_entered.connect(func(): _on_tool_item_hover(index))
 	container.mouse_exited.connect(func(): _on_tool_item_unhover())
 	
-	# Create panel background
+	# Theme supplies the component state styling for generated wheel items.
 	var bg = Panel.new()
 	bg.size = Vector2(ITEM_SIZE * 2, ITEM_SIZE * 2)
-	bg.modulate = Color(0.25, 0.25, 0.25, 0.8)
+	bg.theme_type_variation = &"ToolWheelItem"
 	container.add_child(bg)
 	
 	# VBox to center content vertically
@@ -97,21 +96,6 @@ func _create_tool_item(tool, index: int, position: Vector2) -> Control:
 	
 	return container
 
-func _input(event: InputEvent) -> void:
-	if not is_open:
-		return
-	
-	# Close wheel on middle mouse release
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
-		if not event.pressed:
-			close_wheel()
-			get_viewport().set_input_as_handled()
-	
-	# Escape key also closes
-	if event.is_action_pressed("ui_cancel"):
-		close_wheel()
-		get_viewport().set_input_as_handled()
-
 func _on_tool_item_hover(index: int) -> void:
 	hovered_tool_index = index
 	
@@ -144,13 +128,9 @@ func open_wheel(hotbar_slot: int) -> void:
 	selected_hotbar_slot = hotbar_slot
 	is_open = true
 	show()
-	set_process_input(true)
 	
 	# Center on screen
 	wheel_container.position = get_viewport().get_visible_rect().get_center()
-	
-	# Release mouse for UI interaction
-	InputManager.request_mouse_release("gameplay")
 	
 	CustomLogger.log_info("Tool wheel opened for slot %d" % hotbar_slot)
 	wheel_opened.emit()
@@ -161,7 +141,6 @@ func close_wheel() -> void:
 	
 	is_open = false
 	hide()
-	set_process_input(false)
 	
 	# Reset hover state
 	if hovered_tool_index >= 0:
@@ -169,8 +148,5 @@ func close_wheel() -> void:
 		hovered_tool_index = -1
 	
 	selected_hotbar_slot = -1
-	
-	# Recapture mouse for gameplay
-	InputManager.request_mouse_capture("gameplay")
 	
 	wheel_closed.emit()

@@ -21,17 +21,23 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-InputManager="*res://Scripts/Managers/InputManager.gd"
 GameStateManager="*res://Scripts/Managers/GameStateManager.gd"
 InventoryManager="*res://Scripts/Inventory/InventoryManager.gd"
-HUDManager="*res://Scripts/Managers/HUDManager.gd"
+UIManager="*res://Scripts/UI/UIManager.gd"
 ConveyorConnectionManager="*res://Scripts/ConveyorBelt/ConveyorManager.gd"
+MachineManager="*res://Scripts/Managers/MachineManager.gd"
 MapManager="*res://Scripts/Managers/MapManager.gd"
 ToolManager="*res://Scripts/Managers/ToolManager.gd"
 ItemUtils="*res://Scripts/Util/ItemUtils.gd"
 VoxelStreamManager="*res://Scripts/Managers/VoxelStreamManager.gd"
 SaveManager="*res://Scripts/Managers/SaveManager.gd"
 GameStateRestoreManager="*res://Scripts/Managers/GameStateRestoreManager.gd"
+PerformanceTracker="*res://Scripts/Managers/PerformanceTracker.gd"
+ThemeManager="*res://Scripts/UI/ThemeManager.gd"
+
+[gui]
+
+theme/custom="res://Assets/GameTheme.tres"
 
 [input]
 
