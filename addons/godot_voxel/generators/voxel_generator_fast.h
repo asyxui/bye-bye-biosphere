@@ -96,6 +96,8 @@ public:
 
 	Array get_biomes() const;
 	void set_biomes(Array value);
+
+	String VoxelGeneratorFast::get_biome_at(Vector3 world_position) const;
 };
 
 

@@ -327,6 +327,73 @@ int VoxelGeneratorFast::get_biome_seed() const
 	return biome_seed;
 }
 
+String VoxelGeneratorFast::get_biome_at(Vector3 world_position) const
+{
+	const float x = world_position.x / biome_period;
+	const float z = world_position.z / biome_period;
+
+	const float t =
+		(biome_noise->get_noise_2d(x, z) + 1.0f) * 0.5f;
+
+	Ref<VoxelBiome> primary_biome;
+	Ref<VoxelBiome> secondary_biome;
+
+	float primary_weight = -1000.0f;
+	float secondary_weight = -1000.0f;
+
+	for (Variant v : biomes)
+	{
+		Ref<VoxelBiome> biome = v;
+
+		if (biome.is_null())
+			continue;
+
+		const float dist =
+			Math::abs(t - biome->get_threshold_center());
+
+		const float weight =
+			1.0f / Math::pow(dist + 0.001f, 2.0f);
+
+		if (weight > primary_weight)
+		{
+			secondary_weight = primary_weight;
+			secondary_biome = primary_biome;
+
+			primary_weight = weight;
+			primary_biome = biome;
+		}
+		else if (weight > secondary_weight)
+		{
+			secondary_weight = weight;
+			secondary_biome = biome;
+		}
+	}
+
+	if (primary_biome.is_null())
+		return "None";
+
+	if (secondary_biome.is_null())
+		return primary_biome->get_biome_name() + " (100%)";
+
+	const float total_weight =
+		primary_weight + secondary_weight;
+
+	const float primary_percentage =
+		primary_weight / total_weight * 100.0f;
+
+	const float secondary_percentage =
+		secondary_weight / total_weight * 100.0f;
+
+	return vformat(
+		"%s (%.1f%%), %s (%.1f%%), threshold: %f",
+		primary_biome->get_biome_name(),
+		primary_percentage,
+		secondary_biome->get_biome_name(),
+		secondary_percentage,
+		t
+	);
+}
+
 void VoxelGeneratorFast::_bind_methods()
 {
 	ClassDB::bind_method(
@@ -387,6 +454,11 @@ void VoxelGeneratorFast::_bind_methods()
 	ClassDB::bind_method(
 		D_METHOD("get_cave_cutoff"),
 		&VoxelGeneratorFast::get_cave_cutoff
+	);
+
+	ClassDB::bind_method(
+		D_METHOD("get_biome_at", "world_position"),
+		&VoxelGeneratorFast::get_biome_at
 	);
 
 	ClassDB::bind_method(D_METHOD("set_block_type_seed", "value"), &VoxelGeneratorFast::set_block_type_seed);

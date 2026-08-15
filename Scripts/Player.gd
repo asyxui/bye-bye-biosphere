@@ -15,6 +15,8 @@ func _ready() -> void:
 	# Listen for tool activation
 	ToolManager.tool_activated.connect(_on_tool_activated)
 	
+	add_to_group("player")
+	
 	# Register as saveable
 	add_to_group("saveable")
 

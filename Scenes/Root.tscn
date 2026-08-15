@@ -40,6 +40,7 @@ threshold_center = 0.9
 
 [sub_resource type="VoxelGeneratorFast" id="VoxelGeneratorFast_pl8e4"]
 biomes = [SubResource("VoxelBiome_bo0b3"), SubResource("VoxelBiome_eypal"), SubResource("VoxelBiome_sn7fr")]
+noise_biome_period = 44.0
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
 culls_neighbors = false
@@ -83,7 +84,7 @@ environment = SubResource("Environment_is6ib")
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Terrain" type="VoxelLodTerrain" parent="." unique_id=791563612]
+[node name="Terrain" type="VoxelLodTerrain" parent="." unique_id=791563612 groups=["voxel_world"]]
 view_distance = 1024
 lod_distance = 120.0
 secondary_lod_distance = 100.0

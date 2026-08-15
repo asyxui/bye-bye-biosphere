@@ -50,7 +50,6 @@ func _ready() -> void:
 	register_command("history", "Show command history", _cmd_history)
 	register_command("echo", "Echo text to console. Usage: echo <text>", _cmd_echo)
 	register_command("savegame", "Display current save game information", _cmd_savegame)
-	register_command("fps", "Display FPS information", _cmd_fps)
 	register_command("performance", "Show loading timings. Usage: performance [on|off]", _cmd_performance)
 
 	# Log welcome message
@@ -371,9 +370,6 @@ func _cmd_savegame(_args: Array) -> void:
 		log_message("[color=yellow]Game Data:[/color] Not found")
 
 	log_message("[color=cyan]============================[/color]")
-
-func _cmd_fps(_args: Array) -> void:
-	UIManager._root.get_node("HUD/FPSLabel").toggle_label()
 
 func _cmd_performance(args: Array) -> void:
 	if args.size() > 1 or (args.size() == 1 and args[0].to_lower() not in ["on", "off"]):
