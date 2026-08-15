@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvq5tsgew55pv"
-path="res://.godot/imported/cave_threshold_modulation.webp-7d80a556278ba1f28bbf933da5dbac0a.ctex"
+path="res://.godot/imported/cave_threshold_modulation.webp-330dab1c5489298aea05fcd54c432a2d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/cave_threshold_modulation.webp"
-dest_files=["res://.godot/imported/cave_threshold_modulation.webp-7d80a556278ba1f28bbf933da5dbac0a.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/cave_threshold_modulation.webp"
+dest_files=["res://.godot/imported/cave_threshold_modulation.webp-330dab1c5489298aea05fcd54c432a2d.ctex"]
 
 [params]
 

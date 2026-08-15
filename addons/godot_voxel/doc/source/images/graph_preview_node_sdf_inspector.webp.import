@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://1oil7fh7vgvd"
-path="res://.godot/imported/graph_preview_node_sdf_inspector.webp-1f3f8e75ecb885d05d6988ac042493cc.ctex"
+path="res://.godot/imported/graph_preview_node_sdf_inspector.webp-37f91776d3ada6182ea529716cd2f93c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/graph_preview_node_sdf_inspector.webp"
-dest_files=["res://.godot/imported/graph_preview_node_sdf_inspector.webp-1f3f8e75ecb885d05d6988ac042493cc.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/graph_preview_node_sdf_inspector.webp"
+dest_files=["res://.godot/imported/graph_preview_node_sdf_inspector.webp-37f91776d3ada6182ea529716cd2f93c.ctex"]
 
 [params]
 

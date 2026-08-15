@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwiefhpp1humh"
-path="res://.godot/imported/landscape_with_instances.webp-af60a9bafa91ea1eb02cc928cfeae3e4.ctex"
+path="res://.godot/imported/landscape_with_instances.webp-e5a016902ce80bc87a4d320c805e6e52.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/landscape_with_instances.webp"
-dest_files=["res://.godot/imported/landscape_with_instances.webp-af60a9bafa91ea1eb02cc928cfeae3e4.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/landscape_with_instances.webp"
+dest_files=["res://.godot/imported/landscape_with_instances.webp-e5a016902ce80bc87a4d320c805e6e52.ctex"]
 
 [params]
 

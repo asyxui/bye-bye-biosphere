@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bojtafy3htodw"
-path="res://.godot/imported/flat_shading.webp-5d2ecc248603cc6b8893cfa549560d0b.ctex"
+path="res://.godot/imported/flat_shading.webp-2b55463a5cce1c6ef0b8539c4e165e54.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/flat_shading.webp"
-dest_files=["res://.godot/imported/flat_shading.webp-5d2ecc248603cc6b8893cfa549560d0b.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/flat_shading.webp"
+dest_files=["res://.godot/imported/flat_shading.webp-2b55463a5cce1c6ef0b8539c4e165e54.ctex"]
 
 [params]
 

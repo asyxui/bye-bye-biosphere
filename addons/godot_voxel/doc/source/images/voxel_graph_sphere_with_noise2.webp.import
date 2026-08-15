@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkhbucqgkufs8"
-path="res://.godot/imported/voxel_graph_sphere_with_noise2.webp-5ad63230f95cae7e92e75fc2ef523dde.ctex"
+path="res://.godot/imported/voxel_graph_sphere_with_noise2.webp-30083ddad6e8e8637fc775882a8c736b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/voxel_graph_sphere_with_noise2.webp"
-dest_files=["res://.godot/imported/voxel_graph_sphere_with_noise2.webp-5ad63230f95cae7e92e75fc2ef523dde.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/voxel_graph_sphere_with_noise2.webp"
+dest_files=["res://.godot/imported/voxel_graph_sphere_with_noise2.webp-30083ddad6e8e8637fc775882a8c736b.ctex"]
 
 [params]
 

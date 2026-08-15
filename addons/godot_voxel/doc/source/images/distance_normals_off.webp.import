@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c828sqlxhiv7g"
-path="res://.godot/imported/distance_normals_off.webp-1ea64ac50dc34a6cc43a173a25a1a049.ctex"
+path="res://.godot/imported/distance_normals_off.webp-eb11da125b6844fd288be135964e6600.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/distance_normals_off.webp"
-dest_files=["res://.godot/imported/distance_normals_off.webp-1ea64ac50dc34a6cc43a173a25a1a049.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/distance_normals_off.webp"
+dest_files=["res://.godot/imported/distance_normals_off.webp-eb11da125b6844fd288be135964e6600.ctex"]
 
 [params]
 

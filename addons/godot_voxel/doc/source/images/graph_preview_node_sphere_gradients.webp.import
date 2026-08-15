@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://1t2sco03pmo0"
-path="res://.godot/imported/graph_preview_node_sphere_gradients.webp-56407903c1ef512068b1efff167fe3a2.ctex"
+path="res://.godot/imported/graph_preview_node_sphere_gradients.webp-96815b6af04bde59fd16a9628142a4d9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/graph_preview_node_sphere_gradients.webp"
-dest_files=["res://.godot/imported/graph_preview_node_sphere_gradients.webp-56407903c1ef512068b1efff167fe3a2.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/graph_preview_node_sphere_gradients.webp"
+dest_files=["res://.godot/imported/graph_preview_node_sphere_gradients.webp-96815b6af04bde59fd16a9628142a4d9.ctex"]
 
 [params]
 

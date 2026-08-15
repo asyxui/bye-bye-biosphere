@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djbvxjcuswyr6"
-path="res://.godot/imported/blocky_sdf.webp-8702c3cb1eadce43db884746b27e63cc.ctex"
+path="res://.godot/imported/blocky_sdf.webp-3cfe6c1720f5baf4ae502fd9b58e2dfe.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/blocky_sdf.webp"
-dest_files=["res://.godot/imported/blocky_sdf.webp-8702c3cb1eadce43db884746b27e63cc.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/blocky_sdf.webp"
+dest_files=["res://.godot/imported/blocky_sdf.webp-3cfe6c1720f5baf4ae502fd9b58e2dfe.ctex"]
 
 [params]
 

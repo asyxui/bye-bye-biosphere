@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dymxo2lnn6dds"
-path="res://.godot/imported/voxel_graph_blocky_biome.webp-5d754d0b6c301f1dfbc261924d67f07c.ctex"
+path="res://.godot/imported/voxel_graph_blocky_biome.webp-6d3a956a076e0e1445278ed5618bc55e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/voxel_graph_blocky_biome.webp"
-dest_files=["res://.godot/imported/voxel_graph_blocky_biome.webp-5d754d0b6c301f1dfbc261924d67f07c.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/voxel_graph_blocky_biome.webp"
+dest_files=["res://.godot/imported/voxel_graph_blocky_biome.webp-6d3a956a076e0e1445278ed5618bc55e.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://fjgo6o1xir03"
-path="res://.godot/imported/virtual_normalmap.webp-be1ee65a9a90a2f84e26f6a5da35e165.ctex"
+path="res://.godot/imported/virtual_normalmap.webp-8f2fb64e18885b6485e160ec547a57a0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/virtual_normalmap.webp"
-dest_files=["res://.godot/imported/virtual_normalmap.webp-be1ee65a9a90a2f84e26f6a5da35e165.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/virtual_normalmap.webp"
+dest_files=["res://.godot/imported/virtual_normalmap.webp-8f2fb64e18885b6485e160ec547a57a0.ctex"]
 
 [params]
 

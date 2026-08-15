@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://scwf8wojlk0m"
-path="res://.godot/imported/navmesh_bumpy_noise_terrain.webp-d304e0d0a95cda328c268896c31f8740.ctex"
+path="res://.godot/imported/navmesh_bumpy_noise_terrain.webp-a3d703f026726cfc29f036303c8eb32b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/navmesh_bumpy_noise_terrain.webp"
-dest_files=["res://.godot/imported/navmesh_bumpy_noise_terrain.webp-d304e0d0a95cda328c268896c31f8740.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/navmesh_bumpy_noise_terrain.webp"
+dest_files=["res://.godot/imported/navmesh_bumpy_noise_terrain.webp-a3d703f026726cfc29f036303c8eb32b.ctex"]
 
 [params]
 

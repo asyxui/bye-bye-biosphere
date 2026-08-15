@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://t8lsxf4srjmj"
-path="res://.godot/imported/generator_noise3d.webp-c7681a247657c0dc4bb7292cb24643d0.ctex"
+path="res://.godot/imported/generator_noise3d.webp-ae383051b55bd8e8b43c2c955ff46451.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/generator_noise3d.webp"
-dest_files=["res://.godot/imported/generator_noise3d.webp-c7681a247657c0dc4bb7292cb24643d0.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/generator_noise3d.webp"
+dest_files=["res://.godot/imported/generator_noise3d.webp-ae383051b55bd8e8b43c2c955ff46451.ctex"]
 
 [params]
 

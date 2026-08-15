@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cqav52g2f33a0"
-path="res://.godot/imported/quickstart_smooth_lod_terrain_result.webp-66b2db58ae183a5fc6d078f880f17cb1.ctex"
+path="res://.godot/imported/quickstart_smooth_lod_terrain_result.webp-4b928bdc39d88e4dc862a08004addd86.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/quickstart_smooth_lod_terrain_result.webp"
-dest_files=["res://.godot/imported/quickstart_smooth_lod_terrain_result.webp-66b2db58ae183a5fc6d078f880f17cb1.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/quickstart_smooth_lod_terrain_result.webp"
+dest_files=["res://.godot/imported/quickstart_smooth_lod_terrain_result.webp-4b928bdc39d88e4dc862a08004addd86.ctex"]
 
 [params]
 
