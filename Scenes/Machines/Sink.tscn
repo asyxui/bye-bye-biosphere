@@ -1,0 +1,57 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Machines/Sink.gd" id="1"]
+[ext_resource type="Script" path="res://Scripts/ConveyorBelt/ConnectionPoint.gd" id="2"]
+[sub_resource type="BoxShape3D" id="BodyShape"]
+size = Vector3(2, 2, 2)
+[sub_resource type="BoxMesh" id="BodyMesh"]
+size = Vector3(2, 2, 2)
+[sub_resource type="StandardMaterial3D" id="BodyMat"]
+albedo_color = Color(0.17, 0.42, 0.24, 1)
+metallic = 0.3
+[sub_resource type="BoxShape3D" id="IntakeShape"]
+size = Vector3(1.5, 1.5, 1.2)
+[sub_resource type="BoxMesh" id="IntakeMesh"]
+size = Vector3(1.4, 0.1, 0.8)
+[sub_resource type="StandardMaterial3D" id="IntakeMat"]
+albedo_color = Color(0.12, 0.12, 0.12, 1)
+[sub_resource type="LabelSettings" id="LabelSettings"]
+font_size = 48
+outline_size = 6
+font_color = Color(1, 1, 1, 1)
+[sub_resource type="BoxMesh" id="IntakeMarkerMesh"]
+size = Vector3(1.35, 0.75, 0.12)
+[sub_resource type="StandardMaterial3D" id="IntakeMarkerMat"]
+albedo_color = Color(1, 0.72, 0.08, 1)
+emission_enabled = true
+emission = Color(0.5, 0.22, 0.01, 1)
+
+[node name="Sink" type="StaticBody3D" groups=["structures"]]
+script = ExtResource("1")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 1, 0)
+shape = SubResource("BodyShape")
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1, 0)
+mesh = SubResource("BodyMesh")
+material_override = SubResource("BodyMat")
+[node name="Intake" type="Area3D" parent="."]
+position = Vector3(0, 0.8, 1.25)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Intake"]
+shape = SubResource("IntakeShape")
+[node name="Opening" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.8, 1.01)
+mesh = SubResource("IntakeMesh")
+material_override = SubResource("IntakeMat")
+[node name="IntakeMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.85, 1.01)
+mesh = SubResource("IntakeMarkerMesh")
+material_override = SubResource("IntakeMarkerMat")
+[node name="Input" type="Node3D" parent="."]
+position = Vector3(0, 0, 1.5)
+script = ExtResource("2")
+[node name="DeliveredLabel" type="Label3D" parent="."]
+position = Vector3(0, 2.7, 0)
+billboard = 1
+label_settings = SubResource("LabelSettings")
+text = "Delivered: 0"

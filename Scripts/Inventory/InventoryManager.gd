@@ -4,7 +4,6 @@
 extends Node
 
 var inventory: Inventory = null  # Inventory type
-var is_inventory_open: bool = false
 
 func _ready() -> void:
 	var inventory_class = load("res://Scripts/Inventory/Inventory.gd")
@@ -29,10 +28,6 @@ func get_item_count(item) -> int:
 ## Get inventory reference
 func get_inventory():
 	return inventory
-
-## Toggle inventory UI
-func toggle_inventory() -> void:
-	is_inventory_open = not is_inventory_open
 
 ## Get total inventory weight
 func get_weight_percent() -> float:

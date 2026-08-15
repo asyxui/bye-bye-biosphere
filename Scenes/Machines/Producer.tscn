@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Machines/Producer.gd" id="1"]
+[ext_resource type="Script" path="res://Scripts/ConveyorBelt/ConnectionPoint.gd" id="2"]
+[sub_resource type="BoxShape3D" id="BodyShape"]
+size = Vector3(2, 2, 2)
+[sub_resource type="BoxMesh" id="BodyMesh"]
+size = Vector3(2, 2, 2)
+[sub_resource type="StandardMaterial3D" id="BodyMat"]
+albedo_color = Color(0.22, 0.31, 0.39, 1)
+metallic = 0.4
+[sub_resource type="CylinderMesh" id="StackMesh"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 1.0
+[sub_resource type="StandardMaterial3D" id="StackMat"]
+albedo_color = Color(0.95, 0.54, 0.12, 1)
+[sub_resource type="BoxMesh" id="OutputMesh"]
+size = Vector3(1.1, 0.55, 0.55)
+[sub_resource type="StandardMaterial3D" id="OutputMat"]
+albedo_color = Color(1, 0.48, 0.05, 1)
+emission_enabled = true
+emission = Color(1, 0.2, 0.01, 1)
+
+[node name="Producer" type="StaticBody3D" groups=["structures"]]
+script = ExtResource("1")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 1, 0)
+shape = SubResource("BodyShape")
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1, 0)
+mesh = SubResource("BodyMesh")
+material_override = SubResource("BodyMat")
+[node name="Stack" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.5, 0)
+mesh = SubResource("StackMesh")
+material_override = SubResource("StackMat")
+[node name="OutputChute" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.85, -1.1)
+mesh = SubResource("OutputMesh")
+material_override = SubResource("OutputMat")
+[node name="Output" type="Node3D" parent="."]
+position = Vector3(0, 0, -1.5)
+script = ExtResource("2")
+point_type = 1
+[node name="DropSpawn" type="Node3D" parent="."]
+position = Vector3(0, 1.2, -1.85)

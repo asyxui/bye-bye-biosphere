@@ -23,12 +23,16 @@ static var dragging_from_index: int = -1
 static var all_slots: Array = []
 
 func _ready() -> void:
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT
 	gui_input.connect(_on_gui_input)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 	clear_slot()
 	# Register this slot in the global list
 	all_slots.append(self)
+
+func _exit_tree() -> void:
+	all_slots.erase(self)
 
 ## Set up the slot with an inventory stack
 func set_stack(stack, index: int) -> void:
@@ -49,32 +53,18 @@ func clear_slot() -> void:
 	icon_rect.texture = null
 	quantity_label.text = ""
 	name_label.text = "Empty"
-	name_label.add_theme_color_override("font_color", Color.GRAY)
+	name_label.theme_type_variation = UIThemeTypes.STATUS_MUTED
 	current_stack = null
 
 ## Select this slot
 func select() -> void:
 	is_selected = true
-	# Create a new stylebox for selected state with exact same border as default
-	var stylebox = StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.2, 0.6, 1, 0.3)
-	stylebox.border_width_left = 2
-	stylebox.border_width_top = 2
-	stylebox.border_width_right = 2
-	stylebox.border_width_bottom = 2
-	stylebox.border_color = Color(0.4, 0.8, 1, 1)
-	stylebox.set_corner_radius_all(3)
-	stylebox.content_margin_left = 0
-	stylebox.content_margin_top = 0
-	stylebox.content_margin_right = 0
-	stylebox.content_margin_bottom = 0
-	add_theme_stylebox_override("panel", stylebox)
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT_SELECTED
 
 ## Deselect this slot
 func deselect() -> void:
 	is_selected = false
-	# Remove the override to use the default theme
-	remove_theme_stylebox_override("panel")
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT
 
 ## Get tooltip text
 func get_slot_tooltip() -> String:
@@ -130,9 +120,7 @@ func show_drag_preview() -> void:
 
 ## Show visual feedback for drag target
 func show_drag_target() -> void:
-	var stylebox = load("res://Resources/Inventory/InventorySlotSelected.tres")
-	if stylebox:
-		add_theme_stylebox_override("panel", stylebox)
+	theme_type_variation = UIThemeTypes.INVENTORY_SLOT_DROP_TARGET
 
 ## Show context menu for item operations
 func _show_context_menu() -> void:

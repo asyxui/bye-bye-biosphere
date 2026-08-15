@@ -1,4 +1,4 @@
-extends Control
+extends UIScreen
 class_name DebugConsole
 
 @onready var console_panel: Panel = $ConsolePanel
@@ -27,23 +27,20 @@ static var _log_buffer: Array = []
 static var _max_buffer_size: int = 100
 
 func _ready() -> void:
-	# Enable input processing
-	set_process_input(true)
-	
 	# Register this instance as the singleton
 	DebugConsole.instance = self
 
 	# Start hidden
 	visible = false
 	console_panel.visible = false
-	
+
 	# Connect signals
 	input_line.text_submitted.connect(_on_input_submitted)
 	autocomplete_list.suggestion_selected.connect(_on_autocomplete_selected)
 	input_line.text_changed.connect(_on_input_text_changed)
 	visibility_changed.connect(_on_visibility_changed)
 	# close_button.pressed signal is already connected in the scene editor
-	
+
 	# Register commands
 	register_command("help", "Display all available commands", _cmd_help)
 	register_command("clear", "Clear the console output", _cmd_clear)
@@ -54,7 +51,8 @@ func _ready() -> void:
 	register_command("echo", "Echo text to console. Usage: echo <text>", _cmd_echo)
 	register_command("savegame", "Display current save game information", _cmd_savegame)
 	register_command("fps", "Display FPS information", _cmd_fps)
-	
+	register_command("performance", "Show loading timings. Usage: performance [on|off]", _cmd_performance)
+
 	# Log welcome message
 	log_message("[color=cyan]Debug Console ready. Type 'help' for commands.[/color]")
 
@@ -62,11 +60,11 @@ func _ready() -> void:
 func _get_save_slot_id(args: Array) -> String:
 	if not args.is_empty():
 		return args[0]
-	
+
 	var root = get_tree().root
 	if root.has_meta("current_save_slot"):
 		return root.get_meta("current_save_slot")
-	
+
 	return "default"
 
 
@@ -82,19 +80,13 @@ func _save_and_quit() -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
-	
+
 	if event is InputEventKey and event.pressed and not event.echo:
-		# Handle Escape to close console
-		if event.keycode == KEY_ESCAPE:
-			GameStateManager.close_console()
-			get_viewport().set_input_as_handled()
-			return
-		# Handle Tab for autocomplete
-		elif event.keycode == KEY_TAB and input_line.has_focus() and autocomplete_active:
+		if event.keycode == KEY_TAB and input_line.has_focus() and autocomplete_active:
 			autocomplete_list.accept_selected()
 			get_viewport().set_input_as_handled()
 			return
-	
+
 	# Block scroll wheel events from reaching ActionBar when console is visible
 	if event is InputEventMouseButton:
 		if (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN) and event.pressed:
@@ -107,7 +99,7 @@ func toggle_console() -> void:
 func _update_console_ui() -> void:
 	is_console_open = visible
 	console_panel.visible = is_console_open
-	
+
 	if is_console_open:
 		input_line.grab_focus()
 		input_line.clear()
@@ -121,26 +113,26 @@ func _on_visibility_changed() -> void:
 	_update_console_ui()
 
 func _on_close_button_pressed() -> void:
-	GameStateManager.toggle_console()
+	UIManager.toggle(UIManager.ScreenId.CONSOLE)
 
 func _on_input_submitted(text: String) -> void:
 	if text.strip_edges().is_empty():
 		return
-	
+
 	# Add to history
 	if command_history.is_empty() or command_history[0] != text:
 		command_history.push_front(text)
 		if command_history.size() > max_history:
 			command_history.pop_back()
-	
+
 	history_index = -1
-	
+
 	# Echo the command
 	log_message("[color=yellow]> " + text + "[/color]")
-	
+
 	# Execute the command
 	execute_command(text)
-	
+
 	# Clear input
 	input_line.clear()
 	autocomplete_list.hide_suggestions()
@@ -178,14 +170,14 @@ func _on_autocomplete_selected(suggestion: String) -> void:
 func navigate_history(direction: int) -> void:
 	if command_history.is_empty():
 		return
-	
+
 	history_index = clampi(history_index + direction, -1, command_history.size() - 1)
-	
+
 	if history_index == -1:
 		input_line.text = ""
 	else:
 		input_line.text = command_history[history_index]
-	
+
 	# Move cursor to end
 	input_line.caret_column = input_line.text.length()
 
@@ -193,10 +185,10 @@ func execute_command(cmd_text: String) -> void:
 	var parts = cmd_text.strip_edges().split(" ", false)
 	if parts.is_empty():
 		return
-	
+
 	var cmd_name = parts[0].to_lower()
 	var args = parts.slice(1)
-	
+
 	if cmd_name in commands:
 		var cmd_data = commands[cmd_name]
 		var callback: Callable = cmd_data["callback"]
@@ -212,7 +204,7 @@ func register_command(cmd_name: String, description: String, callback: Callable)
 
 func log_message(message: String) -> void:
 	output_log.append_text(message + "\n")
-	
+
 	# Limit log lines to prevent memory issues
 	var line_count = output_log.get_line_count()
 	if line_count > max_log_lines:
@@ -222,7 +214,7 @@ func log_message(message: String) -> void:
 		var keep_lines = lines.slice(line_count - max_log_lines)
 		output_log.clear()
 		output_log.append_text("\n".join(keep_lines))
-	
+
 	# Scroll to bottom
 	output_log.scroll_to_line(output_log.get_line_count() - 1)
 
@@ -265,7 +257,7 @@ func _cmd_history(_args: Array) -> void:
 	if command_history.is_empty():
 		log_message("[color=gray]No command history.[/color]")
 		return
-	
+
 	log_message("[color=cyan]=== Command History ===[/color]")
 	for i in range(command_history.size()):
 		log_message(str(i + 1) + ". " + command_history[i])
@@ -279,7 +271,7 @@ func _cmd_echo(args: Array) -> void:
 func _cmd_save(args: Array) -> void:
 	var slot_id = _get_save_slot_id(args)
 	log_message("[color=cyan]Saving to slot: %s...[/color]" % slot_id)
-	
+
 	SaveManager.save_completed.connect(func(success, error):
 		if success:
 			log_message("[color=green]Save completed: %s[/color]" % slot_id)
@@ -292,14 +284,15 @@ func _cmd_load(args: Array) -> void:
 	if args.is_empty():
 		log_message("[color=gray]Usage: load <slot_name>[/color]")
 		return
-	
+
 	var slot_id = args[0]
 	log_message("[color=cyan]Loading slot: %s...[/color]" % slot_id)
-	
-	GameStateManager.close_console()
+
+	UIManager.pop_screen(UIManager.ScreenId.CONSOLE)
 	var game_state_restore_manager = get_node("/root/GameStateRestoreManager")
 	if game_state_restore_manager:
-		await game_state_restore_manager.transition_to_world(slot_id)
+		if not await game_state_restore_manager.transition_to_world(slot_id):
+			log_message("[color=red]World load failed: %s[/color]" % slot_id)
 	else:
 		log_message("[color=red]GameStateRestoreManager not found[/color]")
 
@@ -309,30 +302,30 @@ func _cmd_savegame(_args: Array) -> void:
 	var root = get_tree().root
 	if root.has_meta("current_save_slot"):
 		slot_id = root.get_meta("current_save_slot")
-	
+
 	log_message("[color=cyan]=== Save Game Information ===[/color]")
 	log_message("[color=yellow]Current Slot ID:[/color] %s" % slot_id)
-	
+
 	# Get save slot path
 	var slot_path = SaveManager.get_slot_directory(slot_id)
 	var absolute_slot_path = ProjectSettings.globalize_path(slot_path)
-	
+
 	log_message("[color=yellow]Save Directory:[/color] %s" % absolute_slot_path)
-	
+
 	if not DirAccess.dir_exists_absolute(slot_path):
 		log_message("[color=orange]Warning: Save slot directory does not exist yet[/color]")
 		return
-	
+
 	# Get metadata from SaveManager
 	var metadata = SaveManager.get_slot_metadata(slot_id)
-	
+
 	if metadata.is_empty():
 		log_message("[color=red]No metadata found![/color]")
 		return
-	
+
 	# Display metadata info
 	log_message("[color=yellow]Version:[/color] %s" % metadata.get("version", "unknown"))
-	
+
 	# Convert timestamp to readable format
 	var timestamp_ms = metadata.get("timestamp", 0)
 	if timestamp_ms > 0:
@@ -345,7 +338,7 @@ func _cmd_savegame(_args: Array) -> void:
 		log_message("[color=yellow]Last Save:[/color] %s" % time_str)
 	else:
 		log_message("[color=yellow]Last Save:[/color] Never")
-	
+
 	# Player position
 	var player_pos = metadata.get("player_position", {})
 	if not player_pos.is_empty():
@@ -354,7 +347,7 @@ func _cmd_savegame(_args: Array) -> void:
 			player_pos.get("y", 0.0),
 			player_pos.get("z", 0.0)
 		])
-	
+
 	# World database size
 	var voxel_db_path = absolute_slot_path.path_join("world.sqlite")
 	if FileAccess.file_exists(voxel_db_path):
@@ -365,7 +358,7 @@ func _cmd_savegame(_args: Array) -> void:
 			log_message("[color=yellow]World Database:[/color] %.2f MB (%d bytes)" % [file_size_mb, file_size_bytes])
 	else:
 		log_message("[color=yellow]World Database:[/color] Not found")
-	
+
 	# Game data file size
 	var game_data_path = absolute_slot_path.path_join("game_data.json")
 	if FileAccess.file_exists(game_data_path):
@@ -376,8 +369,29 @@ func _cmd_savegame(_args: Array) -> void:
 			log_message("[color=yellow]Game Data:[/color] %.2f KB (%d bytes)" % [file_size_kb, file_size_bytes])
 	else:
 		log_message("[color=yellow]Game Data:[/color] Not found")
-	
+
 	log_message("[color=cyan]============================[/color]")
 
 func _cmd_fps(_args: Array) -> void:
-	HUDManager.toggle_fps_label()
+	UIManager._root.get_node("HUD/FPSLabel").toggle_label()
+
+func _cmd_performance(args: Array) -> void:
+	if args.size() > 1 or (args.size() == 1 and args[0].to_lower() not in ["on", "off"]):
+		log_message("[color=gray]Usage: performance [on|off][/color]")
+		return
+	if args.size() == 1:
+		var enabled: bool = args[0].to_lower() == "on"
+		PerformanceTracker.set_display_enabled(enabled)
+		log_message("[color=cyan]Performance display %s.[/color]" % ("enabled" if enabled else "disabled"))
+		return
+	var timer := PerformanceTracker.get_latest_timer("Loading")
+	if timer.is_empty():
+		log_message("[color=gray]No loading performance data collected yet.[/color]")
+		return
+	log_message("[color=cyan]=== Loading Performance (%.3fs, %s) ===[/color]" % [timer.total_elapsed, timer.status])
+	for checkpoint in timer.checkpoints:
+		log_message("%s %.3fs (%.3fs total)" % [checkpoint.label, checkpoint.split, checkpoint.cumulative])
+		for substep in checkpoint.get("substeps", []):
+			log_message("  ↳ %s ×%d: Σ %.3fs, avg %.3fms, max %.3fms" % [substep.label, substep.count, substep.total, substep.average * 1000.0, substep.max * 1000.0])
+	if timer.status == "active":
+		log_message("▶ %s %.3fs" % [timer.current_label, timer.current_elapsed])

@@ -25,7 +25,7 @@ size = Vector3(20, 0.01, 0.9)
 [sub_resource type="ORMMaterial3D" id="ORMMaterial3D_skxa2"]
 albedo_texture = ExtResource("1_cel3d")
 
-[node name="ConveyorBelt" type="StaticBody3D"]
+[node name="ConveyorBelt" type="StaticBody3D" groups=["structures"]]
 
 [node name="Stand" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
