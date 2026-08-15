@@ -15,6 +15,7 @@ var belts: Array[ConveyorBeltObject] = []
 var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBelt.tscn")
 var _next_belt_id: int = 1
 var _simulation_accumulator: float = 0.0
+var _pending_conveyor_contents: Array[Dictionary] = []
 
 func _ready() -> void:
 	# Register as saveable
@@ -106,6 +107,11 @@ func get_construction_cost() -> Dictionary:
 ## logical connection survives scene reloads without a visual dependency.
 func get_downstream_belt(belt: ConveyorBeltObject) -> ConveyorBeltObject:
 	if belt == null:
+		return null
+	if not belt.downstream_belt_id.is_empty():
+		var saved_downstream: ConveyorBeltObject = get_belt_by_id(belt.downstream_belt_id)
+		if saved_downstream != null and saved_downstream.start.distance_to(belt.end) <= BELT_ENDPOINT_CONNECTION_DISTANCE:
+			return saved_downstream
 		return null
 	var closest: ConveyorBeltObject = null
 	var closest_distance: float = BELT_ENDPOINT_CONNECTION_DISTANCE
@@ -382,6 +388,8 @@ func get_save_data() -> Dictionary:
 	var conveyor_data = []
 	for belt in belts:
 		if is_instance_valid(belt) and is_instance_valid(belt.scene_node):
+			var downstream: ConveyorBeltObject = get_downstream_belt(belt)
+			belt.downstream_belt_id = downstream.belt_id if downstream != null else ""
 			conveyor_data.append(belt.to_dict())
 	return { "belts": conveyor_data }
 
@@ -390,35 +398,55 @@ func get_save_data() -> Dictionary:
 func load_save_data(data: Dictionary) -> void:
 	# Clear current belts
 	clear_save_data()
+	_pending_conveyor_contents.clear()
 	var pending_connections: Array[Dictionary] = []
 	var conveyor_data = data.get("belts", [])
 	for belt_dict in conveyor_data:
 		var belt = ConveyorBeltObject.from_dict(belt_dict)
 		if belt:
+			var saved_items: Array[ConveyorItem] = []
+			for saved_item in belt.items:
+				saved_items.append(saved_item)
+			belt.items.clear()
 			var scene_node = spawn_conveyor(belt.start, belt.end, belt.belt_id)
 			var created_belt := get_belt_for_scene(scene_node)
 			if created_belt != null:
-				for saved_item in belt.items:
-					created_belt.items.append(saved_item)
 				created_belt.start_port_id = str(belt_dict.get("start_port_id", ""))
 				created_belt.end_port_id = str(belt_dict.get("end_port_id", ""))
-				pending_connections.append({"belt_id": created_belt.belt_id, "start_port_id": created_belt.start_port_id, "end_port_id": created_belt.end_port_id})
-	if not pending_connections.is_empty():
-		call_deferred("_restore_saved_connections", pending_connections)
+				created_belt.downstream_belt_id = str(belt_dict.get("downstream_belt_id", ""))
+				pending_connections.append({"belt": created_belt, "start_port_id": created_belt.start_port_id, "end_port_id": created_belt.end_port_id})
+				_pending_conveyor_contents.append({"belt": created_belt, "items": saved_items})
 
-func _restore_saved_connections(pending_connections: Array[Dictionary]) -> void:
+	# Machines have already been restored by SaveManager. Reconnect ports before
+	# putting conveyor contents back into the live simulation.
 	for connection_data in pending_connections:
-		var belt := get_belt_by_id(str(connection_data.get("belt_id", "")))
-		if belt == null:
+		var connected_belt: ConveyorBeltObject = connection_data.get("belt") as ConveyorBeltObject
+		if connected_belt == null:
 			continue
 		var start_port := find_port_by_id(str(connection_data.get("start_port_id", "")))
 		var end_port := find_port_by_id(str(connection_data.get("end_port_id", "")))
 		if start_port != null:
-			connect_belt_endpoint(belt, ConnectionPoint.PointType.START, start_port)
+			connect_belt_endpoint(connected_belt, ConnectionPoint.PointType.START, start_port)
 		if end_port != null:
-			connect_belt_endpoint(belt, ConnectionPoint.PointType.END, end_port)
+			connect_belt_endpoint(connected_belt, ConnectionPoint.PointType.END, end_port)
+
+
+## Release saved logical items after machine buffers and processing state have
+## been restored. Until then the belt remains an empty presentation geometry.
+func restore_saved_contents() -> void:
+	for pending_contents in _pending_conveyor_contents:
+		var restored_belt: ConveyorBeltObject = pending_contents.get("belt") as ConveyorBeltObject
+		if restored_belt == null or not is_instance_valid(restored_belt):
+			continue
+		var saved_items: Array = pending_contents.get("items", [])
+		for saved_item_value in saved_items:
+			var saved_item: ConveyorItem = saved_item_value as ConveyorItem
+			if saved_item != null:
+				restored_belt.items.append(saved_item)
+	_pending_conveyor_contents.clear()
 
 ## Clear conveyors (called during world transitions)
 func clear_save_data() -> void:
+	_pending_conveyor_contents.clear()
 	for belt in belts.duplicate():
 		remove_conveyor(belt, false, false)

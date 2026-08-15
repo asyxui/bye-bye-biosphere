@@ -30,7 +30,13 @@ func _physics_process(delta: float) -> void:
 			output_buffer.insert_stack(produced, 1)
 
 func get_machine_state() -> Dictionary:
-	return {}
+	return {
+		"input_buffer": input_buffer.to_dict(),
+		"output_buffer": output_buffer.to_dict(),
+		"production_accumulator": _production_accumulator
+	}
 
-func load_machine_state(_state: Dictionary) -> void:
-	pass
+func load_machine_state(state: Dictionary) -> void:
+	input_buffer.load_dict(state.get("input_buffer", []))
+	output_buffer.load_dict(state.get("output_buffer", []))
+	_production_accumulator = maxf(0.0, float(state.get("production_accumulator", 0.0)))

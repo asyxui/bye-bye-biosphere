@@ -100,6 +100,29 @@ func get_total_quantity() -> int:
 		total += stack.quantity
 	return total
 
+func to_dict() -> Array[Dictionary]:
+	var data: Array[Dictionary] = []
+	for stack in stacks:
+		data.append({
+			"item_id": stack.item_id,
+			"quantity": stack.quantity,
+			"metadata": stack.metadata
+		})
+	return data
+
+func load_dict(data: Array) -> void:
+	stacks.clear()
+	for stack_value in data:
+		if not stack_value is Dictionary:
+			continue
+		var stack_data: Dictionary = stack_value
+		var item_id: String = str(stack_data.get("item_id", ""))
+		var quantity: int = int(stack_data.get("quantity", 0))
+		if item_id.is_empty() or quantity <= 0:
+			continue
+		var metadata: Dictionary = stack_data.get("metadata", {})
+		var stack := ItemStack.new(ItemUtils.item_object_by_id(item_id), quantity, metadata)
+		insert_stack(stack)
+
 func _stack_limit(stack: ItemStack) -> int:
 	return mini(stack_capacity, stack.get_max_stack_size(stack_capacity))
-

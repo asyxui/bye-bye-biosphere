@@ -224,11 +224,7 @@ func _load_recipe_by_id(recipe_id: String) -> Recipe:
 	return IRON_SMELTING_RECIPE
 
 func _serialize_buffer(buffer: ItemBuffer) -> Array[Dictionary]:
-	var data: Array[Dictionary] = []
-	for stack_value in buffer.stacks:
-		var stack: ItemStack = stack_value as ItemStack
-		data.append(_serialize_stack(stack))
-	return data
+	return buffer.to_dict()
 
 func _serialize_stack(stack: ItemStack) -> Dictionary:
 	if stack == null or stack.quantity <= 0:
@@ -248,11 +244,4 @@ func _deserialize_stack(data: Dictionary) -> ItemStack:
 	return ItemStack.new(ItemUtils.item_object_by_id(item_id), quantity, metadata)
 
 func _restore_buffer(buffer: ItemBuffer, data: Array) -> void:
-	buffer.stacks.clear()
-	for stack_value in data:
-		if not stack_value is Dictionary:
-			continue
-		var stack_data: Dictionary = stack_value
-		var stack := _deserialize_stack(stack_data)
-		if stack != null:
-			buffer.insert_stack(stack)
+	buffer.load_dict(data)

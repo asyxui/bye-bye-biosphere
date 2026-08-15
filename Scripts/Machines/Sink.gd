@@ -50,8 +50,16 @@ func _update_label() -> void:
 	$DeliveredLabel.text = "Delivered: %d" % consumed_count
 
 func get_machine_state() -> Dictionary:
-	return {"consumed_count": consumed_count}
+	return {
+		"consumed_count": consumed_count,
+		"input_buffer": input_buffer.to_dict(),
+		"output_buffer": output_buffer.to_dict(),
+		"consume_accumulator": _consume_accumulator
+	}
 
 func load_machine_state(state: Dictionary) -> void:
-	consumed_count = state.get("consumed_count", 0)
+	consumed_count = int(state.get("consumed_count", 0))
+	input_buffer.load_dict(state.get("input_buffer", []))
+	output_buffer.load_dict(state.get("output_buffer", []))
+	_consume_accumulator = maxf(0.0, float(state.get("consume_accumulator", 0.0)))
 	_update_label()

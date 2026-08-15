@@ -14,6 +14,7 @@ var items: Array[ConveyorItem] = []
 
 var start_port_id: String = ""
 var end_port_id: String = ""
+var downstream_belt_id: String = ""
 var start_port: ConnectionPoint = null
 var end_port: ConnectionPoint = null
 @export var speed: float = DEFAULT_SPEED
@@ -197,6 +198,7 @@ func to_dict() -> Dictionary:
 		"end": [end.x, end.y, end.z],
 		"start_port_id": start_port_id,
 		"end_port_id": end_port_id,
+		"downstream_belt_id": downstream_belt_id,
 		"items": saved_items
 	}
 
@@ -210,6 +212,7 @@ static func from_dict(d: Dictionary) -> ConveyorBeltObject:
 		Vector3(d["end"][0], d["end"][1], d["end"][2]),
 		str(d.get("id", ""))
 	)
+	belt.downstream_belt_id = str(d.get("downstream_belt_id", ""))
 	var saved_items: Array = d.get("items", [])
 	for saved_item in saved_items:
 		if not saved_item is Dictionary:

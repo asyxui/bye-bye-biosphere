@@ -54,7 +54,8 @@ func get_save_data() -> Dictionary:
 		if not slot.is_empty() and slot.item:
 			save_data.append({
 				"item_id": slot.item.id,
-				"quantity": slot.quantity
+				"quantity": slot.quantity,
+				"metadata": slot.metadata
 			})
 		else:
 			save_data.append(null)
@@ -86,7 +87,10 @@ func load_save_data(data: Dictionary) -> void:
 		
 		var item = _load_item_by_id(item_id)
 		if item:
-			add_item(item, quantity)
+			var metadata: Dictionary = slot_data.get("metadata", {})
+			var stack := ItemStack.new(item, int(quantity), metadata)
+			inventory.insert_stack(stack)
+	inventory.items_changed.emit()
 
 
 ## Clear inventory (called during world transitions)

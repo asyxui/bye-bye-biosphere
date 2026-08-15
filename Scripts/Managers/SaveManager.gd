@@ -9,6 +9,13 @@ signal restoration_failed(error: String)
 
 const SAVES_DIR = "user://saves"
 
+# Saveable nodes are discovered by group membership, but their restore order
+# is part of the persistence contract. Machines must exist before conveyor
+# ports can be reconnected, and machine buffers must exist before belt items
+# resume simulation.
+const SAVE_ORDER: Array[String] = ["machines", "conveyors", "biosphere", "inventory", "player", "tools"]
+const CLEAR_ORDER: Array[String] = ["conveyors", "machines", "biosphere", "inventory", "player", "tools"]
+
 var current_slot_id: String = ""
 
 ## Get list of all available save slots
@@ -132,8 +139,8 @@ func save_game(slot_id: String) -> bool:
 
 	save_progress.emit(0.2)
 
-	var save_data = {}
-	var saveable_nodes = get_tree().get_nodes_in_group("saveable")
+	var save_data: Dictionary = {}
+	var saveable_nodes: Array[Node] = _get_ordered_saveables(SAVE_ORDER)
 
 	CustomLogger.log_info("SaveManager: Found %d saveable nodes" % saveable_nodes.size())
 
@@ -217,24 +224,82 @@ func load_game_data(slot_id: String) -> Variant:
 
 
 func restore_game_state(save_data: Dictionary) -> bool:
-	var saveable_nodes = get_tree().get_nodes_in_group("saveable")
+	var saveables_by_key: Dictionary = _get_saveables_by_key()
+	var restored_keys: Dictionary = {}
 
-	for node in saveable_nodes:
-		var key = node.get_save_key()
-		if key in save_data:
-			node.load_save_data(save_data[key])
-			CustomLogger.log_info("Restored data for: %s" % key)
+	# Phase 1: instantiate machines, then create conveyor geometry and rebuild
+	# machine-port connections against those stable IDs.
+	_restore_saveable_key(saveables_by_key, save_data, "machines")
+	restored_keys["machines"] = true
+	_restore_saveable_key(saveables_by_key, save_data, "conveyors")
+	restored_keys["conveyors"] = true
+
+	# Phase 2: restore machine buffers and processing, then release conveyor
+	# contents so the first simulation tick sees a complete factory graph.
+	var machine_manager: Node = saveables_by_key.get("machines") as Node
+	if machine_manager != null and machine_manager.has_method("restore_machine_states"):
+		machine_manager.restore_machine_states()
+	var conveyor_manager: Node = saveables_by_key.get("conveyors") as Node
+	if conveyor_manager != null and conveyor_manager.has_method("restore_saved_contents"):
+		conveyor_manager.restore_saved_contents()
+
+	# Phase 3: restore ecological state, inventory, player transform, and tools/UI.
+	for key in ["biosphere", "inventory", "player", "tools"]:
+		_restore_saveable_key(saveables_by_key, save_data, key)
+		restored_keys[key] = true
+
+	# Preserve forward compatibility for saveable systems added later.
+	for node in _get_ordered_saveables(SAVE_ORDER):
+		var key: String = str(node.get_save_key())
+		if restored_keys.has(key):
+			continue
+		_restore_saveable_key(saveables_by_key, save_data, key)
 
 	restoration_completed.emit()
 	return true
 
 
 func clear_all_saveables() -> void:
-	var saveable_nodes = get_tree().get_nodes_in_group("saveable")
+	var saveable_nodes: Array[Node] = _get_ordered_saveables(CLEAR_ORDER)
 
 	for node in saveable_nodes:
 		node.clear_save_data()
 		CustomLogger.log_info("Cleared data for: %s" % node.get_save_key() if node.has_method("get_save_key") else "unknown")
+
+
+func _get_ordered_saveables(preferred_order: Array[String]) -> Array[Node]:
+	var by_key: Dictionary = _get_saveables_by_key()
+	var ordered: Array[Node] = []
+	for key in preferred_order:
+		var ordered_node: Node = by_key.get(key) as Node
+		if ordered_node != null:
+			ordered.append(ordered_node)
+			by_key.erase(key)
+
+	# Preserve forward compatibility for new saveables that have not yet been
+	# added to the explicit lifecycle order.
+	for remaining_node_value in by_key.values():
+		var remaining_node: Node = remaining_node_value as Node
+		if remaining_node != null:
+			ordered.append(remaining_node)
+	return ordered
+
+
+func _get_saveables_by_key() -> Dictionary:
+	var by_key: Dictionary = {}
+	for node_value in get_tree().get_nodes_in_group("saveable"):
+		var node: Node = node_value as Node
+		if node != null and node.has_method("get_save_key"):
+			by_key[str(node.get_save_key())] = node
+	return by_key
+
+
+func _restore_saveable_key(saveables_by_key: Dictionary, save_data: Dictionary, key: String) -> void:
+	var node: Node = saveables_by_key.get(key) as Node
+	if node == null or not save_data.has(key):
+		return
+	node.load_save_data(save_data[key])
+	CustomLogger.log_info("Restored data for: %s" % key)
 
 
 func _load_slot_metadata(slot_path: String) -> Dictionary:

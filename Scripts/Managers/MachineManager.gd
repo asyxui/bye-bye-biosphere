@@ -6,6 +6,7 @@ const SMELTER_SCENE := preload("res://Scenes/Machines/Smelter.tscn")
 const STRUCTURE_GROUP := "structures"
 var machines: Array[Node3D] = []
 var _next_machine_id: int = 1
+var _pending_machine_states: Array[Dictionary] = []
 
 func _ready() -> void:
 	add_to_group("saveable")
@@ -133,10 +134,29 @@ func get_save_data() -> Dictionary:
 
 func load_save_data(data: Dictionary) -> void:
 	clear_save_data()
+	_pending_machine_states.clear()
 	for machine_data in data.get("machines", []):
 		var p: Dictionary = machine_data.get("position", {})
-		place_machine(machine_data.get("type", ""), Vector3(p.get("x", 0.0), p.get("y", 0.0), p.get("z", 0.0)), machine_data.get("rotation_y", 0.0), machine_data.get("state", {}), str(machine_data.get("id", "")))
+		var machine: Node3D = place_machine(
+			machine_data.get("type", ""),
+			Vector3(p.get("x", 0.0), p.get("y", 0.0), p.get("z", 0.0)),
+			machine_data.get("rotation_y", 0.0),
+			{},
+			str(machine_data.get("id", ""))
+		)
+		if machine != null:
+			_pending_machine_states.append({"machine": machine, "state": machine_data.get("state", {})})
+
+## Apply buffers and processing state after all machine ports exist and the
+## conveyor manager has reconstructed its geometry and port connections.
+func restore_machine_states() -> void:
+	for pending_state in _pending_machine_states:
+		var machine: Node3D = pending_state.get("machine") as Node3D
+		if machine != null and is_instance_valid(machine) and machine.has_method("load_machine_state"):
+			machine.load_machine_state(pending_state.get("state", {}))
+	_pending_machine_states.clear()
 
 func clear_save_data() -> void:
+	_pending_machine_states.clear()
 	for machine in machines.duplicate():
 		remove_machine(machine, false)
