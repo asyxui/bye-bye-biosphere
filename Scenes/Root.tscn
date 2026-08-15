@@ -42,6 +42,7 @@ threshold_center = 0.9
 
 [sub_resource type="VoxelGeneratorFast" id="VoxelGeneratorFast_pl8e4"]
 biomes = [SubResource("VoxelBiome_bo0b3"), SubResource("VoxelBiome_eypal"), SubResource("VoxelBiome_sn7fr")]
+noise_biome_period = 110.0
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
 culls_neighbors = false
