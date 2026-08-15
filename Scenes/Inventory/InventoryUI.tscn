@@ -92,3 +92,23 @@ size_flags_vertical = 3
 theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 6
 columns = 5
+
+[node name="CraftingSection" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 170)
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 4
+
+[node name="CraftingTitle" type="Label" parent="Panel/MarginContainer/VBoxContainer/CraftingSection"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "CRAFTING"
+
+[node name="RecipeScroll" type="ScrollContainer" parent="Panel/MarginContainer/VBoxContainer/CraftingSection"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RecipeList" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/CraftingSection/RecipeScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
