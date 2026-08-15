@@ -44,6 +44,10 @@ voxel_world=""
 
 theme/custom="res://Assets/GameTheme.tres"
 
+[gameplay]
+
+debug_start_in_normal_mode=false
+
 [input]
 
 move_left={

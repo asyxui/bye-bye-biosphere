@@ -196,6 +196,32 @@ text = "Changes the visual system without affecting controls or gameplay."
 custom_minimum_size = Vector2(260, 40)
 layout_mode = 2
 
+[node name="Debug" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Debug"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DebugLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Debug/VBoxContainer"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "Debug"
+
+[node name="CreativeModeHint" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Debug/VBoxContainer"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+text = "Creative mode disables construction costs for this session."
+
+[node name="CreativeModeCheck" type="CheckButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Debug/VBoxContainer"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+text = "Creative Mode"
+
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/Controls"]
 layout_mode = 2
 theme_override_constants/separation = 16

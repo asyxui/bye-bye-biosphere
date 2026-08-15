@@ -2,6 +2,7 @@
 extends SceneTree
 
 func _initialize() -> void:
+	GameStateManager.set_creative_mode(false)
 	var inventory := Inventory.new(2)
 	var ingot: InventoryItem = ItemUtils.item_object_by_id("3")
 	assert(ingot != null)

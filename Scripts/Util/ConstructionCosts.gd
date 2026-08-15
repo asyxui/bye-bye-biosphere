@@ -9,6 +9,8 @@ static func get_cost(tool_id: String) -> Dictionary:
 	return tool.construction_cost.duplicate(true)
 
 static func get_missing(cost: Dictionary, inventory: Inventory) -> Dictionary:
+	if not GameStateManager.construction_costs_enabled():
+		return {}
 	var missing: Dictionary = {}
 	if inventory == null:
 		return cost.duplicate(true)
@@ -23,9 +25,13 @@ static func get_missing(cost: Dictionary, inventory: Inventory) -> Dictionary:
 	return missing
 
 static func can_afford(cost: Dictionary, inventory: Inventory) -> bool:
+	if not GameStateManager.construction_costs_enabled():
+		return true
 	return get_missing(cost, inventory).is_empty()
 
 static func consume(cost: Dictionary, inventory: Inventory) -> bool:
+	if not GameStateManager.construction_costs_enabled():
+		return true
 	if not can_afford(cost, inventory):
 		return false
 	for item_key in cost:
@@ -47,6 +53,8 @@ static func consume(cost: Dictionary, inventory: Inventory) -> bool:
 	return true
 
 static func refund(cost: Dictionary, inventory: Inventory, drop_position: Vector3) -> void:
+	if not GameStateManager.construction_costs_enabled():
+		return
 	for item_key in cost:
 		var item_id: String = str(item_key)
 		var quantity: int = int(cost[item_key])
