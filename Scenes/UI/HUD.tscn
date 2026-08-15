@@ -1,27 +1,15 @@
-[gd_scene load_steps=7 format=3 uid="uid://c3gynxmj3suco"]
+[gd_scene format=3 uid="uid://c3gynxmj3suco"]
 
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
-[ext_resource type="Texture2D" uid="uid://c55uafcnp1ntd" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
+[ext_resource type="Texture2D" uid="uid://dvt2vm0ldvpy4" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
 [ext_resource type="Script" uid="uid://b5lxc51kltku5" path="res://Scripts/UI/Debug/F3Screen.gd" id="5_ykvyr"]
-[ext_resource type="Script" path="res://Scripts/UI/BiosphereStatus.gd" id="6_biosphere_status"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_placement_status"]
-bg_color = Color(0.02, 0.04, 0.05, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.25, 0.35, 0.4, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-content_margin_left = 14.0
-content_margin_top = 6.0
-content_margin_right = 14.0
-content_margin_bottom = 6.0
+[ext_resource type="Script" uid="uid://cs383dof813dw" path="res://Scripts/UI/BiosphereStatus.gd" id="6_biosphere_status"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_biosphere_status"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
 bg_color = Color(0.02, 0.04, 0.05, 0.9)
 border_width_left = 2
 border_width_top = 2
@@ -32,14 +20,26 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-content_margin_left = 12.0
-content_margin_top = 10.0
-content_margin_right = 12.0
-content_margin_bottom = 10.0
 
-[node name="Hud" type="CanvasLayer"]
+[sub_resource type="StyleBoxFlat" id="StyleBox_placement_status"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.02, 0.04, 0.05, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
-[node name="Crosshair" type="Control" parent="." unique_id=4373763]
+[node name="Hud" type="CanvasLayer" unique_id=494431965]
+
+[node name="Crosshair" type="Control" parent="." unique_id=1000675313]
 z_index = -1
 layout_mode = 3
 anchors_preset = 8
@@ -137,7 +137,7 @@ offset_right = 51.0
 offset_bottom = 32.0
 script = ExtResource("5_ykvyr")
 
-[node name="BiosphereStatus" type="PanelContainer" parent="."]
+[node name="BiosphereStatus" type="PanelContainer" parent="." unique_id=1608542983]
 z_index = 10
 offset_left = 12.0
 offset_top = 48.0
@@ -147,17 +147,19 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_biosphere_status")
 script = ExtResource("6_biosphere_status")
 
-[node name="MarginContainer" type="MarginContainer" parent="BiosphereStatus"]
+[node name="MarginContainer" type="MarginContainer" parent="BiosphereStatus" unique_id=1245102625]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="BiosphereStatus/MarginContainer"]
+[node name="Label" type="Label" parent="BiosphereStatus/MarginContainer" unique_id=1723730659]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.95, 0.85, 1)
 theme_override_font_sizes/font_size = 15
-text = "FIELD INSTRUMENT\nBIOSPHERE: 100.0%\nINGOTS: 0 / 10"
+text = "FIELD INSTRUMENT
+BIOSPHERE: 100.0%
+INGOTS: 0 / 10"
 autowrap_mode = 2
 
-[node name="PlacementStatus" type="PanelContainer" parent="."]
+[node name="PlacementStatus" type="PanelContainer" parent="." unique_id=233195210]
 visible = false
 z_index = 10
 anchors_preset = 7
@@ -174,7 +176,7 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_placement_status")
 
-[node name="Label" type="Label" parent="PlacementStatus"]
+[node name="Label" type="Label" parent="PlacementStatus" unique_id=1436940487]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.35, 0.3, 1)
 theme_override_font_sizes/font_size = 18

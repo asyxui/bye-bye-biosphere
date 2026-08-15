@@ -4,22 +4,14 @@
 extends Node
 
 var inventory: Inventory = null  # Inventory type
-const BOOTSTRAP_INGOT_ID: String = "3"
-const BOOTSTRAP_INGOT_QUANTITY: int = 8
 
 func _ready() -> void:
 	var inventory_class = load("res://Scripts/Inventory/Inventory.gd")
 	inventory = inventory_class.new(20)
 	inventory.max_weight = 100.0
-	_grant_bootstrap_materials()
 	
 	# Register as saveable
 	add_to_group("saveable")
-
-func _grant_bootstrap_materials() -> void:
-	var ingot: InventoryItem = ItemUtils.item_object_by_id(BOOTSTRAP_INGOT_ID)
-	if ingot != null:
-		add_item(ingot, BOOTSTRAP_INGOT_QUANTITY)
 
 ## Add item to player inventory
 func add_item(item, quantity: int = 1) -> int:

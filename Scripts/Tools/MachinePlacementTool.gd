@@ -37,7 +37,14 @@ func on_update(_delta: float) -> void:
 			_update_preview(hit)
 
 func _create_preview(position: Vector3) -> void:
-	preview = MachineManager.get_machine_scene(_tool_resource.id).instantiate() as Node3D
+	var machine_scene: PackedScene = MachineManager.get_machine_scene(_tool_resource.id) if _tool_resource != null else null
+	if machine_scene == null:
+		waiting_for_confirmation = false
+		preview_is_valid = false
+		UIManager.set_placement_status("Cannot place structure: scene not found", false)
+		return
+
+	preview = machine_scene.instantiate() as Node3D
 	if preview is CollisionObject3D:
 		preview.set_collision_layer_value(1, false)
 		preview.set_collision_mask_value(1, false)

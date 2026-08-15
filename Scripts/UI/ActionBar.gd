@@ -92,6 +92,7 @@ func select_tool(slot_index: int) -> void:
 	_highlight_selected_slot(slot_index)
 	
 	var tool = ToolManager.get_tool_in_slot(slot_index)
+	ToolManager.set_selected_hotbar_slot(slot_index, tool.id if tool else "")
 	if tool:
 		tool_selected.emit(tool.id, slot_index)
 	else:

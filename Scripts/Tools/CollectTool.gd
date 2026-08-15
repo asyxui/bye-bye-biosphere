@@ -29,9 +29,16 @@ func pick_up(item: Node3D):
 	var source_stack: ItemStack = item.get_item_stack()
 	if source_stack == null:
 		return
-	var inserted: int = InventoryManager.get_inventory().insert_stack(source_stack)
+	var inventory: Inventory = InventoryManager.get_inventory()
+	if inventory == null:
+		return
+	var inserted: int = inventory.insert_stack(source_stack)
 	if inserted <= 0:
 		return
+	# Directly using the shared ItemStorage contract does not emit the
+	# inventory-specific UI signal, so notify the inventory after a successful
+	# partial transfer.
+	inventory.items_changed.emit()
 	if item.has_method("remove_quantity"):
 		item.remove_quantity(inserted)
 	else:

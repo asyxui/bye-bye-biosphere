@@ -14,6 +14,7 @@ var active_tool: Object = null  # Reference to the currently active tool script
 func _ready() -> void:
 	# Listen for tool activation
 	ToolManager.tool_activated.connect(_on_tool_activated)
+	ToolManager.active_tool_invalidated.connect(_on_active_tool_invalidated)
 	
 	add_to_group("player")
 	
@@ -22,20 +23,54 @@ func _ready() -> void:
 
 func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
 	var tool = ToolManager.get_tool_in_slot(slot_index)
-	if tool:
-		var same_tool_active: bool = ToolManager.active_tool_instance != null and active_tool != null and active_tool.get_script().resource_path == tool.tool_script_path and active_tool._is_active
-		# Check if this is the same tool that's already active and still has state
-		if same_tool_active:  # Only reuse if tool is still active (multi-step)
-			# Same tool and still active, execute again (for multi-click tools like conveyor)
-			active_tool.execute(null)  # Pass null since player is already cached
-		else:
-			if active_tool and active_tool.has_method("cancel"):
-				active_tool.cancel()
-			# Different tool, no active tool, or tool finished (single-step), create a new instance
-			var tool_instance = ToolManager.tool_executor.execute_tool(tool, self)
-			if tool_instance:
-				active_tool = tool_instance
-				ToolManager.active_tool_instance = tool_instance
+	if not tool:
+		cancel_active_tool()
+		return
+
+	if _can_reuse_active_tool(tool):
+		# Same resource identity and an intentional multi-step continuation.
+		active_tool.execute(null)
+		_sync_active_tool_reference()
+		return
+
+	cancel_active_tool()
+	var tool_instance = ToolManager.tool_executor.execute_tool(tool, self)
+	if tool_instance and tool_instance.has_method("get_tool_id") and tool_instance.get_tool_id() == tool.id and tool_instance._is_active and tool.is_multi_step:
+		active_tool = tool_instance
+		ToolManager.active_tool_instance = tool_instance
+	else:
+		active_tool = null
+		ToolManager.active_tool_instance = null
+
+func _can_reuse_active_tool(tool: ToolResource) -> bool:
+	return active_tool != null \
+		and ToolManager.active_tool_instance == active_tool \
+		and active_tool.has_method("get_tool_id") \
+		and active_tool.get_tool_id() == tool.id \
+		and tool.is_multi_step \
+		and active_tool._is_active
+
+func _sync_active_tool_reference() -> void:
+	if active_tool == null or not active_tool._is_active or not active_tool.is_multi_step():
+		active_tool = null
+		ToolManager.active_tool_instance = null
+
+func _on_active_tool_invalidated(_new_tool_id: String) -> void:
+	# ToolManager already canceled its cached instance. Cancel a local instance
+	# too if it was out of sync, then drop both references.
+	if active_tool != null and active_tool.has_method("cancel"):
+		active_tool.cancel()
+	active_tool = null
+	ToolManager.active_tool_instance = null
+
+func cancel_active_tool() -> void:
+	var cached_tool = ToolManager.active_tool_instance
+	if active_tool != null and active_tool.has_method("cancel"):
+		active_tool.cancel()
+	if cached_tool != null and cached_tool != active_tool and cached_tool.has_method("cancel"):
+		cached_tool.cancel()
+	active_tool = null
+	ToolManager.active_tool_instance = null
 
 func get_player_transform() -> Transform3D:
 	return camera.get_global_transform()
@@ -54,8 +89,8 @@ func _input(event: InputEvent) -> void:
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
 	elif event.is_action_pressed("click") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_activate_selected_tool()
-	elif event.is_action_pressed("right_click") and active_tool and active_tool.has_method("cancel"):
-		active_tool.cancel()
+	elif event.is_action_pressed("right_click") and (active_tool != null or ToolManager.active_tool_instance != null):
+		cancel_active_tool()
 
 func _activate_selected_tool() -> void:
 	var current_slot = UIManager._root.get_action_bar().current_slot

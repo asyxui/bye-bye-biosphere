@@ -18,6 +18,11 @@ var _tool_resource: ToolResource = null  # Reference to the tool resource for me
 func set_tool_resource(tool_resource: ToolResource) -> void:
 	_tool_resource = tool_resource
 
+## The resource ID is the identity of a configured tool. Multiple resources
+## can intentionally share the same implementation script.
+func get_tool_id() -> String:
+	return _tool_resource.id if _tool_resource != null else ""
+
 ## Called when the tool is first activated with a player
 func on_activate(p: Node) -> void:
 	player = p

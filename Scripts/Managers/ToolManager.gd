@@ -4,9 +4,11 @@ var tools: Dictionary = {}  # tool_id -> ToolResource
 var tool_executor: Node
 var hotbar_tools: Array[Resource] = []  # Array of ToolResource or null for each slot (size 10)
 var active_tool_instance: Object = null  # Cache the active tool instance so state persists
+var selected_hotbar_slot: int = -1
 
 signal tool_equipped(tool_id: String, slot_index: int)
 signal tool_activated(tool_id: String, slot_index: int)
+signal active_tool_invalidated(new_tool_id: String)
 
 const HOTBAR_SIZE = 10
 const TOOLS_PATH = "res://Resources/Tools/"
@@ -60,6 +62,7 @@ func equip_tool(tool_id: String, slot_index: int) -> bool:
 		return false
 	
 	hotbar_tools[slot_index] = tool
+	_invalidate_active_tool_if_needed(tool.id, slot_index)
 	tool_equipped.emit(tool_id, slot_index)
 	return true
 
@@ -77,6 +80,7 @@ func equip_item(inventory_slot_id: int, slot_index: int):
 	itemTool.id = item.id
 
 	hotbar_tools[slot_index] = itemTool
+	_invalidate_active_tool_if_needed(itemTool.id, slot_index)
 	tool_equipped.emit(item.id, slot_index)
 	return true
 
@@ -86,6 +90,7 @@ func unequip_tool(slot_index: int) -> bool:
 		return false
 	
 	hotbar_tools[slot_index] = null
+	_invalidate_active_tool_if_needed("", slot_index)
 	return true
 
 func get_tool_in_slot(slot_index: int):
@@ -103,6 +108,36 @@ func activate_tool(slot_index: int) -> void:
 		tool_activated.emit(tool.id, slot_index)
 	else:
 		print("No tool in slot %d" % slot_index)
+
+func set_selected_hotbar_slot(slot_index: int, tool_id: String) -> void:
+	if slot_index < 0 or slot_index >= HOTBAR_SIZE:
+		return
+	selected_hotbar_slot = slot_index
+	_invalidate_active_tool_if_needed(tool_id, slot_index)
+
+func _invalidate_active_tool_if_needed(new_tool_id: String, slot_index: int) -> void:
+	if slot_index != selected_hotbar_slot:
+		return
+	if active_tool_instance == null:
+		# Also notify the player when its local reference has somehow drifted
+		# from the manager cache.
+		active_tool_invalidated.emit(new_tool_id)
+		return
+	if _get_active_tool_id() == new_tool_id:
+		return
+
+	var stale_instance := active_tool_instance
+	if stale_instance.has_method("cancel"):
+		stale_instance.cancel()
+	active_tool_instance = null
+	active_tool_invalidated.emit(new_tool_id)
+
+func _get_active_tool_id() -> String:
+	if active_tool_instance == null:
+		return ""
+	if active_tool_instance.has_method("get_tool_id"):
+		return str(active_tool_instance.get_tool_id())
+	return ""
 
 func get_hotbar_tools() -> Array[Resource]:
 	return hotbar_tools.duplicate()
@@ -145,6 +180,12 @@ func load_save_data(data: Dictionary) -> void:
 
 ## Clear tools/hotbar (called during world transitions)
 func clear_save_data() -> void:
+	if active_tool_instance != null:
+		var stale_instance := active_tool_instance
+		if stale_instance.has_method("cancel"):
+			stale_instance.cancel()
+		active_tool_instance = null
+		active_tool_invalidated.emit("")
 	hotbar_tools.clear()
 	hotbar_tools.resize(HOTBAR_SIZE)
 	for i in range(HOTBAR_SIZE):
