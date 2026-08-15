@@ -112,6 +112,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_K:
 		toggle(ScreenId.CONSOLE)
 		get_viewport().set_input_as_handled()
+	if event.is_action_pressed("f3"):
+		UIManager._root.get_node("HUD/F3Screen").toggle_label()
 
 func _present(screen_id: ScreenId, data: Dictionary) -> void:
 	var screen = _screens[screen_id]
