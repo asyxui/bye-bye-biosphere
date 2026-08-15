@@ -8,7 +8,7 @@ valid=false
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/storage/mixel4.windows.editor.x86_64.obj"
+source_file="res://addons/godot_voxel/storage/mixel4.windows.editor.x86_64.obj"
 
 [params]
 

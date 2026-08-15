@@ -8,7 +8,7 @@ valid=false
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/engine/buffered_task_scheduler.windows.editor.x86_64.obj"
+source_file="res://addons/godot_voxel/engine/buffered_task_scheduler.windows.editor.x86_64.obj"
 
 [params]
 
