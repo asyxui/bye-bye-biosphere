@@ -25,17 +25,47 @@ private:
 	Ref<ZN_FastNoiseLite> biome_noise;
 
 	
-	static constexpr float BLOCK_TYPE_FREQUENCY = 1.0f / 64.0f;
-	static constexpr float TERRAIN_FREQUENCY = 1.0f / 80.0f;
-	static constexpr float CAVE_FREQUENCY = 1.0f / 250.0f;
-	static constexpr float BIOME_FREQUENCY = 1.0f / 30.0f;
+	float block_type_period = 64.0f;
+	float terrain_period = 80.0f;
+	float cave_period = 250.0f;
+	float biome_period = 100.0f;
 	
-	static constexpr float CAVE_CUTOFF = 0.3f;
-	
+	float cave_cutoff = 0.3f;
+
+	int block_type_seed = 0;
+	int terrain_seed = 0;
+	int cave_seed = 0;
+	int biome_seed = 0;	
 	
 	static constexpr int BLOCK_GREY = 1;
 	static constexpr int BLOCK_PURPLE = 2;
 	
+	void set_block_type_period(float value);
+	float get_block_type_period() const;
+
+	void set_terrain_period(float value);
+	float get_terrain_period() const;
+
+	void set_cave_period(float value);
+	float get_cave_period() const;
+
+	void set_biome_period(float value);
+	float get_biome_period() const;
+
+	void set_cave_cutoff(float value);
+	float get_cave_cutoff() const;
+
+	void set_block_type_seed(int value);
+	int get_block_type_seed() const;
+
+	void set_terrain_seed(int value);
+	int get_terrain_seed() const;
+
+	void set_cave_seed(int value);
+	int get_cave_seed() const;
+
+	void set_biome_seed(int value);
+	int get_biome_seed() const;
 	
 	struct Biome
 	{
