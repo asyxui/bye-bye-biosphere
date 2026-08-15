@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="VoxelBlockyType" inherits="Resource" is_experimental="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_rotation_attribute" qualifiers="const">
+			<return type="VoxelBlockyAttribute" />
+			<description>
+			</description>
+		</method>
+		<method name="set_variant_model">
+			<return type="void" />
+			<param index="0" name="key" type="Array" />
+			<param index="1" name="model" type="VoxelBlockyModel" />
+			<description>
+				Explicitely sets which model to use for a given combination of attributes (key).
+				If you have attributes that automatically generate variants (such as rotations), you are expected to only set models for the default value of such attributes. Other models will not be preserved. This is because the default value will be used as a reference to generate the other models.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="_variant_models_data" type="Array" setter="_set_variant_models_data" getter="_get_variant_models_data" default="[]">
+		</member>
+		<member name="attributes" type="VoxelBlockyAttribute[]" setter="set_attributes" getter="get_attributes" default="[]">
+		</member>
+		<member name="base_model" type="VoxelBlockyModel" setter="set_base_model" getter="get_base_model">
+		</member>
+		<member name="unique_name" type="StringName" setter="set_unique_name" getter="get_unique_name" default="&amp;&quot;unnamed&quot;">
+		</member>
+	</members>
+	<constants>
+		<constant name="MAX_ATTRIBUTES" value="4">
+		</constant>
+	</constants>
+</class>

@@ -7,15 +7,18 @@ const Mountains = "mountains"
 
 static var biomes: Dictionary = {
 	Plains: {
-		"height_scale": 15,
+		"base_height": 20,
+		"terrain_amplitude": 15,
 		"threshold_center": 0.5
 	},
 	Desert: {
-		"height_scale": 4,
+		"base_height": 10,
+		"terrain_amplitude": 4,
 		"threshold_center": 0.1
 	},
 	Mountains: {
-		"height_scale": 200,
+		"base_height": 250,
+		"terrain_amplitude": 150,
 		"threshold_center": 0.9
 	}
 }
