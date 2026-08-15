@@ -4,6 +4,10 @@ const EMIT_INTERVAL := 1.0
 const MAX_OUTSTANDING_DROPS := 20
 const ORE := preload("res://Resources/Items/Ore.tres")
 var machine_type := "producer"
+## Logical ports used by machines/conveyors. The existing loose-drop output is
+## intentionally left in place for this milestone's compatibility path.
+var input_buffer: ItemBuffer = ItemBuffer.new(1, 64)
+var output_buffer: ItemBuffer = ItemBuffer.new(4, 64)
 var _elapsed := 0.0
 var _outstanding: Array[WeakRef] = []
 var _had_output_belt := false
@@ -11,6 +15,12 @@ var _had_output_belt := false
 func _ready() -> void:
 	add_to_group("machines")
 	add_to_group("structures")
+
+func get_input_buffer() -> ItemBuffer:
+	return input_buffer
+
+func get_output_buffer() -> ItemBuffer:
+	return output_buffer
 
 func _process(delta: float) -> void:
 	_elapsed += delta

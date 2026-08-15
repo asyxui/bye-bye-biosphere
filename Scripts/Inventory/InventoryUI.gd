@@ -211,7 +211,7 @@ func _find_target_slot_for_split(from_slot: int) -> int:
 	# Then try slots with the same item
 	for i in range(inventory.inventory_size):
 		var slot = inventory.get_slot_item(i)
-		if i != from_slot and slot.item == from_stack.item:
+		if i != from_slot and slot.is_same_item(from_stack):
 			return i
 	
 	return -1

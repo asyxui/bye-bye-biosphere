@@ -24,5 +24,15 @@ func scan_area():
 			pick_up(obj.get_parent_node_3d())
 
 func pick_up(item: Node3D):
-	InventoryManager.add_item(item.dropData, 1)
-	item.queue_free()
+	if item == null or not item.has_method("get_item_stack"):
+		return
+	var source_stack: ItemStack = item.get_item_stack()
+	if source_stack == null:
+		return
+	var inserted := InventoryManager.get_inventory().insert_stack(source_stack)
+	if inserted <= 0:
+		return
+	if item.has_method("remove_quantity"):
+		item.remove_quantity(inserted)
+	else:
+		item.queue_free()

@@ -2,12 +2,20 @@ extends StaticBody3D
 
 var machine_type := "sink"
 var consumed_count := 0
+var input_buffer: ItemBuffer = ItemBuffer.new(4, 64)
+var output_buffer: ItemBuffer = ItemBuffer.new(1, 64)
 
 func _ready() -> void:
 	add_to_group("machines")
 	add_to_group("structures")
 	$Intake.body_entered.connect(_on_intake_body_entered)
 	_update_label()
+
+func get_input_buffer() -> ItemBuffer:
+	return input_buffer
+
+func get_output_buffer() -> ItemBuffer:
+	return output_buffer
 
 func _on_intake_body_entered(body: Node3D) -> void:
 	if not body is RigidBody3D:

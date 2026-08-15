@@ -72,12 +72,12 @@ func wait_for_terrain_ready() -> bool:
 	if not terrain:
 		CustomLogger.log_error("Cannot wait for terrain: terrain not found")
 		return false
-	
+
 	var player = get_tree().root.find_child("Player", true, false)
 	if not player:
 		CustomLogger.log_error("Cannot wait for terrain: player not found")
 		return false
-	
+
 	var player_pos = player.global_position
 	var player_local = terrain.to_local(player_pos)
 	var local_half_extent = Vector3(16, 16, 16)
@@ -127,7 +127,7 @@ func _destroy(origin: Vector3, direction: Vector3):
 		var coordsWithDrops: Array[Vector3] = []
 		var coordsWorld = sphere_coords(hit.position, 1, 2)
 
-		for i in range(0, coordsWorld.size()): 
+		for i in range(0, coordsWorld.size()):
 			var type: int = voxelTool.get_voxel(coordsWorld[i])
 			if type != 0:
 				drops.append(type)
@@ -165,7 +165,7 @@ func drop_item(type: int, coords: Vector3):
 
 ## Spawn a physical drop from an inventory item. This is shared by terrain,
 ## inventory use, and machines so all drops behave identically on conveyors.
-func spawn_item_drop(item: InventoryItem, pos: Vector3, isGlobal: bool = false) -> Node3D:
+func spawn_item_drop(item: InventoryItem, pos: Vector3, parent: Node = null, quantity: int = 1, isGlobal: bool = false) -> Node3D:
 	if item == null:
 		return null
 	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
@@ -175,6 +175,7 @@ func spawn_item_drop(item: InventoryItem, pos: Vector3, isGlobal: bool = false) 
 	mesh.set_surface_override_material(0, newMat)
 
 	newDrop.dropData = item
+	newDrop.quantity = maxi(1, quantity)
 	newMat.albedo_color = newDrop.dropData.dropColor
 	newDrop.get_child(0).add_to_group("Collectibles")
 	get_voxel_terrain().add_child(newDrop)
@@ -186,5 +187,5 @@ func spawn_item_drop(item: InventoryItem, pos: Vector3, isGlobal: bool = false) 
 		newDrop.position = pos
 	else:
 		newDrop.global_position = pos
-	
+
 	return newDrop
