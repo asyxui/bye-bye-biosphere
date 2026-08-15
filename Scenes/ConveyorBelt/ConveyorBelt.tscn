@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://ct5hbibsxlcre" path="res://Scenes/ConveyorBelt/StartNode.tscn" id="5_n7hj5"]
 [ext_resource type="PackedScene" uid="uid://bmodpey6blh6e" path="res://Scenes/ConveyorBelt/EndNode.tscn" id="6_0ieqd"]
 [ext_resource type="Script" uid="uid://dei4ocjq2dock" path="res://Scripts/ConveyorBelt/ConnectionPoint.gd" id="7_8nexv"]
+[ext_resource type="Script" path="res://Scripts/ConveyorBelt/ConveyorBeltVisual.gd" id="8_visual"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_frame"]
 size = Vector3(20, 0.48, 0.72)
@@ -27,6 +28,9 @@ size = Vector3(20, 0.06, 0.82)
 albedo_texture = ExtResource("1_cel3d")
 
 [node name="ConveyorBelt" type="StaticBody3D" unique_id=930255072 groups=["structures"]]
+script = ExtResource("8_visual")
+
+[node name="ItemVisuals" type="Node3D" parent="." unique_id=2146075984]
 
 [node name="FrameCollision" type="CollisionShape3D" parent="." unique_id=987902930]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)

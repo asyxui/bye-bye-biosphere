@@ -34,6 +34,17 @@ func configure_machine_port(new_port_id: String, structure_id: String) -> void:
 	port_id = new_port_id
 	owner_structure_id = structure_id
 
+## Returns the nearest owning machine for a machine port. Ports are currently
+## direct children of machines, but walking upward keeps the connection
+## contract valid if a future scene adds an intermediate port container.
+func get_owner_structure() -> Node:
+	var candidate: Node = get_parent()
+	while candidate != null:
+		if candidate.has_method("get_input_buffer") or candidate.has_method("get_output_buffer"):
+			return candidate
+		candidate = candidate.get_parent()
+	return null
+
 func can_connect_belt() -> bool:
 	return is_machine_port and connected_belt_ids.size() < maxi(1, max_connections)
 

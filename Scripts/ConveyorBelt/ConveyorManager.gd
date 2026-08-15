@@ -7,14 +7,44 @@ const MIN_CONVEYOR_LENGTH := 2.0
 const MAX_CONVEYOR_LENGTH := 1000.0
 const MAX_CONVEYOR_SLOPE_DEGREES := 25.0
 const CONVEYOR_CLEARANCE := 1.0
+const FIXED_SIMULATION_STEP: float = 1.0 / 60.0
+const MAX_SIMULATION_STEPS_PER_FRAME: int = 8
+const BELT_ENDPOINT_CONNECTION_DISTANCE: float = 0.75
 
 var belts: Array[ConveyorBeltObject] = []
 var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBelt.tscn")
 var _next_belt_id: int = 1
+var _simulation_accumulator: float = 0.0
 
 func _ready() -> void:
 	# Register as saveable
 	add_to_group("saveable")
+
+func _physics_process(delta: float) -> void:
+	_simulation_accumulator += maxf(0.0, delta)
+	var steps: int = 0
+	while _simulation_accumulator >= FIXED_SIMULATION_STEP and steps < MAX_SIMULATION_STEPS_PER_FRAME:
+		_simulation_accumulator -= FIXED_SIMULATION_STEP
+		_simulate_step(FIXED_SIMULATION_STEP)
+		steps += 1
+	if steps >= MAX_SIMULATION_STEPS_PER_FRAME:
+		_simulation_accumulator = 0.0
+
+func _simulate_step(delta: float) -> void:
+	var belt_snapshot: Array[ConveyorBeltObject] = []
+	for belt in belts:
+		if is_instance_valid(belt):
+			belt_snapshot.append(belt)
+
+	# Resolve exits before movement, then move, then pull new items. This keeps
+	# transfers deterministic and prevents a newly transferred item from moving
+	# through multiple belts in the same fixed tick.
+	for belt in belt_snapshot:
+		belt.transfer_leading_item()
+	for belt in belt_snapshot:
+		belt.advance_items(delta)
+	for belt in belt_snapshot:
+		belt.pull_from_connected_source()
 
 func register_point(p: Node3D):
 	if not points.has(p):
@@ -67,6 +97,23 @@ func get_belt_for_scene(scene_node: Node) -> ConveyorBeltObject:
 		if is_instance_valid(belt) and belt.scene_node == scene_node:
 			return belt
 	return null
+
+## A downstream belt is connected when its start endpoint meets this belt's end
+## endpoint. Endpoint matching is reconstructed from saved geometry, so the
+## logical connection survives scene reloads without a visual dependency.
+func get_downstream_belt(belt: ConveyorBeltObject) -> ConveyorBeltObject:
+	if belt == null:
+		return null
+	var closest: ConveyorBeltObject = null
+	var closest_distance: float = BELT_ENDPOINT_CONNECTION_DISTANCE
+	for candidate in belts:
+		if not is_instance_valid(candidate) or candidate == belt:
+			continue
+		var distance: float = candidate.start.distance_to(belt.end)
+		if distance <= closest_distance:
+			closest = candidate
+			closest_distance = distance
+	return closest
 
 func get_connected_belt(port: ConnectionPoint) -> ConveyorBeltObject:
 	if port == null:
@@ -251,10 +298,10 @@ func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "") ->
 	var transform = Transform3D(basis, mid)
 	conveyor.global_transform = transform
 	conveyor.scale.x = length / CONVEYOR_SCENE_LENGTH
+	conveyor.set_meta("conveyor_belt_object", belt)
 
 	get_tree().current_scene.add_child(conveyor)
 	belt.scene_node = conveyor
-	conveyor.set_meta("conveyor_belt_object", belt)
 	register_belt(belt)
 	return conveyor
 
@@ -293,17 +340,20 @@ func _disconnect_scene_ports(scene_node: Node) -> void:
 			child.clear_connections()
 
 func _drop_belt_contents(belt: ConveyorBeltObject) -> void:
-	var stack: ItemStack = belt.extract_stack(belt.item.item_id, belt.item.quantity) if belt.item != null else null
-	if stack == null or stack.quantity <= 0:
-		return
-	var item_resource: InventoryItem = stack.item as InventoryItem
-	if item_resource == null:
-		item_resource = ItemUtils.item_object_by_id(stack.item_id)
-	if item_resource == null:
-		push_error("Cannot create dismantling pickup for item id: %s" % stack.item_id)
-		return
-	var drop_position := belt.start.lerp(belt.end, 0.5) + Vector3.UP * 1.5
-	MapManager.spawn_item_drop(item_resource, drop_position, null, stack.quantity)
+	while not belt.items.is_empty():
+		var leading: ConveyorItem = belt.items[0]
+		var progress: float = leading.progress
+		var stack: ItemStack = belt.extract_stack(leading.item_id, leading.quantity)
+		if stack == null or stack.quantity <= 0:
+			break
+		var item_resource: InventoryItem = stack.item_resource as InventoryItem
+		if item_resource == null:
+			item_resource = ItemUtils.item_object_by_id(stack.item_id)
+		if item_resource == null:
+			push_error("Cannot create dismantling pickup for item id: %s" % stack.item_id)
+			continue
+		var drop_position: Vector3 = belt.start.lerp(belt.end, progress) + Vector3.UP * 0.3
+		MapManager.spawn_item_drop(item_resource, drop_position, null, stack.quantity)
 
 ## Saveable interface: get unique save key
 func get_save_key() -> String:
@@ -331,6 +381,8 @@ func load_save_data(data: Dictionary) -> void:
 			var scene_node = spawn_conveyor(belt.start, belt.end, belt.belt_id)
 			var created_belt := get_belt_for_scene(scene_node)
 			if created_belt != null:
+				for saved_item in belt.items:
+					created_belt.items.append(saved_item)
 				created_belt.start_port_id = str(belt_dict.get("start_port_id", ""))
 				created_belt.end_port_id = str(belt_dict.get("end_port_id", ""))
 				pending_connections.append({"belt_id": created_belt.belt_id, "start_port_id": created_belt.start_port_id, "end_port_id": created_belt.end_port_id})

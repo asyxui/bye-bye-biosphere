@@ -32,8 +32,8 @@ func _initialize() -> void:
 	var belt := ConveyorBeltObject.new(Vector3.ZERO, Vector3.ONE)
 	assert(ItemTransfer.transfer(inventory, belt, ORE.id, 1) == 1)
 	assert(inventory.get_extractable_quantity(ORE.id) == 0)
-	assert(belt.item is ConveyorItem)
-	assert(belt.item.item_id == ORE.id)
+	assert(belt.items.size() == 1)
+	assert(belt.items[0] is ConveyorItem)
+	assert(belt.items[0].item_id == ORE.id)
 
 	quit()
-
