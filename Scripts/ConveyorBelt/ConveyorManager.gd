@@ -4,12 +4,13 @@ var points: Array[Node3D] = []
 const SNAP_DISTANCE := 2.0
 const CONVEYOR_SCENE_LENGTH = 20.0
 const MIN_CONVEYOR_LENGTH := 2.0
-const MAX_CONVEYOR_LENGTH := 20.0
+const MAX_CONVEYOR_LENGTH := 1000.0
 const MAX_CONVEYOR_SLOPE_DEGREES := 25.0
 const CONVEYOR_CLEARANCE := 1.0
 
 var belts: Array[ConveyorBeltObject] = []
 var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBelt.tscn")
+var _next_belt_id: int = 1
 
 func _ready() -> void:
 	# Register as saveable
@@ -27,45 +28,155 @@ func register_belt(belt: ConveyorBeltObject):
 		belts.append(belt)
 
 func find_closest_connection(hit_pos: Vector3) -> ConnectionPoint:
+	return find_closest_port(hit_pos)
+
+func find_closest_port(hit_pos: Vector3, desired_direction: int = -1, compatible_with: ConnectionPoint = null) -> ConnectionPoint:
 	var closest: ConnectionPoint = null
 	var closest_dist := SNAP_DISTANCE
-
 	for point in points.duplicate():
-		if not is_instance_valid(point):
-			points.erase(point)
+		if not is_instance_valid(point) or not point.is_machine_port:
+			continue
+		if desired_direction >= 0 and point.port_direction != desired_direction:
+			continue
+		if not point.can_connect_belt():
+			continue
+		if compatible_with != null and not _ports_are_compatible(compatible_with, point):
 			continue
 		var dist: float = point.global_position.distance_to(hit_pos)
 		if dist < closest_dist:
 			closest = point
 			closest_dist = dist
-
 	return closest
 
-## Placement validation shared by the conveyor tool and the manager. A
-## touching endpoint is allowed so belts can connect to an existing port, but
-## the spans themselves may not overlap an existing structure.
-func can_place_conveyor(start: Vector3, end: Vector3) -> bool:
+func find_port_by_id(saved_port_id: String) -> ConnectionPoint:
+	if saved_port_id.is_empty():
+		return null
+	for point in points:
+		if is_instance_valid(point) and point.is_machine_port and point.port_id == saved_port_id:
+			return point
+	return null
+
+func get_belt_by_id(saved_belt_id: String) -> ConveyorBeltObject:
+	for belt in belts:
+		if is_instance_valid(belt) and belt.belt_id == saved_belt_id:
+			return belt
+	return null
+
+func get_belt_for_scene(scene_node: Node) -> ConveyorBeltObject:
+	for belt in belts:
+		if is_instance_valid(belt) and belt.scene_node == scene_node:
+			return belt
+	return null
+
+func get_connected_belt(port: ConnectionPoint) -> ConveyorBeltObject:
+	if port == null:
+		return null
+	var belt = port.get_connected_belt()
+	return belt as ConveyorBeltObject
+
+func connect_belt_endpoint(belt: ConveyorBeltObject, endpoint: int, port: ConnectionPoint) -> bool:
+	if belt == null or port == null or not port.is_machine_port or belt.belt_id.is_empty():
+		return false
+	var expected_direction := ConnectionPoint.PortDirection.OUTPUT if endpoint == ConnectionPoint.PointType.START else ConnectionPoint.PortDirection.INPUT
+	if port.port_direction != expected_direction or not port.can_connect_belt():
+		return false
+	var existing_port: ConnectionPoint = belt.start_port if endpoint == ConnectionPoint.PointType.START else belt.end_port
+	if existing_port != null:
+		return existing_port == port
+	var other_port: ConnectionPoint = belt.end_port if endpoint == ConnectionPoint.PointType.START else belt.start_port
+	if other_port != null and not _ports_are_compatible(port, other_port):
+		return false
+	if not port.add_belt_connection(belt.belt_id, belt):
+		return false
+	belt.set_endpoint_port(endpoint, port)
+	return true
+
+func disconnect_belt_endpoint(belt: ConveyorBeltObject, endpoint: int) -> void:
+	if belt == null:
+		return
+	var port: ConnectionPoint = belt.start_port if endpoint == ConnectionPoint.PointType.START else belt.end_port
+	if port != null:
+		port.remove_belt_connection(belt.belt_id)
+	belt.clear_endpoint_port(endpoint)
+
+func disconnect_port(port: ConnectionPoint) -> void:
+	if port == null:
+		return
+	var belt_ids: Array = port.connected_belt_ids.duplicate()
+	for belt_id in belt_ids:
+		var belt := get_belt_by_id(belt_id)
+		if belt == null:
+			continue
+		if belt.start_port == port or belt.start_port_id == port.port_id:
+			disconnect_belt_endpoint(belt, ConnectionPoint.PointType.START)
+		if belt.end_port == port or belt.end_port_id == port.port_id:
+			disconnect_belt_endpoint(belt, ConnectionPoint.PointType.END)
+	port.clear_connections()
+
+func _ports_are_compatible(first: ConnectionPoint, second: ConnectionPoint) -> bool:
+	var output_port: ConnectionPoint = first if first.port_direction == ConnectionPoint.PortDirection.OUTPUT else second
+	var input_port: ConnectionPoint = first if first.port_direction == ConnectionPoint.PortDirection.INPUT else second
+	if output_port == null or input_port == null:
+		return false
+	if output_port.accept_all_items or input_port.accept_all_items:
+		return true
+	for item_id in output_port.accepted_item_ids:
+		if input_port.accepted_item_ids.has(item_id):
+			return true
+	return false
+
+func _allocate_belt_id() -> String:
+	var candidate := "belt_%d" % _next_belt_id
+	while get_belt_by_id(candidate) != null:
+		_next_belt_id += 1
+		candidate = "belt_%d" % _next_belt_id
+	_next_belt_id += 1
+	return candidate
+
+## Returns an empty string when placement is valid, otherwise a player-facing
+## reason for the invalid preview state.
+func get_conveyor_placement_error(start: Vector3, end: Vector3) -> String:
 	var delta := end - start
-	var length := delta.length()
-	if length < MIN_CONVEYOR_LENGTH or length > MAX_CONVEYOR_LENGTH:
-		return false
-	var horizontal_length := Vector2(delta.x, delta.z).length()
+	var length: float = delta.length()
+	if length < MIN_CONVEYOR_LENGTH:
+		return "Too short (minimum %.0f m)" % MIN_CONVEYOR_LENGTH
+	if length > MAX_CONVEYOR_LENGTH:
+		return "Too long (maximum %.0f m)" % MAX_CONVEYOR_LENGTH
+	var horizontal_length: float = Vector2(delta.x, delta.z).length()
 	if horizontal_length < 0.001:
-		return false
-	var slope_degrees := rad_to_deg(atan2(absf(delta.y), horizontal_length))
+		return "Belt must have a horizontal direction"
+	var slope_degrees: float = rad_to_deg(atan2(absf(delta.y), horizontal_length))
 	if slope_degrees > MAX_CONVEYOR_SLOPE_DEGREES:
-		return false
+		return "Slope is too steep (maximum %.0f°)" % MAX_CONVEYOR_SLOPE_DEGREES
 
 	for machine in get_tree().get_nodes_in_group("machines"):
-		if is_instance_valid(machine) and _segment_near_point(start, end, machine.global_position, CONVEYOR_CLEARANCE + 1.0):
-			return false
+		if not is_instance_valid(machine):
+			continue
+		if _segment_near_point(start, end, machine.global_position, CONVEYOR_CLEARANCE + 1.0) and not _segment_has_machine_port_endpoint(machine, start, end):
+			return "Too close to a machine"
 
 	for belt in belts:
 		if not is_instance_valid(belt):
 			continue
 		if _segments_overlap(start, end, belt.start, belt.end):
-			return false
-	return true
+			return "Overlaps another conveyor"
+	return ""
+
+## Placement validation shared by the conveyor tool and the manager. A
+## touching endpoint is allowed so belts can connect to an existing port, but
+## the spans themselves may not overlap an existing structure.
+func can_place_conveyor(start: Vector3, end: Vector3) -> bool:
+	return get_conveyor_placement_error(start, end).is_empty()
+
+func _segment_has_machine_port_endpoint(machine: Node, start: Vector3, end: Vector3) -> bool:
+	for point in points:
+		if not is_instance_valid(point) or not point.is_machine_port:
+			continue
+		if not machine.is_ancestor_of(point):
+			continue
+		if point.global_position.distance_to(start) < 0.75 or point.global_position.distance_to(end) < 0.75:
+			return true
+	return false
 
 func is_position_near_belt(position: Vector3, clearance: float = CONVEYOR_CLEARANCE) -> bool:
 	for belt in belts:
@@ -118,12 +229,13 @@ func _segment_progress(point: Vector2, start: Vector2, end: Vector2) -> float:
 	return clampf((point - start).dot(end - start) / (end - start).length_squared(), 0.0, 1.0)
 
 ## Spawn a conveyor belt at the given positions and register it for saving
-func spawn_conveyor(start: Vector3, end: Vector3) -> Node:
+func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "") -> Node:
 	if not can_place_conveyor(start, end):
 		return null
 	var length = start.distance_to(end)
 
-	var belt = ConveyorBeltObject.new(start, end)
+	var belt_id := saved_belt_id if not saved_belt_id.is_empty() else _allocate_belt_id()
+	var belt = ConveyorBeltObject.new(start, end, belt_id)
 
 	var conveyor = conveyor_scene.instantiate()
 
@@ -153,6 +265,8 @@ func remove_conveyor(target, drop_contents: bool = true) -> bool:
 	if belt == null:
 		return false
 	belts.erase(belt)
+	disconnect_belt_endpoint(belt, ConnectionPoint.PointType.START)
+	disconnect_belt_endpoint(belt, ConnectionPoint.PointType.END)
 	_disconnect_scene_ports(belt.scene_node)
 	if drop_contents:
 		_drop_belt_contents(belt)
@@ -175,8 +289,8 @@ func _disconnect_scene_ports(scene_node: Node) -> void:
 		return
 	for child in scene_node.find_children("*", "ConnectionPoint", true, false):
 		ConveyorConnectionManager.unregister_point(child)
-		if child.has_method("disconnect_port"):
-			child.disconnect_port()
+		if child.has_method("clear_connections"):
+			child.clear_connections()
 
 func _drop_belt_contents(belt: ConveyorBeltObject) -> void:
 	var stack: ItemStack = belt.extract_stack(belt.item.item_id, belt.item.quantity) if belt.item != null else null
@@ -209,12 +323,31 @@ func get_save_data() -> Dictionary:
 func load_save_data(data: Dictionary) -> void:
 	# Clear current belts
 	clear_save_data()
-	
+	var pending_connections: Array[Dictionary] = []
 	var conveyor_data = data.get("belts", [])
 	for belt_dict in conveyor_data:
 		var belt = ConveyorBeltObject.from_dict(belt_dict)
 		if belt:
-			spawn_conveyor(belt.start, belt.end)
+			var scene_node = spawn_conveyor(belt.start, belt.end, belt.belt_id)
+			var created_belt := get_belt_for_scene(scene_node)
+			if created_belt != null:
+				created_belt.start_port_id = str(belt_dict.get("start_port_id", ""))
+				created_belt.end_port_id = str(belt_dict.get("end_port_id", ""))
+				pending_connections.append({"belt_id": created_belt.belt_id, "start_port_id": created_belt.start_port_id, "end_port_id": created_belt.end_port_id})
+	if not pending_connections.is_empty():
+		call_deferred("_restore_saved_connections", pending_connections)
+
+func _restore_saved_connections(pending_connections: Array[Dictionary]) -> void:
+	for connection_data in pending_connections:
+		var belt := get_belt_by_id(str(connection_data.get("belt_id", "")))
+		if belt == null:
+			continue
+		var start_port := find_port_by_id(str(connection_data.get("start_port_id", "")))
+		var end_port := find_port_by_id(str(connection_data.get("end_port_id", "")))
+		if start_port != null:
+			connect_belt_endpoint(belt, ConnectionPoint.PointType.START, start_port)
+		if end_port != null:
+			connect_belt_endpoint(belt, ConnectionPoint.PointType.END, end_port)
 
 ## Clear conveyors (called during world transitions)
 func clear_save_data() -> void:

@@ -1,6 +1,7 @@
 extends StaticBody3D
 
 var machine_type := "sink"
+var structure_id: String = ""
 var consumed_count := 0
 var input_buffer: ItemBuffer = ItemBuffer.new(4, 64)
 var output_buffer: ItemBuffer = ItemBuffer.new(1, 64)

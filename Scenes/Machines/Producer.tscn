@@ -40,8 +40,12 @@ position = Vector3(0, 0.85, -1.1)
 mesh = SubResource("OutputMesh")
 material_override = SubResource("OutputMat")
 [node name="Output" type="Node3D" parent="."]
-position = Vector3(0, 0, -1.5)
+position = Vector3(0, 0.8, -1.5)
 script = ExtResource("2")
 point_type = 1
+port_direction = 1
+accepted_item_ids = ["2"]
+accept_all_items = false
+max_connections = 1
 [node name="DropSpawn" type="Node3D" parent="."]
 position = Vector3(0, 1.2, -1.85)

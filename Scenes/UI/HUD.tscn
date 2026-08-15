@@ -1,10 +1,26 @@
-[gd_scene format=3 uid="uid://c3gynxmj3suco"]
+[gd_scene load_steps=5 format=3 uid="uid://c3gynxmj3suco"]
 
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
 [ext_resource type="Texture2D" uid="uid://c55uafcnp1ntd" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
 [ext_resource type="Script" uid="uid://b5lxc51kltku5" path="res://Scripts/UI/Debug/F3Screen.gd" id="5_ykvyr"]
 
-[node name="Hud" type="CanvasLayer" unique_id=1826004349]
+[sub_resource type="StyleBoxFlat" id="StyleBox_placement_status"]
+bg_color = Color(0.02, 0.04, 0.05, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+
+[node name="Hud" type="CanvasLayer"]
 
 [node name="Crosshair" type="Control" parent="." unique_id=4373763]
 z_index = -1
@@ -103,3 +119,28 @@ offset_top = 9.0
 offset_right = 51.0
 offset_bottom = 32.0
 script = ExtResource("5_ykvyr")
+
+[node name="PlacementStatus" type="PanelContainer" parent="."]
+visible = false
+z_index = 10
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -162.0
+offset_right = 260.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_placement_status")
+
+[node name="Label" type="Label" parent="PlacementStatus"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "Placement status"
+horizontal_alignment = 1
+vertical_alignment = 1

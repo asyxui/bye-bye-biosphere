@@ -4,6 +4,7 @@ const PRODUCER_SCENE := preload("res://Scenes/Machines/Producer.tscn")
 const SINK_SCENE := preload("res://Scenes/Machines/Sink.tscn")
 const STRUCTURE_GROUP := "structures"
 var machines: Array[Node3D] = []
+var _next_machine_id: int = 1
 
 func _ready() -> void:
 	add_to_group("saveable")
@@ -25,7 +26,7 @@ func can_place(machine_type: String, position: Vector3, _rotation_y: float) -> b
 			return false
 	return true
 
-func place_machine(machine_type: String, position: Vector3, rotation_y: float, state: Dictionary = {}) -> Node3D:
+func place_machine(machine_type: String, position: Vector3, rotation_y: float, state: Dictionary = {}, saved_structure_id: String = "") -> Node3D:
 	if not can_place(machine_type, position, rotation_y):
 		return null
 	var scene = get_machine_scene(machine_type)
@@ -34,10 +35,34 @@ func place_machine(machine_type: String, position: Vector3, rotation_y: float, s
 	get_tree().current_scene.add_child(machine)
 	machine.global_position = position
 	machine.rotation.y = rotation_y
+	var structure_id := saved_structure_id if not saved_structure_id.is_empty() else _allocate_machine_id()
+	machine.set("structure_id", structure_id)
 	machines.append(machine)
+	_configure_machine_ports(machine, structure_id)
 	if machine.has_method("load_machine_state"):
 		machine.load_machine_state(state)
 	return machine
+
+func get_machine_by_id(saved_structure_id: String) -> Node3D:
+	for machine in machines:
+		if is_instance_valid(machine) and str(machine.get("structure_id")) == saved_structure_id:
+			return machine
+	return null
+
+func _allocate_machine_id() -> String:
+	var candidate := "machine_%d" % _next_machine_id
+	while get_machine_by_id(candidate) != null:
+		_next_machine_id += 1
+		candidate = "machine_%d" % _next_machine_id
+	_next_machine_id += 1
+	return candidate
+
+func _configure_machine_ports(machine: Node3D, structure_id: String) -> void:
+	for port in machine.find_children("*", "ConnectionPoint", true, false):
+		var connection_point: ConnectionPoint = port as ConnectionPoint
+		if connection_point == null:
+			continue
+		connection_point.configure_machine_port("%s:%s" % [structure_id, connection_point.name], structure_id)
 
 ## Dismantle a placed machine and remove it from the registry immediately.
 func remove_machine(machine: Node3D, return_materials: bool = true) -> bool:
@@ -54,9 +79,9 @@ func remove_machine(machine: Node3D, return_materials: bool = true) -> bool:
 
 func _disconnect_ports(machine: Node) -> void:
 	for child in machine.find_children("*", "ConnectionPoint", true, false):
-		ConveyorConnectionManager.unregister_point(child)
+		ConveyorConnectionManager.disconnect_port(child)
 		if child.has_method("disconnect_port"):
-			child.disconnect_port()
+			child.clear_connections()
 
 func _return_construction_materials(machine: Node3D) -> void:
 	if not machine.has_method("get_construction_cost"):
@@ -86,14 +111,14 @@ func get_save_data() -> Dictionary:
 	var data: Array[Dictionary] = []
 	for machine in machines:
 		if is_instance_valid(machine):
-			data.append({"type": machine.get("machine_type"), "position": {"x": machine.global_position.x, "y": machine.global_position.y, "z": machine.global_position.z}, "rotation_y": machine.rotation.y, "state": machine.call("get_machine_state")})
+			data.append({"id": str(machine.get("structure_id")), "type": machine.get("machine_type"), "position": {"x": machine.global_position.x, "y": machine.global_position.y, "z": machine.global_position.z}, "rotation_y": machine.rotation.y, "state": machine.call("get_machine_state")})
 	return {"machines": data}
 
 func load_save_data(data: Dictionary) -> void:
 	clear_save_data()
 	for machine_data in data.get("machines", []):
 		var p: Dictionary = machine_data.get("position", {})
-		place_machine(machine_data.get("type", ""), Vector3(p.get("x", 0.0), p.get("y", 0.0), p.get("z", 0.0)), machine_data.get("rotation_y", 0.0), machine_data.get("state", {}))
+		place_machine(machine_data.get("type", ""), Vector3(p.get("x", 0.0), p.get("y", 0.0), p.get("z", 0.0)), machine_data.get("rotation_y", 0.0), machine_data.get("state", {}), str(machine_data.get("id", "")))
 
 func clear_save_data() -> void:
 	for machine in machines.duplicate():

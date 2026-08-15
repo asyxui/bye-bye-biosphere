@@ -23,13 +23,14 @@ func _ready() -> void:
 func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
 	var tool = ToolManager.get_tool_in_slot(slot_index)
 	if tool:
+		var same_tool_active: bool = ToolManager.active_tool_instance != null and active_tool != null and active_tool.get_script().resource_path == tool.tool_script_path and active_tool._is_active
 		# Check if this is the same tool that's already active and still has state
-		if (ToolManager.active_tool_instance and active_tool and 
-			active_tool.get_script().resource_path == tool.tool_script_path and
-			active_tool._is_active):  # Only reuse if tool is still active (multi-step)
+		if same_tool_active:  # Only reuse if tool is still active (multi-step)
 			# Same tool and still active, execute again (for multi-click tools like conveyor)
 			active_tool.execute(null)  # Pass null since player is already cached
 		else:
+			if active_tool and active_tool.has_method("cancel"):
+				active_tool.cancel()
 			# Different tool, no active tool, or tool finished (single-step), create a new instance
 			var tool_instance = ToolManager.tool_executor.execute_tool(tool, self)
 			if tool_instance:

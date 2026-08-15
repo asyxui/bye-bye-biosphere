@@ -4,6 +4,7 @@ const EMIT_INTERVAL := 1.0
 const MAX_OUTSTANDING_DROPS := 20
 const ORE := preload("res://Resources/Items/Ore.tres")
 var machine_type := "producer"
+var structure_id: String = ""
 ## Logical ports used by machines/conveyors. The existing loose-drop output is
 ## intentionally left in place for this milestone's compatibility path.
 var input_buffer: ItemBuffer = ItemBuffer.new(1, 64)
@@ -34,6 +35,8 @@ func _process(delta: float) -> void:
 		# the line is connected so they cannot keep this new factory stalled.
 		_clear_outstanding_drops()
 	_had_output_belt = output_belt != null
+	if output_belt == null:
+		return
 	if _outstanding.size() >= MAX_OUTSTANDING_DROPS:
 		return
 	var spawn_position = _get_spawn_position(output_belt)
@@ -44,16 +47,13 @@ func _process(delta: float) -> void:
 		_outstanding.append(weakref(drop))
 
 func _get_output_belt() -> ConveyorBeltObject:
-	for belt in ConveyorConnectionManager.belts:
-		if belt.start.distance_to($Output.global_position) < ConveyorConnectionManager.SNAP_DISTANCE:
-			return belt
-	return null
+	return ConveyorConnectionManager.get_connected_belt($Output)
 
 func _get_spawn_position(output_belt: ConveyorBeltObject) -> Vector3:
 	if output_belt:
 		var direction = (output_belt.end - output_belt.start).normalized()
-		# Release over the belt's first section, rather than at its collision seam.
-		return output_belt.start + direction * 0.75 + Vector3.UP * 1.2
+		# Release just above the belt surface, rather than high above the port.
+		return output_belt.start + direction * 0.75 + Vector3.UP * 0.18
 	return $DropSpawn.global_position
 
 func _output_is_occupied(spawn_position: Vector3) -> bool:

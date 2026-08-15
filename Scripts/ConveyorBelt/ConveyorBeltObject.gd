@@ -3,15 +3,21 @@ extends ItemStorage
 
 var start: Vector3
 var end: Vector3
+var belt_id: String
 var item: ConveyorItem = null
+var start_port_id: String = ""
+var end_port_id: String = ""
+var start_port: ConnectionPoint = null
+var end_port: ConnectionPoint = null
 @export var segment_capacity: int = 1
 # Runtime-only scene instance. It is deliberately not included in to_dict(),
 # so save data remains just the belt's endpoints.
 var scene_node: Node
 
-func _init(p_start: Vector3, p_end: Vector3):
+func _init(p_start: Vector3, p_end: Vector3, p_belt_id: String = ""):
 	start = p_start
 	end = p_end
+	belt_id = p_belt_id
 	segment_capacity = 1
 
 ## ItemStorage contract. The belt owns the logical item; any mesh instance is
@@ -67,11 +73,30 @@ func advance_item(progress_delta: float) -> bool:
 		return false
 	item.progress = clampf(item.progress + progress_delta, 0.0, 1.0)
 	return item.progress >= 1.0
+
+func set_endpoint_port(endpoint: int, port: ConnectionPoint) -> void:
+	if endpoint == ConnectionPoint.PointType.START:
+		start_port = port
+		start_port_id = port.port_id if port != null else ""
+	else:
+		end_port = port
+		end_port_id = port.port_id if port != null else ""
+
+func clear_endpoint_port(endpoint: int) -> void:
+	if endpoint == ConnectionPoint.PointType.START:
+		start_port = null
+		start_port_id = ""
+	else:
+		end_port = null
+		end_port_id = ""
 	
 func to_dict() -> Dictionary:
 	return {
+		"id": belt_id,
 		"start": [start.x, start.y, start.z],
-		"end": [end.x, end.y, end.z]
+		"end": [end.x, end.y, end.z],
+		"start_port_id": start_port_id,
+		"end_port_id": end_port_id
 	}
 
 static func from_dict(d: Dictionary) -> ConveyorBeltObject:
@@ -81,5 +106,6 @@ static func from_dict(d: Dictionary) -> ConveyorBeltObject:
 
 	return ConveyorBeltObject.new(
 		Vector3(d["start"][0], d["start"][1], d["start"][2]),
-		Vector3(d["end"][0], d["end"][1], d["end"][2])
+		Vector3(d["end"][0], d["end"][1], d["end"][2]),
+		str(d.get("id", ""))
 	)
