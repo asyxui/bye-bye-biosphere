@@ -1,6 +1,8 @@
 extends Node3D
 class_name ConnectionPoint
 
+signal port_disconnected
+
 enum PointType { START, END }
 
 @export var point_type: PointType = PointType.START
@@ -12,4 +14,9 @@ func _exit_tree():
 	ConveyorConnectionManager.unregister_point(self)
 
 func get_forward_dir() -> Vector3:
-	return global_transform.basis.z
+	return global_transform.basis.z.normalized()
+
+## Ports currently have no persistent connection object, but this hook gives
+## managers a safe, immediate disconnect point before queue_free occurs.
+func disconnect_port() -> void:
+	port_disconnected.emit()

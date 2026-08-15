@@ -26,7 +26,7 @@ func get_item_count(item) -> int:
 	return inventory.get_item_count(item)
 
 ## Get inventory reference
-func get_inventory():
+func get_inventory() -> Inventory:
 	return inventory
 
 ## Get total inventory weight

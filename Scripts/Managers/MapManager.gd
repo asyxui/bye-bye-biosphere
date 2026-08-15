@@ -158,6 +158,31 @@ func sphere_coords(center: Vector3, cubeScale: float, radius: int) -> Array[Vect
 					coords.append(pos + center)
 	return coords
 
+## Structure dismantling uses the same ray as terrain destruction, but resolves
+## structure ownership first so machines and conveyors never become terrain
+## edits by accident.
+func dismantle_structure(origin: Vector3, direction: Vector3) -> bool:
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + direction.normalized() * 100.0)
+	var result := get_world_3d().direct_space_state.intersect_ray(query)
+	if result.is_empty():
+		return false
+	var structure := _find_structure_ancestor(result.get("collider"))
+	if structure == null:
+		return false
+	if structure.get("machine_type") != null:
+		return MachineManager.remove_machine(structure)
+	if structure.name == "ConveyorBelt" or structure.has_meta("conveyor_belt_object"):
+		return ConveyorConnectionManager.remove_conveyor(structure)
+	return false
+
+func _find_structure_ancestor(node: Node) -> Node3D:
+	var current := node
+	while current != null:
+		if current is Node3D and current.is_in_group("structures"):
+			return current
+		current = current.get_parent()
+	return null
+
 func drop_item(type: int, coords: Vector3):
 	var item = ItemUtils.item_object_by_type_id(type)
 	if item:

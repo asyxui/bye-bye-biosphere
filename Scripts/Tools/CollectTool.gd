@@ -29,7 +29,7 @@ func pick_up(item: Node3D):
 	var source_stack: ItemStack = item.get_item_stack()
 	if source_stack == null:
 		return
-	var inserted := InventoryManager.get_inventory().insert_stack(source_stack)
+	var inserted: int = InventoryManager.get_inventory().insert_stack(source_stack)
 	if inserted <= 0:
 		return
 	if item.has_method("remove_quantity"):

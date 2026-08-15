@@ -19,7 +19,7 @@ func on_execute(_p: Node) -> void:
 	if not waiting_for_confirmation:
 		waiting_for_confirmation = true
 		_create_preview(hit)
-	elif MachineManager.place_machine(_tool_resource.id, preview_position, preview_rotation_y):
+	elif preview_is_valid and MachineManager.place_machine(_tool_resource.id, preview_position, preview_rotation_y):
 		_cleanup_preview()
 
 func on_cancel() -> void:
@@ -39,7 +39,8 @@ func _create_preview(position: Vector3) -> void:
 	preview.process_mode = Node.PROCESS_MODE_DISABLED
 	player.get_tree().current_scene.add_child(preview)
 	preview.remove_from_group("structures")
-	preview_is_valid = not MachineManager.can_place(_tool_resource.id, position, 0.0)
+	preview.remove_from_group("machines")
+	preview_is_valid = false
 	_update_preview(position)
 
 func _update_preview(position: Vector3) -> void:
@@ -52,9 +53,8 @@ func _update_preview(position: Vector3) -> void:
 	preview.global_position = preview_position
 	preview.rotation.y = preview_rotation_y
 	var valid = MachineManager.can_place(_tool_resource.id, preview_position, preview_rotation_y)
-	if valid != preview_is_valid:
-		preview_is_valid = valid
-		_set_preview_color(valid)
+	preview_is_valid = valid
+	_set_preview_color(valid)
 
 func _set_preview_color(valid: bool) -> void:
 	var color = Color(0.3, 1.0, 0.4, 0.5) if valid else Color(1.0, 0.2, 0.2, 0.5)

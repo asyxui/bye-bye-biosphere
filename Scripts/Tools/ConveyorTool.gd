@@ -13,6 +13,7 @@ var waiting_for_second_press: bool = false
 var conveyor_reversal: bool = false
 var start_pos: Vector3 = Vector3.ZERO
 var preview_conveyor: Node = null
+var preview_is_valid: bool = false
 
 func on_activate(p: Node) -> void:
 	super.on_activate(p)
@@ -67,18 +68,24 @@ func _start_conveyor_placement(hit_point: Vector3) -> void:
 	_create_preview_conveyor()
 
 func _finalize_conveyor(hit_point: Vector3) -> void:
-	waiting_for_second_press = false
-	
 	# Check for snap points
 	var snap_point = ConveyorConnectionManager.find_closest_connection(hit_point)
 	if snap_point:
 		hit_point = snap_point.global_position
 	
-	# Spawn the actual conveyor
-	if conveyor_reversal:
-		_spawn_conveyor(hit_point, start_pos)
-	else:
-		_spawn_conveyor(start_pos, hit_point)
+	var actual_start := hit_point if conveyor_reversal else start_pos
+	var actual_end := start_pos if conveyor_reversal else hit_point
+	if not ConveyorConnectionManager.can_place_conveyor(actual_start, actual_end):
+		preview_is_valid = false
+		_set_preview_color(false)
+		return
+
+	# Spawn the actual conveyor only after the same validation used by the preview.
+	var spawned = _spawn_conveyor(actual_start, actual_end)
+	if spawned == null:
+		preview_is_valid = false
+		_set_preview_color(false)
+		return
 	
 	_cleanup_preview()
 	waiting_for_second_press = false
@@ -104,6 +111,7 @@ func _create_preview_conveyor() -> void:
 
 func _cleanup_preview() -> void:
 	conveyor_reversal = false
+	preview_is_valid = false
 	if preview_conveyor:
 		preview_conveyor.queue_free()
 		preview_conveyor = null
@@ -113,6 +121,8 @@ func _update_preview_transform(start: Vector3, end: Vector3) -> void:
 	var length = start.distance_to(end)
 	
 	if length < 0.001:
+		preview_is_valid = false
+		_set_preview_color(false)
 		return
 	
 	var direction = (end - start).normalized()
@@ -130,9 +140,22 @@ func _update_preview_transform(start: Vector3, end: Vector3) -> void:
 	var transform = Transform3D(basis, mid)
 	preview_conveyor.global_transform = transform
 	preview_conveyor.scale.x = length / ConveyorConnectionManager.CONVEYOR_SCENE_LENGTH
+	preview_is_valid = ConveyorConnectionManager.can_place_conveyor(start if not conveyor_reversal else end, end if not conveyor_reversal else start)
+	_set_preview_color(preview_is_valid)
 
-func _spawn_conveyor(start: Vector3, end: Vector3) -> void:
-	ConveyorConnectionManager.spawn_conveyor(start, end)
+func _spawn_conveyor(start: Vector3, end: Vector3) -> Node:
+	return ConveyorConnectionManager.spawn_conveyor(start, end)
+
+func _set_preview_color(valid: bool) -> void:
+	if not is_instance_valid(preview_conveyor):
+		return
+	var color := Color(0.3, 1.0, 0.4, 0.55) if valid else Color(1.0, 0.2, 0.2, 0.55)
+	for child in preview_conveyor.find_children("*", "GeometryInstance3D", true, false):
+		var geometry := child as GeometryInstance3D
+		var material := StandardMaterial3D.new()
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		material.albedo_color = color
+		geometry.material_override = material
 
 func _get_center_hit() -> Vector3:
 	if not player:

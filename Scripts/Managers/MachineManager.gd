@@ -39,16 +39,43 @@ func place_machine(machine_type: String, position: Vector3, rotation_y: float, s
 		machine.load_machine_state(state)
 	return machine
 
+## Dismantle a placed machine and remove it from the registry immediately.
+func remove_machine(machine: Node3D, return_materials: bool = true) -> bool:
+	if not is_instance_valid(machine) or not machines.has(machine):
+		return false
+	machines.erase(machine)
+	_disconnect_ports(machine)
+	if return_materials:
+		_return_construction_materials(machine)
+	machine.remove_from_group("machines")
+	machine.remove_from_group(STRUCTURE_GROUP)
+	machine.queue_free()
+	return true
+
+func _disconnect_ports(machine: Node) -> void:
+	for child in machine.find_children("*", "ConnectionPoint", true, false):
+		ConveyorConnectionManager.unregister_point(child)
+		if child.has_method("disconnect_port"):
+			child.disconnect_port()
+
+func _return_construction_materials(machine: Node3D) -> void:
+	if not machine.has_method("get_construction_cost"):
+		return
+	var cost = machine.get_construction_cost()
+	if not cost is Dictionary:
+		return
+	for item_id in cost:
+		var item = ItemUtils.item_object_by_id(str(item_id))
+		var quantity := int(cost[item_id])
+		if item != null and quantity > 0:
+			MapManager.spawn_item_drop(item, machine.global_position + Vector3.UP * 1.5, null, quantity)
+
 func _boxes_overlap(a: Vector3, b: Vector3) -> bool:
 	return absf(a.x - b.x) < 2.2 and absf(a.z - b.z) < 2.2
 
 func _point_near_structure(position: Vector3, structure: Node3D) -> bool:
 	if structure.name == "ConveyorBelt":
-		var offset = position - structure.global_position
-		var axis = structure.global_transform.basis.x.normalized()
-		var sideways = structure.global_transform.basis.z.normalized()
-		var half_length = 10.0 * structure.global_transform.basis.x.length()
-		return absf(offset.dot(axis)) < half_length + 1.1 and absf(offset.dot(sideways)) < 1.5
+		return ConveyorConnectionManager.is_position_near_belt(position, 1.1)
 	var local = structure.to_local(position)
 	return absf(local.x) < 1.1 and absf(local.z) < 1.5
 
@@ -69,7 +96,5 @@ func load_save_data(data: Dictionary) -> void:
 		place_machine(machine_data.get("type", ""), Vector3(p.get("x", 0.0), p.get("y", 0.0), p.get("z", 0.0)), machine_data.get("rotation_y", 0.0), machine_data.get("state", {}))
 
 func clear_save_data() -> void:
-	for machine in machines:
-		if is_instance_valid(machine):
-			machine.queue_free()
-	machines.clear()
+	for machine in machines.duplicate():
+		remove_machine(machine, false)
