@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://bupxsdp2yg6r6"]
+[gd_scene format=3 uid="uid://bupxsdp2yg6r6"]
 
 [ext_resource type="Script" uid="uid://ccckl8p3tjvas" path="res://Resources/Items/DropInfo.gd" id="1_vg37v"]
 
@@ -6,23 +6,20 @@
 albedo_color = Color(0.34407577, 0.34407574, 0.34407574, 0.09019608)
 
 [sub_resource type="BoxMesh" id="BoxMesh_aw8k8"]
-size = Vector3(0.45, 0.45, 0.45)
 material = SubResource("StandardMaterial3D_aw8k8")
+size = Vector3(0.45, 0.45, 0.45)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_aw8k8"]
 size = Vector3(0.45, 0.45, 0.45)
 
-[node name="Drop" type="Node3D"]
+[node name="Drop" type="Node3D" unique_id=936027651]
 script = ExtResource("1_vg37v")
 
-[node name="RigidBody3D" type="RigidBody3D" parent="."]
-mass = 1.673
-angular_damp = 20.0
-lock_rotation = true
+[node name="Area3D" type="Area3D" parent="." unique_id=346193105]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Area3D" unique_id=43168337]
 mesh = SubResource("BoxMesh_aw8k8")
 skeleton = NodePath("../..")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1089818900]
 shape = SubResource("BoxShape3D_aw8k8")

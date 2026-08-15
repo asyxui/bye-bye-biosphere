@@ -29,7 +29,7 @@ func _process(delta: float) -> void:
 	var spawn_position = _get_spawn_position(output_belt)
 	if _output_is_occupied(spawn_position):
 		return
-	var drop = MapManager.spawn_item_drop(ORE, spawn_position)
+	var drop = MapManager.spawn_item_drop(ORE, spawn_position, true)
 	if drop:
 		_outstanding.append(weakref(drop))
 
