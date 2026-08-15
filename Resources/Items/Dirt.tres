@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://bi6gfsapxsh4h"]
+
+[ext_resource type="Texture2D" uid="uid://cpxepoyykkfsi" path="res://Assets/Items/Dirt.png" id="1_iym82"]
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="2_5fdsa"]
+
+[resource]
+script = ExtResource("2_5fdsa")
+id = "1"
+name = "Dirt"
+description = "Root-Embedder"
+max_stack_size = 64
+icon = ExtResource("1_iym82")
+weight = 0.5
+dropColor = Color(0.27450982, 0.27450982, 0.27450982, 1)
+metadata/_custom_type_script = "uid://dnsa8h5olxgbd"

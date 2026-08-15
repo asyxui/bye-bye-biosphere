@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://to8fgf5iwotc"]
+
+[ext_resource type="Texture2D" uid="uid://dyvtx1wsrt85f" path="res://Assets/Items/CopperIngot.png" id="1_v5rhs"]
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="2_4jntn"]
+
+[resource]
+script = ExtResource("2_4jntn")
+id = "1"
+name = "CopperIngot"
+description = "Slab of Conductivity"
+max_stack_size = 64
+icon = ExtResource("1_v5rhs")
+weight = 1.0
+rarity = "uncommon"
+dropColor = Color(0.6117647, 0.3529412, 0.23529412, 1)
+metadata/_custom_type_script = "uid://dnsa8h5olxgbd"

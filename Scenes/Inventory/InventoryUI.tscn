@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://dfchf2ldpehh"]
+[gd_scene format=3 uid="uid://dfchf2ldpehh"]
 
 [ext_resource type="Script" uid="uid://dt5htqeoblwpv" path="res://Scripts/Inventory/InventoryUI.gd" id="1_uvo7v"]
 
-[node name="InventoryUI" type="Control"]
+[node name="InventoryUI" type="Control" unique_id=1137754903]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_uvo7v")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=536644813]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,24 +20,20 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.5)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="Panel" parent="." unique_id=561464246]
+custom_minimum_size = Vector2(550, 615)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_minimum_size = Vector2(550, 615)
 
-[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=370411726]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -49,48 +45,47 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer" unique_id=37467532]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TitleBar" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+[node name="TitleBar" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=654872235]
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_constants/separation = 8
 
-[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TitleBar"]
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TitleBar" unique_id=42334010]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 text = "INVENTORY"
 
-[node name="CloseButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TitleBar"]
+[node name="CloseButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TitleBar" unique_id=1303199113]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_horizontal = 0
 text = "X"
 
-[node name="StatsContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+[node name="StatsContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=1768098805]
 layout_mode = 2
 size_flags_vertical = 0
 theme_override_constants/separation = 20
 
-[node name="WeightLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatsContainer"]
+[node name="WeightLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatsContainer" unique_id=655068485]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Weight: 0 / 100 kg (0%)"
 
-[node name="SlotsLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatsContainer"]
+[node name="SlotsLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/StatsContainer" unique_id=1612148801]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Slots: 0 / 20"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Panel/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 0)
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=1067566445]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="GridContainer" type="GridContainer" parent="Panel/MarginContainer/VBoxContainer/ScrollContainer"]
+[node name="GridContainer" type="GridContainer" parent="Panel/MarginContainer/VBoxContainer/ScrollContainer" unique_id=1410869921]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

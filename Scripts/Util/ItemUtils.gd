@@ -7,7 +7,19 @@ func item_object_by_type_id(id: int):
 	
 func item_name_by_type_id(id: int):
 	match id:
+		0:
+			return "Rock"
 		1:
 			return "Apple"
 		2:
 			return "Ore"
+		3:
+			return "Dirt"
+		4:
+			return "IronOre"
+		5:
+			return "IronIngot"
+		6:
+			return "CopperOre"
+		7:
+			return "CopperIngot"
