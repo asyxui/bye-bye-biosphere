@@ -140,7 +140,10 @@ func _auto_load_default_world() -> bool:
 
 func _restore_conveyor_belts(conveyor_data: Array[ConveyorBeltObject]) -> void:
 	for belt in conveyor_data:
-		ConveyorConnectionManager.spawn_conveyor(belt.start, belt.end, belt.belt_id, false)
+		var scene_node = ConveyorConnectionManager.spawn_conveyor(belt.start, belt.end, belt.belt_id, false)
+		var restored_belt := ConveyorConnectionManager.get_belt_for_scene(scene_node)
+		if restored_belt != null:
+			restored_belt.construction_cost_paid = belt.construction_cost_paid
 
 
 func _finalize_new_world(slot_id: String) -> bool:

@@ -324,6 +324,8 @@ func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "", ch
 	if charge_cost and not is_loading and not ConstructionCosts.consume(construction_cost, inventory):
 		remove_conveyor(belt, false, false)
 		return null
+	if charge_cost:
+		belt.construction_cost_paid = ConstructionCosts.cost_was_charged(construction_cost, is_loading)
 	return conveyor
 
 ## Remove a belt from the live world and registry. Contents are converted to
@@ -339,7 +341,8 @@ func remove_conveyor(target, drop_contents: bool = true, return_materials: bool 
 	if drop_contents:
 		_drop_belt_contents(belt)
 	if return_materials:
-		ConstructionCosts.refund(get_construction_cost(), InventoryManager.get_inventory(), belt.start.lerp(belt.end, 0.5))
+		if belt.construction_cost_paid:
+			ConstructionCosts.refund(get_construction_cost(), InventoryManager.get_inventory(), belt.start.lerp(belt.end, 0.5))
 	if is_instance_valid(belt.scene_node):
 		belt.scene_node.remove_from_group("structures")
 		belt.scene_node.queue_free()
@@ -411,6 +414,7 @@ func load_save_data(data: Dictionary) -> void:
 			var scene_node = spawn_conveyor(belt.start, belt.end, belt.belt_id)
 			var created_belt := get_belt_for_scene(scene_node)
 			if created_belt != null:
+				created_belt.construction_cost_paid = belt.construction_cost_paid
 				created_belt.start_port_id = str(belt_dict.get("start_port_id", ""))
 				created_belt.end_port_id = str(belt_dict.get("end_port_id", ""))
 				created_belt.downstream_belt_id = str(belt_dict.get("downstream_belt_id", ""))

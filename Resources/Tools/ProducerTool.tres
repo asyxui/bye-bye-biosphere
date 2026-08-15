@@ -9,3 +9,4 @@ name = "Creative Producer"
 description = "Development-only infinite ore source"
 tool_script_path = "res://Scripts/Tools/MachinePlacementTool.gd"
 is_multi_step = true
+creative_only = true

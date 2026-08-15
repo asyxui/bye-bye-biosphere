@@ -47,8 +47,10 @@ func _get_structure_placement_error(machine_type: String, position: Vector3) -> 
 			return "Too close to another structure"
 	return ""
 
-func place_machine(machine_type: String, position: Vector3, rotation_y: float, state: Dictionary = {}, saved_structure_id: String = "") -> Node3D:
+func place_machine(machine_type: String, position: Vector3, rotation_y: float, state: Dictionary = {}, saved_structure_id: String = "", construction_cost_paid: bool = true) -> Node3D:
 	var is_loading: bool = not saved_structure_id.is_empty()
+	if not is_loading and not ToolManager.is_tool_available(machine_type):
+		return null
 	if not _get_structure_placement_error(machine_type, position).is_empty():
 		return null
 	var construction_cost: Dictionary = get_construction_cost(machine_type)
@@ -63,6 +65,7 @@ func place_machine(machine_type: String, position: Vector3, rotation_y: float, s
 	machine.rotation.y = rotation_y
 	var structure_id := saved_structure_id if not saved_structure_id.is_empty() else _allocate_machine_id()
 	machine.set("structure_id", structure_id)
+	machine.set_meta("construction_cost_paid", construction_cost_paid if is_loading else ConstructionCosts.cost_was_charged(construction_cost))
 	machines.append(machine)
 	_configure_machine_ports(machine, structure_id)
 	if machine.has_method("load_machine_state"):
@@ -101,7 +104,8 @@ func remove_machine(machine: Node3D, return_materials: bool = true) -> bool:
 	_disconnect_ports(machine)
 	if return_materials:
 		var machine_type: String = str(machine.get("machine_type"))
-		ConstructionCosts.refund(get_construction_cost(machine_type), InventoryManager.get_inventory(), machine.global_position)
+		if machine.get_meta("construction_cost_paid", true):
+			ConstructionCosts.refund(get_construction_cost(machine_type), InventoryManager.get_inventory(), machine.global_position)
 	machine.remove_from_group("machines")
 	machine.remove_from_group(STRUCTURE_GROUP)
 	machine.queue_free()
@@ -129,7 +133,7 @@ func get_save_data() -> Dictionary:
 	var data: Array[Dictionary] = []
 	for machine in machines:
 		if is_instance_valid(machine):
-			data.append({"id": str(machine.get("structure_id")), "type": machine.get("machine_type"), "position": {"x": machine.global_position.x, "y": machine.global_position.y, "z": machine.global_position.z}, "rotation_y": machine.rotation.y, "state": machine.call("get_machine_state")})
+			data.append({"id": str(machine.get("structure_id")), "type": machine.get("machine_type"), "position": {"x": machine.global_position.x, "y": machine.global_position.y, "z": machine.global_position.z}, "rotation_y": machine.rotation.y, "state": machine.call("get_machine_state"), "construction_cost_paid": machine.get_meta("construction_cost_paid", true)})
 	return {"machines": data}
 
 func load_save_data(data: Dictionary) -> void:
@@ -142,7 +146,8 @@ func load_save_data(data: Dictionary) -> void:
 			Vector3(p.get("x", 0.0), p.get("y", 0.0), p.get("z", 0.0)),
 			machine_data.get("rotation_y", 0.0),
 			{},
-			str(machine_data.get("id", ""))
+			str(machine_data.get("id", "")),
+			bool(machine_data.get("construction_cost_paid", true))
 		)
 		if machine != null:
 			_pending_machine_states.append({"machine": machine, "state": machine_data.get("state", {})})

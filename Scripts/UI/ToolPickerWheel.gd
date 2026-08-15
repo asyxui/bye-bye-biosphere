@@ -22,6 +22,7 @@ func _ready() -> void:
 	
 	# Populate wheel with tools
 	_populate_wheel()
+	GameStateManager.mode_changed.connect(_on_mode_changed)
 	
 	# Initially hidden
 	hide()
@@ -43,6 +44,13 @@ func _populate_wheel() -> void:
 		var tool_item = _create_tool_item(tool_array[i], i, pos)
 		wheel_container.add_child(tool_item)
 		tool_items.append(tool_item)
+
+func _on_mode_changed(_creative_enabled: bool) -> void:
+	for child in wheel_container.get_children():
+		child.queue_free()
+	tool_items.clear()
+	hovered_tool_index = -1
+	_populate_wheel()
 
 func _create_tool_item(tool, index: int, position: Vector2) -> Control:
 	# Create a large clickable area for the pie slice

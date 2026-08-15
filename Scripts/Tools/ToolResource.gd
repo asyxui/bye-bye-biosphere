@@ -8,3 +8,4 @@ class_name ToolResource
 @export var tool_script_path: String
 @export var is_multi_step: bool = false
 @export var construction_cost: Dictionary = {}
+@export var creative_only: bool = false

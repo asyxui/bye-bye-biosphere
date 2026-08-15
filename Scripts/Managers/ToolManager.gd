@@ -25,6 +25,7 @@ func _ready() -> void:
 	
 	# Discover and load all tools from Resources/Tools/
 	_load_tools()
+	GameStateManager.mode_changed.connect(_on_mode_changed)
 	
 	# Register as saveable
 	add_to_group("saveable")
@@ -49,7 +50,15 @@ func get_tool(tool_id: String):
 	return tools.get(tool_id)
 
 func get_all_tools() -> Dictionary:
-	return tools.duplicate()
+	var available_tools: Dictionary = {}
+	for tool_id in tools:
+		if is_tool_available(tool_id):
+			available_tools[tool_id] = tools[tool_id]
+	return available_tools
+
+func is_tool_available(tool_id: String) -> bool:
+	var tool: ToolResource = get_tool(tool_id) as ToolResource
+	return tool != null and (not tool.creative_only or GameStateManager.is_creative_mode())
 
 func equip_tool(tool_id: String, slot_index: int) -> bool:
 	if slot_index < 0 or slot_index >= HOTBAR_SIZE:
@@ -59,6 +68,9 @@ func equip_tool(tool_id: String, slot_index: int) -> bool:
 	var tool = get_tool(tool_id)
 	if not tool:
 		push_error("Tool not found: %s" % tool_id)
+		return false
+	if not is_tool_available(tool_id):
+		push_error("Tool unavailable in normal mode: %s" % tool_id)
 		return false
 	
 	hotbar_tools[slot_index] = tool
@@ -103,11 +115,30 @@ func activate_tool(slot_index: int) -> void:
 		return
 	
 	var tool = hotbar_tools[slot_index]
-	if tool:
+	if tool and is_tool_available(tool.id):
 		# Emit signal - Player will listen for this and activate the tool itself
 		tool_activated.emit(tool.id, slot_index)
 	else:
 		print("No tool in slot %d" % slot_index)
+
+func _on_mode_changed(creative_enabled: bool) -> void:
+	if creative_enabled:
+		return
+
+	var active_tool_id := _get_active_tool_id()
+	var active_tool_resource: ToolResource = get_tool(active_tool_id) as ToolResource
+	if active_tool_instance != null and active_tool_resource != null and active_tool_resource.creative_only:
+		var stale_instance := active_tool_instance
+		if stale_instance.has_method("cancel"):
+			stale_instance.cancel()
+		active_tool_instance = null
+		active_tool_invalidated.emit("")
+
+	for slot_index in range(HOTBAR_SIZE):
+		var tool: ToolResource = hotbar_tools[slot_index] as ToolResource
+		if tool != null and tool.creative_only:
+			hotbar_tools[slot_index] = null
+			tool_equipped.emit("", slot_index)
 
 func set_selected_hotbar_slot(slot_index: int, tool_id: String) -> void:
 	if slot_index < 0 or slot_index >= HOTBAR_SIZE:
@@ -176,7 +207,9 @@ func load_save_data(data: Dictionary) -> void:
 		
 		var tool_id = save_data[slot_index]
 		if tool_id and tool_id != null:
-			equip_tool(tool_id, slot_index)
+			if not equip_tool(tool_id, slot_index):
+				# Keep the UI synchronized when a tool is unavailable in this mode.
+				tool_equipped.emit("", slot_index)
 
 ## Clear tools/hotbar (called during world transitions)
 func clear_save_data() -> void:

@@ -8,6 +8,9 @@ static func get_cost(tool_id: String) -> Dictionary:
 		return {}
 	return tool.construction_cost.duplicate(true)
 
+static func cost_was_charged(cost: Dictionary, is_loading: bool = false) -> bool:
+	return not is_loading and not cost.is_empty() and GameStateManager.construction_costs_enabled()
+
 static func get_missing(cost: Dictionary, inventory: Inventory) -> Dictionary:
 	if not GameStateManager.construction_costs_enabled():
 		return {}

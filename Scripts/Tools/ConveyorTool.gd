@@ -110,6 +110,7 @@ func _finalize_conveyor(hit_point: Vector3) -> void:
 		preview_is_valid = false
 		_set_preview_color(false, ConstructionCosts.format_missing(ConstructionCosts.get_missing(construction_cost, InventoryManager.get_inventory())))
 		return
+	created_belt.construction_cost_paid = ConstructionCosts.cost_was_charged(construction_cost)
 	
 	_cleanup_preview()
 	waiting_for_second_press = false
