@@ -12,6 +12,7 @@ func on_execute(_p: Node) -> void:
 func scan_area():
 	var query = PhysicsShapeQueryParameters3D.new()
 	query.transform = player.get_player_transform()
+	query.collide_with_areas = true
 	query.shape = SphereShape3D.new()
 	query.shape.radius = 2.0
 	
