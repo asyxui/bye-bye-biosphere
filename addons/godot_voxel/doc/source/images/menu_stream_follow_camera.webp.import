@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://7e6qywjqfpa4"
-path="res://.godot/imported/menu_stream_follow_camera.webp-d486cfe0be8fbe72b3876b77a8b18874.ctex"
+path="res://.godot/imported/menu_stream_follow_camera.webp-c1f2ff9502bae3745b6ad4f4bc0a2510.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/menu_stream_follow_camera.webp"
-dest_files=["res://.godot/imported/menu_stream_follow_camera.webp-d486cfe0be8fbe72b3876b77a8b18874.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/menu_stream_follow_camera.webp"
+dest_files=["res://.godot/imported/menu_stream_follow_camera.webp-c1f2ff9502bae3745b6ad4f4bc0a2510.ctex"]
 
 [params]
 

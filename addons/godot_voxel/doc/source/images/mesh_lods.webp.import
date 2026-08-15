@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://yrh6it4ldki0"
-path="res://.godot/imported/mesh_lods.webp-cca27a834fffdbdc78d3b313153d92c9.ctex"
+path="res://.godot/imported/mesh_lods.webp-114a3b560b721afe51b6e25c3dc4fdc0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/mesh_lods.webp"
-dest_files=["res://.godot/imported/mesh_lods.webp-cca27a834fffdbdc78d3b313153d92c9.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/mesh_lods.webp"
+dest_files=["res://.godot/imported/mesh_lods.webp-114a3b560b721afe51b6e25c3dc4fdc0.ctex"]
 
 [params]
 

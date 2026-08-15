@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bx722j805gey0"
-path="res://.godot/imported/godot_editor_stop_button.webp-78b93695f94df8d9b3a4847bbc18d0b1.ctex"
+path="res://.godot/imported/godot_editor_stop_button.webp-09c29ccbcdd22c3227ff2f8c1b03875a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/godot_editor_stop_button.webp"
-dest_files=["res://.godot/imported/godot_editor_stop_button.webp-78b93695f94df8d9b3a4847bbc18d0b1.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/godot_editor_stop_button.webp"
+dest_files=["res://.godot/imported/godot_editor_stop_button.webp-09c29ccbcdd22c3227ff2f8c1b03875a.ctex"]
 
 [params]
 

@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
-[ext_resource type="VoxelGeneratorScript" uid="uid://dvlck5ivq5ecq" path="res://Scripts/Terrain/VoxelGeneratorScript.tres" id="2_pl8e4"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_uiroot"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_oss8w"]

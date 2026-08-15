@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cqkdhp1myp861"
-path="res://.godot/imported/github_actions_windows_artifacts.webp-6d9d15c07d1e8bfe480ccbe21acc58d7.ctex"
+path="res://.godot/imported/github_actions_windows_artifacts.webp-5f02045fc07f459fc02c8ce03a893239.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/github_actions_windows_artifacts.webp"
-dest_files=["res://.godot/imported/github_actions_windows_artifacts.webp-6d9d15c07d1e8bfe480ccbe21acc58d7.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/github_actions_windows_artifacts.webp"
+dest_files=["res://.godot/imported/github_actions_windows_artifacts.webp-5f02045fc07f459fc02c8ce03a893239.ctex"]
 
 [params]
 

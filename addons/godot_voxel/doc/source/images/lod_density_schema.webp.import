@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bfrr8yloqbdox"
-path="res://.godot/imported/lod_density_schema.webp-2fd4e4549f423f1b3500374ead5da81e.ctex"
+path="res://.godot/imported/lod_density_schema.webp-278b8e2855a9ef656c9b9155d8da8ae9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/lod_density_schema.webp"
-dest_files=["res://.godot/imported/lod_density_schema.webp-2fd4e4549f423f1b3500374ead5da81e.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/lod_density_schema.webp"
+dest_files=["res://.godot/imported/lod_density_schema.webp-278b8e2855a9ef656c9b9155d8da8ae9.ctex"]
 
 [params]
 

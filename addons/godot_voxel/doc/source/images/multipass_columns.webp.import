@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfvggrdl2ad1l"
-path="res://.godot/imported/multipass_columns.webp-411ed173ba92b86c7fc24f5379376b25.ctex"
+path="res://.godot/imported/multipass_columns.webp-fabb96bc65da3246dce1b260daa7280d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/multipass_columns.webp"
-dest_files=["res://.godot/imported/multipass_columns.webp-411ed173ba92b86c7fc24f5379376b25.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/multipass_columns.webp"
+dest_files=["res://.godot/imported/multipass_columns.webp-fabb96bc65da3246dce1b260daa7280d.ctex"]
 
 [params]
 

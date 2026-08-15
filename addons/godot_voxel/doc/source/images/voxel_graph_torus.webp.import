@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bghukgbmblb6j"
-path="res://.godot/imported/voxel_graph_torus.webp-9fb1f2096d068df7869f265699b3e231.ctex"
+path="res://.godot/imported/voxel_graph_torus.webp-d4efed70462fcd04d24e4008c5b64d01.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/voxel_graph_torus.webp"
-dest_files=["res://.godot/imported/voxel_graph_torus.webp-9fb1f2096d068df7869f265699b3e231.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/voxel_graph_torus.webp"
+dest_files=["res://.godot/imported/voxel_graph_torus.webp-d4efed70462fcd04d24e4008c5b64d01.ctex"]
 
 [params]
 

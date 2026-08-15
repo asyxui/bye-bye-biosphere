@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://yi57dudj1py8"
-path="res://.godot/imported/voxel_graph_flat_offset.webp-1d63ac20f55a76fbd26c641e0c21f846.ctex"
+path="res://.godot/imported/voxel_graph_flat_offset.webp-6b7a929b24af7118ed507cdc20f8f10a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/voxel_graph_flat_offset.webp"
-dest_files=["res://.godot/imported/voxel_graph_flat_offset.webp-1d63ac20f55a76fbd26c641e0c21f846.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/voxel_graph_flat_offset.webp"
+dest_files=["res://.godot/imported/voxel_graph_flat_offset.webp-6b7a929b24af7118ed507cdc20f8f10a.ctex"]
 
 [params]
 

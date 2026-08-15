@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dnoduef8kifb4"
-path="res://.godot/imported/tree_generation_neighbor_fix_schema.webp-2986825f38404a639b0517ec22dfed78.ctex"
+path="res://.godot/imported/tree_generation_neighbor_fix_schema.webp-7e350d0183be8c416089e5350ddb15e0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/tree_generation_neighbor_fix_schema.webp"
-dest_files=["res://.godot/imported/tree_generation_neighbor_fix_schema.webp-2986825f38404a639b0517ec22dfed78.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/tree_generation_neighbor_fix_schema.webp"
+dest_files=["res://.godot/imported/tree_generation_neighbor_fix_schema.webp-7e350d0183be8c416089e5350ddb15e0.ctex"]
 
 [params]
 

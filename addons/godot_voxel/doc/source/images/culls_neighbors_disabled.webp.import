@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bcoriw5q5jfkq"
-path="res://.godot/imported/culls_neighbors_disabled.webp-deb568280507dd2eec1454fd23e82d00.ctex"
+path="res://.godot/imported/culls_neighbors_disabled.webp-72857f49aac5698da5919de3486fe3eb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/culls_neighbors_disabled.webp"
-dest_files=["res://.godot/imported/culls_neighbors_disabled.webp-deb568280507dd2eec1454fd23e82d00.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/culls_neighbors_disabled.webp"
+dest_files=["res://.godot/imported/culls_neighbors_disabled.webp-72857f49aac5698da5919de3486fe3eb.ctex"]
 
 [params]
 

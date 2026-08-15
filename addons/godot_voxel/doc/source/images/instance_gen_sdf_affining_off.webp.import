@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bfkuutecodlfx"
-path="res://.godot/imported/instance_gen_sdf_affining_off.webp-a8de7e163ed2ba643d4519a8279096f0.ctex"
+path="res://.godot/imported/instance_gen_sdf_affining_off.webp-13d4cdda5993f361b2da89da0d89622a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/instance_gen_sdf_affining_off.webp"
-dest_files=["res://.godot/imported/instance_gen_sdf_affining_off.webp-a8de7e163ed2ba643d4519a8279096f0.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/instance_gen_sdf_affining_off.webp"
+dest_files=["res://.godot/imported/instance_gen_sdf_affining_off.webp-13d4cdda5993f361b2da89da0d89622a.ctex"]
 
 [params]
 

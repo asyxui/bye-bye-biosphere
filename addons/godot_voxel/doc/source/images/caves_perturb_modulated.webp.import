@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dlnjidnfc37er"
-path="res://.godot/imported/caves_perturb_modulated.webp-595beca154c65407263ce1728c072218.ctex"
+path="res://.godot/imported/caves_perturb_modulated.webp-60ea66f41d8c6050369c4ccfeec6eec2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/caves_perturb_modulated.webp"
-dest_files=["res://.godot/imported/caves_perturb_modulated.webp-595beca154c65407263ce1728c072218.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/caves_perturb_modulated.webp"
+dest_files=["res://.godot/imported/caves_perturb_modulated.webp-60ea66f41d8c6050369c4ccfeec6eec2.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cjb7crals5dgw"
-path="res://.godot/imported/mismatching_model_sides.webp-9b4b816b4c8cbb9d56476af758445cac.ctex"
+path="res://.godot/imported/mismatching_model_sides.webp-8c71d449670b2e91a88f7b5e7b6da8ad.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/mismatching_model_sides.webp"
-dest_files=["res://.godot/imported/mismatching_model_sides.webp-9b4b816b4c8cbb9d56476af758445cac.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/mismatching_model_sides.webp"
+dest_files=["res://.godot/imported/mismatching_model_sides.webp-8c71d449670b2e91a88f7b5e7b6da8ad.ctex"]
 
 [params]
 

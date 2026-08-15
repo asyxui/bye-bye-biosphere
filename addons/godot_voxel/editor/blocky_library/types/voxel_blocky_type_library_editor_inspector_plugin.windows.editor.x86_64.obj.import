@@ -8,7 +8,7 @@ valid=false
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/editor/blocky_library/types/voxel_blocky_type_library_editor_inspector_plugin.windows.editor.x86_64.obj"
+source_file="res://addons/godot_voxel/editor/blocky_library/types/voxel_blocky_type_library_editor_inspector_plugin.windows.editor.x86_64.obj"
 
 [params]
 

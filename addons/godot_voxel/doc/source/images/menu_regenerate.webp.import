@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csbypgltqda04"
-path="res://.godot/imported/menu_regenerate.webp-6ccc628c6e7b765579fd10ec6178c6f7.ctex"
+path="res://.godot/imported/menu_regenerate.webp-e0e4558da84a55c0a844c66fb34cdb4c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/menu_regenerate.webp"
-dest_files=["res://.godot/imported/menu_regenerate.webp-6ccc628c6e7b765579fd10ec6178c6f7.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/menu_regenerate.webp"
+dest_files=["res://.godot/imported/menu_regenerate.webp-e0e4558da84a55c0a844c66fb34cdb4c.ctex"]
 
 [params]
 

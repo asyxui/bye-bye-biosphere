@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b10hgc5imn8kg"
-path="res://.godot/imported/blocky_fluid_flowing_states.webp-6d4e357ace7d169a5a68d4f03872d816.ctex"
+path="res://.godot/imported/blocky_fluid_flowing_states.webp-7bb0076dfeec4b1191fe7d156a390e0d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/blocky_fluid_flowing_states.webp"
-dest_files=["res://.godot/imported/blocky_fluid_flowing_states.webp-6d4e357ace7d169a5a68d4f03872d816.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/blocky_fluid_flowing_states.webp"
+dest_files=["res://.godot/imported/blocky_fluid_flowing_states.webp-7bb0076dfeec4b1191fe7d156a390e0d.ctex"]
 
 [params]
 

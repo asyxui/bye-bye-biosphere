@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ewi5vmc1pgdh"
-path="res://.godot/imported/graph_flatten_brush.webp-aa9d49d3a4116ffe3345cfe18a000581.ctex"
+path="res://.godot/imported/graph_flatten_brush.webp-d309fe9294aec399783e194e0d1843a0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/graph_flatten_brush.webp"
-dest_files=["res://.godot/imported/graph_flatten_brush.webp-aa9d49d3a4116ffe3345cfe18a000581.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/graph_flatten_brush.webp"
+dest_files=["res://.godot/imported/graph_flatten_brush.webp-d309fe9294aec399783e194e0d1843a0.ctex"]
 
 [params]
 

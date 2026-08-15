@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b4aomuan8fwsh"
-path="res://.godot/imported/squared_noise_with_highlight.webp-3a3caecf5e0b776c7d56d11d960c57c3.ctex"
+path="res://.godot/imported/squared_noise_with_highlight.webp-e5ce648683ba80900faa0133dbee8ae9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/squared_noise_with_highlight.webp"
-dest_files=["res://.godot/imported/squared_noise_with_highlight.webp-3a3caecf5e0b776c7d56d11d960c57c3.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/squared_noise_with_highlight.webp"
+dest_files=["res://.godot/imported/squared_noise_with_highlight.webp-e5ce648683ba80900faa0133dbee8ae9.ctex"]
 
 [params]
 

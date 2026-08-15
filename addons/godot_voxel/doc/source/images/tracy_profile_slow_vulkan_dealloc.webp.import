@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbtc1akd8ps6u"
-path="res://.godot/imported/tracy_profile_slow_vulkan_dealloc.webp-04ed34b514dab29583d9ee46aa94efa2.ctex"
+path="res://.godot/imported/tracy_profile_slow_vulkan_dealloc.webp-ca0f0a8573fa0118aa335a9b180fa354.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/tracy_profile_slow_vulkan_dealloc.webp"
-dest_files=["res://.godot/imported/tracy_profile_slow_vulkan_dealloc.webp-04ed34b514dab29583d9ee46aa94efa2.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/tracy_profile_slow_vulkan_dealloc.webp"
+dest_files=["res://.godot/imported/tracy_profile_slow_vulkan_dealloc.webp-ca0f0a8573fa0118aa335a9b180fa354.ctex"]
 
 [params]
 

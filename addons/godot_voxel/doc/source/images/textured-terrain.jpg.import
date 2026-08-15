@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csv7xwp4u5sp1"
-path="res://.godot/imported/textured-terrain.jpg-da94a043f64bf9970a29fcab83758643.ctex"
+path="res://.godot/imported/textured-terrain.jpg-1f1c5ecc9dcb3c814f60a215de042662.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/doc/source/images/textured-terrain.jpg"
-dest_files=["res://.godot/imported/textured-terrain.jpg-da94a043f64bf9970a29fcab83758643.ctex"]
+source_file="res://addons/godot_voxel/doc/source/images/textured-terrain.jpg"
+dest_files=["res://.godot/imported/textured-terrain.jpg-1f1c5ecc9dcb3c814f60a215de042662.ctex"]
 
 [params]
 

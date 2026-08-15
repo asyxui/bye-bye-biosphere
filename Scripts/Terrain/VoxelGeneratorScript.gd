@@ -39,13 +39,13 @@ func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> voi
 	var buffer_size := out_buffer.get_size()
 	var scale = 1 << lod
 	var biome_started_usec := Time.get_ticks_usec()
-	var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)
+	#var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)
 	var biome_elapsed_usec := Time.get_ticks_usec() - biome_started_usec
 	var generation_started_usec := Time.get_ticks_usec()
-	if lod >= 2:
-		_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
-	else:
-		_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
+	#if lod >= 2:
+		#_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
+	#else:
+		#_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
 	var generation_elapsed_usec := Time.get_ticks_usec() - generation_started_usec
 	_merge_performance_samples("Biome calculation", biome_elapsed_usec, _generation_label_for_lod(lod), generation_elapsed_usec)
 
@@ -54,14 +54,14 @@ func _generate_block_without_performance(out_buffer: VoxelBuffer, origin: Vector
 	var buffer_size := out_buffer.get_size()
 	var scale = 1 << lod
 	
-	var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)	
+	#var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)	
 	
 	# At high LODs, use simplified generation
 	if lod >= 2:
-		_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
+		#_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
 		return
 	
-	_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
+	#_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
 
 
 func _generate_block_detailed(out_buffer: VoxelBuffer, origin: Vector3i, buffer_size: Vector3i, scale: int, height_scale: float) -> void:
