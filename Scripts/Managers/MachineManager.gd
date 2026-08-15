@@ -2,6 +2,7 @@ extends Node
 
 const PRODUCER_SCENE := preload("res://Scenes/Machines/Producer.tscn")
 const SINK_SCENE := preload("res://Scenes/Machines/Sink.tscn")
+const SMELTER_SCENE := preload("res://Scenes/Machines/Smelter.tscn")
 const STRUCTURE_GROUP := "structures"
 var machines: Array[Node3D] = []
 var _next_machine_id: int = 1
@@ -13,6 +14,7 @@ func get_machine_scene(machine_type: String) -> PackedScene:
 	match machine_type:
 		"producer": return PRODUCER_SCENE
 		"sink": return SINK_SCENE
+		"smelter": return SMELTER_SCENE
 	return null
 
 func can_place(machine_type: String, position: Vector3, _rotation_y: float) -> bool:

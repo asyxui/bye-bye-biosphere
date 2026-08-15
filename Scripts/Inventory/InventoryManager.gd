@@ -89,6 +89,10 @@ func clear_save_data() -> void:
 
 ## Helper to load item by ID
 func _load_item_by_id(item_id: String) -> Variant:
+	var resolved_item: InventoryItem = ItemUtils.item_object_by_id(str(item_id))
+	if resolved_item != null:
+		return resolved_item
+
 	# Try to load from Resources/Items directory
 	var item_path = "res://Resources/Items/%s.tres" % item_id
 	if ResourceLoader.exists(item_path):

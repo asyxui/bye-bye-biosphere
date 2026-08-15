@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ToolResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Tools/ToolResource.gd" id="1_tool_resource"]
+
+[resource]
+script = ExtResource("1_tool_resource")
+id = "load_smelter"
+name = "Load Smelter"
+description = "Insert ore from your inventory"
+tool_script_path = "res://Scripts/Tools/SmelterInteractionTool.gd"
