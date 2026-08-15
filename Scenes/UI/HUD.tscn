@@ -1,21 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://c3gynxmj3suco"]
+[gd_scene load_steps=4 format=3 uid="uid://c3gynxmj3suco"]
 
-[ext_resource type="PackedScene" uid="uid://dfchf2ldpehh" path="res://Scenes/Inventory/InventoryUI.tscn" id="1_inventory"]
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
-[ext_resource type="PackedScene" uid="uid://c4g8pq7xjwj4r" path="res://Scenes/UI/Debug/DebugConsole.tscn" id="2_debug"]
-[ext_resource type="PackedScene" uid="uid://bsjr6j0kx6eg8" path="res://Scenes/UI/ToolPickerWheel.tscn" id="3_tool_wheel"]
 [ext_resource type="Texture2D" uid="uid://c55uafcnp1ntd" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
 [ext_resource type="Script" uid="uid://b5lxc51kltku5" path="res://Scripts/UI/Debug/FPSLabel.gd" id="5_ykvyr"]
 
 [node name="Hud" type="CanvasLayer"]
-
-[node name="InventoryUI" parent="." instance=ExtResource("1_inventory")]
-visible = false
-
-[node name="DebugConsole" parent="." instance=ExtResource("2_debug")]
-visible = false
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Crosshair" type="Control" parent="."]
 z_index = -1
@@ -56,24 +45,26 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -280.0
-offset_top = -98.0
-offset_bottom = -18.0
+offset_left = -347.0
+offset_top = -114.0
+offset_right = 347.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("1_kqhfj")
 
 [node name="ActionGrid" type="GridContainer" parent="ActionBar"]
 layout_mode = 0
-offset_right = 560.0
-offset_bottom = 70.0
-theme_override_constants/h_separation = 5
-theme_override_constants/v_separation = 5
+offset_right = 694.0
+offset_bottom = 104.0
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
 columns = 10
 
 [node name="ActionSlotTemplate" type="PanelContainer" parent="ActionBar/ActionGrid"]
-custom_minimum_size = Vector2(55, 65)
+custom_minimum_size = Vector2(64, 92)
 layout_mode = 2
+theme_type_variation = &"InventorySlot"
 
 [node name="ColorRect" type="ColorRect" parent="ActionBar/ActionGrid/ActionSlotTemplate"]
 layout_mode = 2
@@ -84,7 +75,7 @@ layout_mode = 2
 theme_override_constants/separation = 0
 
 [node name="TextureRect" type="TextureRect" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
-custom_minimum_size = Vector2(55, 55)
+custom_minimum_size = Vector2(64, 56)
 layout_mode = 2
 size_flags_vertical = 2
 texture = ExtResource("4_ykvyr")
@@ -94,7 +85,7 @@ stretch_mode = 5
 [node name="Label" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 11
 text = "Tool"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -105,9 +96,6 @@ layout_mode = 2
 size_flags_vertical = 2
 text = "[1]"
 horizontal_alignment = 1
-
-[node name="ToolPickerWheel" parent="." instance=ExtResource("3_tool_wheel")]
-visible = false
 
 [node name="FPSLabel" type="Label" parent="."]
 offset_left = 11.0

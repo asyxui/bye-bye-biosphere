@@ -1,18 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://bppx5p1xrv02y"]
+[gd_scene load_steps=3 format=3 uid="uid://bppx5p1xrv02y"]
 
 [ext_resource type="Script" path="res://Scripts/Inventory/InventorySlot.gd" id="1_ktd0t"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3d4mh"]
-bg_color = Color(0.22, 0.22, 0.24, 1.0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.35, 0.35, 0.38, 1.0)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
 
 [sub_resource type="LabelSettings" id="LabelSettings_u2rp2"]
 font_sizes/font_size = 14
@@ -22,7 +10,7 @@ font_sizes/font_size = 11
 
 [node name="InventorySlot" type="PanelContainer"]
 custom_minimum_size = Vector2(100, 100)
-theme_override_styles/panel = SubResource("StyleBoxFlat_3d4mh")
+theme_type_variation = &"InventorySlot"
 script = ExtResource("1_ktd0t")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]

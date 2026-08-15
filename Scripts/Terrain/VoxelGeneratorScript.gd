@@ -20,6 +20,9 @@ const BLOCK_GREY := 1
 const BLOCK_PURPLE := 2
 
 var biome_cache: Array = []
+var _performance_mutex := Mutex.new()
+var _performance_capture_enabled := false
+var _performance_statistics: Dictionary = {}
 
 func _ready():
 	prepare_noise()
@@ -29,6 +32,25 @@ func _get_used_channels_mask() -> int:
 	return 1 << channel
 
 func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> void:
+	if not _performance_capture_enabled:
+		_generate_block_without_performance(out_buffer, origin, lod)
+		return
+
+	var buffer_size := out_buffer.get_size()
+	var scale = 1 << lod
+	var biome_started_usec := Time.get_ticks_usec()
+	var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)
+	var biome_elapsed_usec := Time.get_ticks_usec() - biome_started_usec
+	var generation_started_usec := Time.get_ticks_usec()
+	if lod >= 2:
+		_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
+	else:
+		_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
+	var generation_elapsed_usec := Time.get_ticks_usec() - generation_started_usec
+	_merge_performance_samples("Biome calculation", biome_elapsed_usec, _generation_label_for_lod(lod), generation_elapsed_usec)
+
+
+func _generate_block_without_performance(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> void:
 	var buffer_size := out_buffer.get_size()
 	var scale = 1 << lod
 	
@@ -57,6 +79,77 @@ func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> voi
 				var block_val = block_type_noise_gen.get_noise_3d(world_x, world_y, world_z)
 				var block_type = BLOCK_PURPLE if block_val > 0.0 else BLOCK_GREY
 				out_buffer.set_voxel(block_type, x, y, z, VoxelBuffer.CHANNEL_TYPE)
+
+
+func reset_performance_statistics() -> void:
+	_performance_mutex.lock()
+	_performance_statistics = {}
+	_performance_mutex.unlock()
+
+
+func set_performance_capture_enabled(enabled: bool) -> void:
+	# Called before the stream is assigned, never while generation jobs are active.
+	_performance_capture_enabled = enabled
+
+
+func get_performance_statistics() -> Array[Dictionary]:
+	var snapshot: Array[Dictionary] = []
+	_performance_mutex.lock()
+	for statistic in _performance_statistics.values():
+		snapshot.append(statistic.duplicate())
+	_performance_mutex.unlock()
+	return snapshot
+
+
+func _merge_performance_samples(biome_label: String, biome_usec: int, generation_label: String, generation_usec: int) -> void:
+	_performance_mutex.lock()
+	_merge_performance_statistic(biome_label, biome_usec)
+	_merge_performance_statistic(generation_label, generation_usec)
+	_performance_mutex.unlock()
+
+
+func _merge_performance_statistic(label: String, elapsed_usec: int) -> void:
+	var statistic: Dictionary = _performance_statistics.get(label, _new_performance_statistic(label))
+	statistic.total_usec += elapsed_usec
+	statistic.count += 1
+	statistic.max_usec = maxi(statistic.max_usec, elapsed_usec)
+	_performance_statistics[label] = statistic
+
+
+func _new_performance_statistic(label: String) -> Dictionary:
+	return {"label": label, "total_usec": 0, "count": 0, "max_usec": 0}
+
+
+func _generation_label_for_lod(lod: int) -> String:
+	if lod == 0:
+		return "LOD 0 detailed"
+	if lod == 1:
+		return "LOD 1 detailed"
+	return "LOD 2+ simplified"
+
+# Simplified generation for distant LODs (2+)
+func _generate_block_simple(out_buffer: VoxelBuffer, origin: Vector3i, buffer_size: Vector3i, scale: int, height_scale: float) -> void:
+	# At high LODs, skip caves entirely and simplify block selection
+	
+	# Don't generate far and deep chunks
+	if origin.y + buffer_size.y * scale < 0:
+		return
+	
+	for z in buffer_size.z:
+		var world_z = float(origin.z + z * scale)
+		for x in buffer_size.x:
+			var world_x = float(origin.x + x * scale)
+			var height: float = terrain_noise_gen.get_noise_2d(world_x, world_z) * height_scale
+			height += height_scale / 2
+			
+			var max_y = int((height - float(origin.y)) / float(scale))
+			max_y = clamp(max_y, 0, buffer_size.y)
+			
+			var block_val = block_type_noise_gen.get_noise_2d(world_x, world_z)
+			var block_type = BLOCK_PURPLE if block_val > 0.0 else BLOCK_GREY
+
+			# Fill entire column below terrain (no caves)
+			out_buffer.fill_area(block_type, Vector3(x, 0, z) , Vector3(x + 1, max_y, z + 1), channel)
 
 func prepare_biome_cache():
 	if not biome_cache.is_empty():

@@ -40,53 +40,24 @@ func get_player_transform() -> Transform3D:
 func get_direction() -> Vector3:
 	return - camera.get_global_transform_interpolated().basis.z.normalized()
 
-func _input(event):
-	# Don't process input when game is paused or modal is active
-	if GameStateManager.is_modal_active():
+## Mouse motion must be observed before GUI controls consume it. It remains
+## gated by UIManager, so overlays and paused menus never rotate the camera.
+func _input(event: InputEvent) -> void:
+	if not UIManager.allows_gameplay_input():
 		return
-	
-	# Check current input state - only process gameplay input in gameplay state
-	if not InputManager.has_input_focus("gameplay"):
-		return
-	
-	# Toggle inventory with inventory action (I key)
-	if event.is_action_pressed("inventory"):
-		# Don't open inventory if debug console input is focused
-		if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
-			return
-		HUDManager.toggle_inventory()
-		return
-		
-	if event.is_action_pressed("click"):
-		# Only capture mouse if no UI is open
-		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and not HUDManager.is_inventory_open() and not HUDManager.is_debug_console_open():
-			InputManager.request_mouse_capture("gameplay")
-		# Activate the currently selected tool
-		var hud = get_tree().current_scene.get_node_or_null("Hud")
-		if hud:
-			var action_bar = hud.get_node_or_null("ActionBar")
-			if action_bar:
-				var current_slot = action_bar.current_slot
-				if current_slot >= 0:
-					ToolManager.activate_tool(current_slot)
-	
-	# Cancel tool preview with right-click
-	if event.is_action_pressed("right_click"):
-		if active_tool and active_tool.has_method("cancel"):
-			active_tool.cancel()
-
-	if event.is_action_pressed("release_mouse"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			InputManager.request_mouse_release("gameplay")
-
-	# Ignore movement input if debug input bar is focused
-	if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
-		return
-		
-	if event is InputEventMouseMotion and InputManager.is_mouse_captured():
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
+	elif event.is_action_pressed("click") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_activate_selected_tool()
+	elif event.is_action_pressed("right_click") and active_tool and active_tool.has_method("cancel"):
+		active_tool.cancel()
+
+func _activate_selected_tool() -> void:
+	var current_slot = UIManager._root.get_action_bar().current_slot
+	if current_slot >= 0:
+		ToolManager.activate_tool(current_slot)
 
 func _process(_delta: float) -> void:
 	# Update active tool preview if it has one (for conveyor tool, etc)
@@ -102,8 +73,7 @@ func _physics_process(delta: float) -> void:
 	if GameStateManager.gravity_enabled and not is_on_floor():
 		velocity += get_gravity() * delta
 
-	# Ignore movement input if debug input bar is focused
-	if DebugConsole.instance and DebugConsole.instance.input_line and DebugConsole.instance.input_line.has_focus():
+	if not UIManager.allows_gameplay_input():
 		return
 
 	# Handle jump.

@@ -2,6 +2,9 @@ class_name ConveyorBeltObject
 
 var start: Vector3
 var end: Vector3
+# Runtime-only scene instance. It is deliberately not included in to_dict(),
+# so save data remains just the belt's endpoints.
+var scene_node: Node
 
 func _init(p_start: Vector3, p_end: Vector3):
 	start = p_start
