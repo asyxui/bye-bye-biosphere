@@ -94,13 +94,4 @@ func _load_item_by_id(item_id: String) -> Variant:
 	if ResourceLoader.exists(item_path):
 		return load(item_path)
 	
-	# Try with other variations
-	var apple_resource = load("res://Resources/Items/Apple.tres")
-	if apple_resource and apple_resource.id == item_id:
-		return apple_resource
-	
-	var ore_resource = load("res://Resources/Items/Ore.tres")
-	if ore_resource and ore_resource.id == item_id:
-		return ore_resource
-	
 	return null

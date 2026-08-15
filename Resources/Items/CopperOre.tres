@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://cvhlmshvhlfpk"]
+
+[ext_resource type="Texture2D" uid="uid://cwrumuo2ki0g5" path="res://Assets/Items/CopperOre.png" id="1_pf35n"]
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="2_81bhc"]
+
+[resource]
+script = ExtResource("2_81bhc")
+id = "1"
+name = "CopperOre"
+description = "Rock-Conducter"
+max_stack_size = 64
+icon = ExtResource("1_pf35n")
+weight = 1.0
+rarity = "uncommon"
+dropColor = Color(0.6117647, 0.3529412, 0.23529412, 1)
+metadata/_custom_type_script = "uid://dnsa8h5olxgbd"

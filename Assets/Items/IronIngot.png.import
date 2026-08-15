@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3168joe02aag"
-path="res://.godot/imported/Ore.png-c4373de29dfb31ca9bf059b098dc42a1.ctex"
+uid="uid://bum34hcsfrp04"
+path="res://.godot/imported/IronIngot.png-5f96c9f17ad4d42ffc3c453d779e6a01.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Items/Ore.png"
-dest_files=["res://.godot/imported/Ore.png-c4373de29dfb31ca9bf059b098dc42a1.ctex"]
+source_file="res://Assets/Items/IronIngot.png"
+dest_files=["res://.godot/imported/IronIngot.png-5f96c9f17ad4d42ffc3c453d779e6a01.ctex"]
 
 [params]
 

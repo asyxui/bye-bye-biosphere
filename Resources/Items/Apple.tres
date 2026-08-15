@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="InventoryItem" load_steps=3 format=3 uid="uid://ben1miq8qteuf"]
+[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://ben1miq8qteuf"]
 
 [ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="1_eiwwi"]
-[ext_resource type="Texture2D" uid="uid://c55uafcnp1ntd" path="res://Assets/Items/Apple.png" id="1_jnbht"]
+[ext_resource type="Texture2D" uid="uid://dvt2vm0ldvpy4" path="res://Assets/Items/Apple.png" id="1_jnbht"]
 
 [resource]
 script = ExtResource("1_eiwwi")

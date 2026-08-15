@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="InventoryItem" format=3 uid="uid://cejju5n77ewlo"]
+
+[ext_resource type="Texture2D" uid="uid://dmc43k42l60i3" path="res://Assets/Items/IronOre.png" id="1_qffwe"]
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="2_s13cs"]
+
+[resource]
+script = ExtResource("2_s13cs")
+id = "1"
+name = "IronOre"
+description = "Rock-Solider"
+max_stack_size = 64
+icon = ExtResource("1_qffwe")
+weight = 1.0
+rarity = "uncommon"
+dropColor = Color(0.7058824, 0.7058824, 0.7058824, 1)
+metadata/_custom_type_script = "uid://dnsa8h5olxgbd"
