@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="InventoryItem" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" uid="uid://dx1wy61686yih" path="res://Assets/Items/Rock.png" id="1_stone_icon"]
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="2_item_script"]
+
+[resource]
+script = ExtResource("2_item_script")
+id = "8"
+name = "Stone"
+description = "A rough piece of stone"
+max_stack_size = 64
+icon = ExtResource("1_stone_icon")
+weight = 1.0
+dropColor = Color(0.27450982, 0.27450982, 0.27450982, 1)

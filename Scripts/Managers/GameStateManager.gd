@@ -1,11 +1,36 @@
 extends Node
 
 signal loading_changed(is_loading: bool, operation_name: String, progress: float)
+signal mode_changed(creative_enabled: bool)
 
 var is_loading := false
 var loading_operation := ""
 var loading_progress := 0.0
 var gravity_enabled: bool = true
+var _creative_mode: bool = false
+
+func _ready() -> void:
+	_creative_mode = _get_startup_creative_mode()
+
+func is_creative_mode() -> bool:
+	return _creative_mode
+
+func set_creative_mode(enabled: bool) -> void:
+	var next_mode := enabled and OS.is_debug_build()
+	if _creative_mode == next_mode:
+		return
+	_creative_mode = next_mode
+	mode_changed.emit(_creative_mode)
+
+func ingredient_costs_enabled() -> bool:
+	return not _creative_mode
+
+func _get_startup_creative_mode() -> bool:
+	if "--normal-mode" in OS.get_cmdline_args():
+		return false
+	if not OS.is_debug_build():
+		return false
+	return not bool(ProjectSettings.get_setting("gameplay/debug_start_in_normal_mode", false))
 
 func start_loading(operation_name: String, first_checkpoint := "World stream configured") -> void:
 	var was_loading = is_loading

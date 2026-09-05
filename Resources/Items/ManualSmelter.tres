@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PlaceableItem" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Items/IronIngot.png" id="1_icon"]
+[ext_resource type="Script" path="res://Scripts/Inventory/PlaceableItem.gd" id="2_script"]
+
+[resource]
+script = ExtResource("2_script")
+id = "9"
+name = "Manual Smelter"
+description = "A packaged manual smelter"
+max_stack_size = 64
+icon = ExtResource("1_icon")
+weight = 5.0
+dropColor = Color(0.55, 0.55, 0.58, 1)
+structure_type = "manual_smelter"
+placement_category = "machine"
+placement_description = "Place a manual smelter"

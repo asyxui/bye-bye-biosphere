@@ -5,7 +5,7 @@ extends Node
 func _ready() -> void:
 	# Load some demo items
 	var apple = load("res://Resources/Items/Apple.tres")
-	var ore = load("res://Resources/Items/Ore.tres")
+	var ore = load("res://Resources/Items/IronOre.tres")
 	
 	# Add some items to inventory for demo
 	var inv_manager = get_node_or_null("/root/InventoryManager")

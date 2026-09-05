@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BiosphereConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Managers/BiosphereConfig.gd" id="1_config_script"]
+
+[resource]
+script = ExtResource("1_config_script")
+initial_integrity = 100.0
+mining_integrity_loss = 0.01
+objective_item_id = "5"
+objective_delivery_target = 10
+air_quality_event_threshold = 91.5
+air_quality_event_id = "air_quality_collapse_warning"
+air_quality_event_title = "AIR QUALITY WARNING"
+air_quality_event_description = "Industrial activity has pushed the local atmosphere past a critical threshold. Production can continue, but the biosphere is ANGERY."

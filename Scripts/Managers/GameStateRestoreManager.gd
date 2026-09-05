@@ -77,6 +77,14 @@ func _load_existing_world(slot_id: String) -> bool:
 	_is_restoring = true
 	GameStateManager.set_loading_progress(5)
 
+	# Validate the prototype save schema before touching the voxel stream or
+	# any live world state.
+	var save_data = SaveManager.load_game_data(slot_id)
+	if save_data == null:
+		return _fail_restore(SaveManager.get_last_load_error())
+
+	GameStateManager.set_loading_progress(15)
+
 	# Configure voxel stream for this slot (must do this before loading save data)
 	var voxel_stream_manager = get_node("/root/VoxelStreamManager")
 	if not voxel_stream_manager:
@@ -84,12 +92,6 @@ func _load_existing_world(slot_id: String) -> bool:
 	if not await voxel_stream_manager.configure_stream(slot_id):
 		return _fail_restore("Failed to configure voxel stream for slot: %s" % slot_id)
 	PerformanceTracker.checkpoint(_loading_timer_id(), "Save state restored")
-
-	GameStateManager.set_loading_progress(15)
-
-	var save_data = SaveManager.load_game_data(slot_id)
-	if save_data == null:
-		return _fail_restore("Failed to load save data for slot: %s" % slot_id)
 
 	GameStateManager.set_loading_progress(25)
 
@@ -136,11 +138,6 @@ func _auto_load_default_world() -> bool:
 			return await _finalize_new_world("default")
 		else:
 			return _fail_restore("Failed to create default world")
-
-
-func _restore_conveyor_belts(conveyor_data: Array[ConveyorBeltObject]) -> void:
-	for belt in conveyor_data:
-		ConveyorConnectionManager.spawn_conveyor(belt.start, belt.end)
 
 
 func _finalize_new_world(slot_id: String) -> bool:

@@ -8,39 +8,76 @@ const SPRINTING_MODIFIER = 2
 const JUMP_VELOCITY = 7
 const MOUSE_SENSITIVITY = 0.002
 const RAY_LENGTH = 20.0
+const INTERACTION_RAY_LENGTH = 20.0
 
-var active_tool: Object = null  # Reference to the currently active tool script
+var active_tool: Object = null # Reference to the currently active tool script
 
 func _ready() -> void:
 	# Listen for tool activation
 	ToolManager.tool_activated.connect(_on_tool_activated)
-	
+	ToolManager.active_tool_invalidated.connect(_on_active_tool_invalidated)
+
 	add_to_group("player")
-	
+
 	# Register as saveable
 	add_to_group("saveable")
 
 func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
 	var tool = ToolManager.get_tool_in_slot(slot_index)
-	if tool:
-		# Check if this is the same tool that's already active and still has state
-		if (ToolManager.active_tool_instance and active_tool and 
-			active_tool.get_script().resource_path == tool.tool_script_path and
-			active_tool._is_active):  # Only reuse if tool is still active (multi-step)
-			# Same tool and still active, execute again (for multi-click tools like conveyor)
-			active_tool.execute(null)  # Pass null since player is already cached
-		else:
-			# Different tool, no active tool, or tool finished (single-step), create a new instance
-			var tool_instance = ToolManager.tool_executor.execute_tool(tool, self)
-			if tool_instance:
-				active_tool = tool_instance
-				ToolManager.active_tool_instance = tool_instance
+	if not tool:
+		cancel_active_tool()
+		return
+
+	if _can_reuse_active_tool(tool ):
+		# Same resource identity and an intentional multi-step continuation.
+		active_tool.execute(null)
+		_sync_active_tool_reference()
+		return
+
+	cancel_active_tool()
+	var tool_instance = ToolManager.tool_executor.execute_tool(tool , self)
+	if tool_instance and tool_instance.has_method("get_tool_id") and tool_instance.get_tool_id() == tool.id and tool_instance._is_active and tool.is_multi_step:
+		active_tool = tool_instance
+		ToolManager.active_tool_instance = tool_instance
+	else:
+		active_tool = null
+		ToolManager.active_tool_instance = null
+
+func _can_reuse_active_tool(tool: ToolResource) -> bool:
+	return active_tool != null \
+		and ToolManager.active_tool_instance == active_tool \
+		and active_tool.has_method("get_tool_id") \
+		and active_tool.get_tool_id() == tool.id \
+		and tool.is_multi_step \
+		and active_tool._is_active
+
+func _sync_active_tool_reference() -> void:
+	if active_tool == null or not active_tool._is_active or not active_tool.is_multi_step():
+		active_tool = null
+		ToolManager.active_tool_instance = null
+
+func _on_active_tool_invalidated(_new_tool_id: String) -> void:
+	# ToolManager already canceled its cached instance. Cancel a local instance
+	# too if it was out of sync, then drop both references.
+	if active_tool != null and active_tool.has_method("cancel"):
+		active_tool.cancel()
+	active_tool = null
+	ToolManager.active_tool_instance = null
+
+func cancel_active_tool() -> void:
+	var cached_tool = ToolManager.active_tool_instance
+	if active_tool != null and active_tool.has_method("cancel"):
+		active_tool.cancel()
+	if cached_tool != null and cached_tool != active_tool and cached_tool.has_method("cancel"):
+		cached_tool.cancel()
+	active_tool = null
+	ToolManager.active_tool_instance = null
 
 func get_player_transform() -> Transform3D:
 	return camera.get_global_transform()
-	
+
 func get_direction() -> Vector3:
-	return - camera.get_global_transform_interpolated().basis.z.normalized()
+	return -camera.get_global_transform_interpolated().basis.z.normalized()
 
 ## Mouse motion must be observed before GUI controls consume it. It remains
 ## gated by UIManager, so overlays and paused menus never rotate the camera.
@@ -53,8 +90,10 @@ func _input(event: InputEvent) -> void:
 		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
 	elif event.is_action_pressed("click") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_activate_selected_tool()
-	elif event.is_action_pressed("right_click") and active_tool and active_tool.has_method("cancel"):
-		active_tool.cancel()
+	elif event.is_action_pressed("right_click") and (active_tool != null or ToolManager.active_tool_instance != null):
+		cancel_active_tool()
+	elif event.is_action_pressed("interact"):
+		_interact_with_target()
 
 func _activate_selected_tool() -> void:
 	var current_slot = UIManager._root.get_action_bar().current_slot
@@ -65,6 +104,40 @@ func _process(_delta: float) -> void:
 	# Update active tool preview if it has one (for conveyor tool, etc)
 	if active_tool and active_tool.has_method("on_update"):
 		active_tool.on_update(_delta)
+	_update_interaction_prompt()
+
+func _interact_with_target() -> void:
+	var target := _get_interaction_target()
+	if target != null and target.has_method("interact"):
+		target.interact(self)
+	_update_interaction_prompt()
+
+func _update_interaction_prompt() -> void:
+	if not UIManager.allows_gameplay_input() or active_tool != null or ToolManager.active_tool_instance != null:
+		UIManager.clear_interaction_status()
+		return
+	var target := _get_interaction_target()
+	if target != null and target.has_method("get_interaction_prompt"):
+		var message: String = str(target.get_interaction_prompt(self))
+		var actionable := message.begins_with("E:") or message.begins_with("Smelting:")
+		UIManager.set_interaction_status(message, actionable)
+	else:
+		UIManager.clear_interaction_status()
+
+func _get_interaction_target() -> Node:
+	var camera: Camera3D = get_node_or_null("Camera3D") as Camera3D
+	if camera == null:
+		return null
+	var origin := camera.global_position
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + get_direction() * INTERACTION_RAY_LENGTH)
+	query.exclude = [self]
+	var result: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+	if result.is_empty():
+		return null
+	var target: Node = result.get("collider") as Node
+	while target != null and not target.has_method("interact"):
+		target = target.get_parent()
+	return target
 
 func _physics_process(delta: float) -> void:
 	# Don't process movement when game is paused
@@ -125,7 +198,7 @@ func load_save_data(data: Dictionary) -> void:
 	if data.has("position"):
 		var pos = data["position"]
 		global_position = Vector3(pos.get("x", 0), pos.get("y", 0), pos.get("z", 0))
-	
+
 	if data.has("rotation"):
 		var rot = data["rotation"]
 		rotation = Vector3(rot.get("x", 0), rot.get("y", 0), rot.get("z", 0))

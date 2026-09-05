@@ -1,12 +1,62 @@
 [gd_scene format=3 uid="uid://c3gynxmj3suco"]
 
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
-[ext_resource type="Texture2D" uid="uid://c55uafcnp1ntd" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
+[ext_resource type="Texture2D" uid="uid://dvt2vm0ldvpy4" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
 [ext_resource type="Script" uid="uid://b5lxc51kltku5" path="res://Scripts/UI/Debug/F3Screen.gd" id="5_ykvyr"]
+[ext_resource type="Script" uid="uid://cs383dof813dw" path="res://Scripts/UI/BiosphereStatus.gd" id="6_biosphere_status"]
+[ext_resource type="Script" path="res://Scripts/UI/EarlyGameChecklist.gd" id="7_early_checklist"]
 
-[node name="Hud" type="CanvasLayer" unique_id=1826004349]
+[sub_resource type="StyleBoxFlat" id="StyleBox_biosphere_status"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.02, 0.04, 0.05, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.55, 0.16, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
-[node name="Crosshair" type="Control" parent="." unique_id=4373763]
+[sub_resource type="StyleBoxFlat" id="StyleBox_placement_status"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.02, 0.04, 0.05, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_checklist"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.02, 0.04, 0.05, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="Hud" type="CanvasLayer" unique_id=494431965]
+
+[node name="Crosshair" type="Control" parent="." unique_id=1000675313]
 z_index = -1
 layout_mode = 3
 anchors_preset = 8
@@ -38,16 +88,16 @@ offset_bottom = 30.0
 color = Color(0, 0, 0, 1)
 
 [node name="ActionBar" type="Control" parent="." unique_id=790615559]
-z_index = -1
+z_index = 1
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -347.0
+offset_left = -387.0
 offset_top = -114.0
-offset_right = 347.0
+offset_right = 387.0
 offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -55,47 +105,72 @@ script = ExtResource("1_kqhfj")
 
 [node name="ActionGrid" type="GridContainer" parent="ActionBar" unique_id=1901099864]
 layout_mode = 0
-offset_right = 694.0
-offset_bottom = 104.0
+offset_right = 774.0
+offset_bottom = 108.0
+mouse_filter = 2
 theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 6
 columns = 10
 
 [node name="ActionSlotTemplate" type="PanelContainer" parent="ActionBar/ActionGrid" unique_id=620520776]
-custom_minimum_size = Vector2(64, 92)
+custom_minimum_size = Vector2(72, 96)
 layout_mode = 2
+mouse_filter = 0
 theme_type_variation = &"InventorySlot"
 
-[node name="ColorRect" type="ColorRect" parent="ActionBar/ActionGrid/ActionSlotTemplate" unique_id=384256541]
+[node name="MarginContainer" type="MarginContainer" parent="ActionBar/ActionGrid/ActionSlotTemplate"]
 layout_mode = 2
-color = Color(0.2, 0.2, 0.2, 1)
+mouse_filter = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ActionBar/ActionGrid/ActionSlotTemplate" unique_id=1367073216]
+[node name="VBoxContainer" type="VBoxContainer" parent="ActionBar/ActionGrid/ActionSlotTemplate/MarginContainer" unique_id=1367073216]
 layout_mode = 2
-theme_override_constants/separation = 0
+theme_override_constants/separation = 1
+alignment = 2
+mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer" unique_id=1289813955]
-custom_minimum_size = Vector2(64, 56)
+[node name="TextureRect" type="TextureRect" parent="ActionBar/ActionGrid/ActionSlotTemplate/MarginContainer/VBoxContainer" unique_id=1289813955]
+custom_minimum_size = Vector2(68, 32)
 layout_mode = 2
-size_flags_vertical = 2
+size_flags_vertical = 1
 texture = ExtResource("4_ykvyr")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer" unique_id=977951182]
+[node name="Label" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/MarginContainer/VBoxContainer" unique_id=977951182]
 layout_mode = 2
-size_flags_vertical = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 20)
+theme_override_colors/font_color = Color(0.91, 0.92, 0.88, 1)
 theme_override_font_sizes/font_size = 11
 text = "Tool"
 horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
+autowrap_mode = 2
+max_lines_visible = 2
 
-[node name="Hotkey" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/VBoxContainer" unique_id=1777049577]
+[node name="QuantityLabel" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/MarginContainer/VBoxContainer" unique_id=222804883]
+custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
-size_flags_vertical = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(1, 0.86, 0.35, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Hotkey" type="Label" parent="ActionBar/ActionGrid/ActionSlotTemplate/MarginContainer/VBoxContainer" unique_id=1777049577]
+layout_mode = 2
+size_flags_vertical = 1
+custom_minimum_size = Vector2(0, 16)
+theme_override_font_sizes/font_size = 12
 text = "[1]"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="F3Screen" type="Label" parent="." unique_id=681017054]
 offset_left = 11.0
@@ -103,3 +178,101 @@ offset_top = 9.0
 offset_right = 51.0
 offset_bottom = 32.0
 script = ExtResource("5_ykvyr")
+
+[node name="BiosphereStatus" type="PanelContainer" parent="." unique_id=1608542983]
+z_index = 10
+offset_left = 12.0
+offset_top = 48.0
+offset_right = 402.0
+offset_bottom = 218.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_biosphere_status")
+script = ExtResource("6_biosphere_status")
+
+[node name="EarlyGameChecklist" type="PanelContainer" parent="." unique_id=222804884]
+z_index = 10
+layout_mode = 0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -390.0
+offset_top = 48.0
+offset_right = -12.0
+offset_bottom = 218.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_checklist")
+script = ExtResource("7_early_checklist")
+
+[node name="MarginContainer" type="MarginContainer" parent="EarlyGameChecklist" unique_id=222804885]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EarlyGameChecklist/MarginContainer" unique_id=222804886]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.95, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "BOOTSTRAP CHECKLIST"
+autowrap_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="BiosphereStatus" unique_id=1245102625]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="BiosphereStatus/MarginContainer" unique_id=1723730659]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.95, 0.85, 1)
+theme_override_font_sizes/font_size = 15
+text = "FIELD INSTRUMENT
+BIOSPHERE: 100.0%
+INGOTS: 0 / 10"
+autowrap_mode = 2
+
+[node name="PlacementStatus" type="PanelContainer" parent="." unique_id=233195210]
+visible = false
+z_index = 10
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -162.0
+offset_right = 260.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_placement_status")
+
+[node name="Label" type="Label" parent="PlacementStatus" unique_id=1436940487]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "Placement status"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InteractionStatus" type="PanelContainer" parent="."]
+visible = false
+z_index = 10
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -158.0
+offset_right = 260.0
+offset_bottom = -116.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_placement_status")
+
+[node name="Label" type="Label" parent="InteractionStatus"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = "Interaction status"
+horizontal_alignment = 1
+vertical_alignment = 1

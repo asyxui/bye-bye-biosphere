@@ -72,12 +72,12 @@ func wait_for_terrain_ready() -> bool:
 	if not terrain:
 		CustomLogger.log_error("Cannot wait for terrain: terrain not found")
 		return false
-	
+
 	var player = get_tree().root.find_child("Player", true, false)
 	if not player:
 		CustomLogger.log_error("Cannot wait for terrain: player not found")
 		return false
-	
+
 	var player_pos = player.global_position
 	var player_local = terrain.to_local(player_pos)
 	var local_half_extent = Vector3(16, 16, 16)
@@ -127,19 +127,25 @@ func _destroy(origin: Vector3, direction: Vector3):
 		var coordsWithDrops: Array[Vector3] = []
 		var coordsWorld = sphere_coords(hit.position, 1, 2)
 
-		for i in range(0, coordsWorld.size()): 
+		for i in range(0, coordsWorld.size()):
 			var type: int = voxelTool.get_voxel(coordsWorld[i])
 			if type != 0:
 				drops.append(type)
 				coordsWithDrops.append(coordsWorld[i])
 
 		voxelTool.do_sphere(hit.position, 2)
-		await get_tree().create_timer(0.2).timeout
 
+		# Count only blocks that the edit actually removed. This keeps the
+		# ecological counter and drops correct when a streamed voxel edit is
+		# rejected or only partially overlaps the terrain.
+		var removed_count := 0
 		for i in range(coordsWithDrops.size()):
 			var coord: Vector3 = coordsWithDrops[i]
-			# coord.y += 1
-			drop_item(drops[i], coord)
+			if voxelTool.get_voxel(coord) != 0:
+				continue
+			drop_voxel_material(drops[i], coord)
+			removed_count += 1
+		BiosphereManager.record_raw_material_extracted(removed_count)
 
 func save_map() -> void:
 	# Delegate voxel save to VoxelStreamManager
@@ -158,14 +164,47 @@ func sphere_coords(center: Vector3, cubeScale: float, radius: int) -> Array[Vect
 					coords.append(pos + center)
 	return coords
 
-func drop_item(type: int, coords: Vector3):
-	var item = ItemUtils.item_object_by_type_id(type)
+## Structure dismantling uses the same ray as terrain destruction, but resolves
+## structure ownership first so machines and conveyors never become terrain
+## edits by accident.
+func dismantle_structure(origin: Vector3, direction: Vector3) -> bool:
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + direction.normalized() * 100.0)
+	var result := get_world_3d().direct_space_state.intersect_ray(query)
+	if result.is_empty():
+		return false
+	var structure := _find_structure_ancestor(result.get("collider"))
+	if structure == null:
+		return false
+	if structure.get("machine_type") != null:
+		return MachineManager.remove_machine(structure)
+	if structure.name == "ConveyorBelt" or structure.has_meta("conveyor_belt_object"):
+		return ConveyorConnectionManager.remove_conveyor(structure)
+	return false
+
+func _find_structure_ancestor(node: Node) -> Node3D:
+	var current := node
+	while current != null:
+		if current is Node3D and current.is_in_group("structures"):
+			return current
+		current = current.get_parent()
+	return null
+
+func drop_item(item_id: String, coords: Vector3):
+	var item = ItemUtils.item_object_by_id(str(item_id))
+	if item:
+		spawn_item_drop(item, coords)
+
+func drop_voxel_material(voxel_type: int, coords: Vector3):
+	var material := VoxelMaterialCatalog.get_definition(voxel_type)
+	if material == null:
+		return
+	var item := material.get_mined_item()
 	if item:
 		spawn_item_drop(item, coords)
 
 ## Spawn a physical drop from an inventory item. This is shared by terrain,
 ## inventory use, and machines so all drops behave identically on conveyors.
-func spawn_item_drop(item: InventoryItem, pos: Vector3, isGlobal: bool = false) -> Node3D:
+func spawn_item_drop(item: InventoryItem, pos: Vector3, parent: Node = null, quantity: int = 1, isGlobal: bool = false) -> Node3D:
 	if item == null:
 		return null
 	var newDrop = preload("res://Resources/Items/Drop.tscn").instantiate()
@@ -175,6 +214,7 @@ func spawn_item_drop(item: InventoryItem, pos: Vector3, isGlobal: bool = false) 
 	mesh.set_surface_override_material(0, newMat)
 
 	newDrop.dropData = item
+	newDrop.quantity = maxi(1, quantity)
 	newMat.albedo_color = newDrop.dropData.dropColor
 	newDrop.get_child(0).add_to_group("Collectibles")
 	get_voxel_terrain().add_child(newDrop)
@@ -186,5 +226,5 @@ func spawn_item_drop(item: InventoryItem, pos: Vector3, isGlobal: bool = false) 
 		newDrop.position = pos
 	else:
 		newDrop.global_position = pos
-	
+
 	return newDrop
