@@ -52,9 +52,15 @@ soil_depth_max = 8.0
 is_ocean = true
 water_level = 0.0
 
+[sub_resource type="Curve" id="Curve_sxhdm"]
+_limits = [-72.0, 300.0, 0.0, 1.0]
+_data = [Vector2(0, -62), 0.0, 0.0, 0, 0, Vector2(0.35, -20), 0.0, 0.0, 0, 0, Vector2(0.5, 0), 0.0, 0.0, 0, 0, Vector2(0.6, 18), 0.0, 0.0, 0, 0, Vector2(0.8, 78), 0.0, 0.0, 0, 0, Vector2(1, 188), 0.0, 0.0, 0, 0]
+point_count = 6
+
 [sub_resource type="VoxelGeneratorFast" id="VoxelGeneratorFast_pl8e4"]
 biomes = [SubResource("VoxelBiome_bo0b3"), SubResource("VoxelBiome_eypal"), SubResource("VoxelBiome_sn7fr"), SubResource("VoxelBiome_ocean01")]
 noise_biome_period = 44.0
+height_curve = SubResource("Curve_sxhdm")
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
 culls_neighbors = false
@@ -152,7 +158,7 @@ lod_distance = 120.0
 secondary_lod_distance = 100.0
 run_stream_in_editor = false
 mesh_block_size = 32
-cache_generated_blocks = false
+cache_generated_blocks = true
 threaded_update_enabled = true
 streaming_system = 1
 stream = SubResource("VoxelStreamSQLite_rwtwo")
