@@ -10,6 +10,9 @@ func _run() -> void:
 	check(ConveyorConnectionManager._segments_overlap(Vector3(5, 0, 0), Vector3(15, 0, 0), Vector3.ZERO, Vector3(10, 0, 0)))
 	check(ConveyorConnectionManager._segments_overlap(Vector3(10, 0, 0), Vector3(5, 0, 0), Vector3.ZERO, Vector3(10, 0, 0)))
 	check(ConveyorConnectionManager._segments_overlap(Vector3(-5, 0, 0), Vector3(5, 0, 0), Vector3(0, 0, -5), Vector3(0, 0, 5)))
+	var free_placement_tool := ConveyorTool.new()
+	var ground_hit := Vector3(3, 7, 11)
+	check(free_placement_tool._resolve_endpoint_position(ground_hit, null).is_equal_approx(ground_hit + Vector3.UP * ConveyorTool.FREE_PLACEMENT_GROUND_OFFSET))
 
 	_test_last_conveyor_keeps_connections()
 

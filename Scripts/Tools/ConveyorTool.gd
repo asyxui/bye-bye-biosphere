@@ -5,6 +5,7 @@ extends "res://Scripts/Tools/BaseTool.gd"
 class_name ConveyorTool
 
 const RAY_LENGTH = 20.0
+const FREE_PLACEMENT_GROUND_OFFSET = 0.54
 
 var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBelt.tscn")
 
@@ -36,8 +37,7 @@ func on_update(_delta: float) -> void:
 			return
 		
 		preview_port = _find_second_port(hit_point)
-		if preview_port:
-			hit_point = preview_port.global_position
+		hit_point = _resolve_endpoint_position(hit_point, preview_port)
 		
 		_update_preview_transform(start_pos, hit_point)
 
@@ -64,10 +64,9 @@ func _start_conveyor_placement(hit_point: Vector3) -> void:
 	
 	first_port = ConveyorConnectionManager.find_closest_port(hit_point)
 	if first_port:
-		hit_point = first_port.global_position
 		conveyor_reversal = first_port.port_direction == ConnectionPoint.PortDirection.INPUT
 	
-	start_pos = hit_point
+	start_pos = _resolve_endpoint_position(hit_point, first_port)
 	_create_preview_conveyor()
 
 func _find_second_port(hit_point: Vector3) -> ConnectionPoint:
@@ -76,10 +75,14 @@ func _find_second_port(hit_point: Vector3) -> ConnectionPoint:
 		desired_direction = ConnectionPoint.PortDirection.INPUT if first_port.port_direction == ConnectionPoint.PortDirection.OUTPUT else ConnectionPoint.PortDirection.OUTPUT
 	return ConveyorConnectionManager.find_closest_port(hit_point, desired_direction, first_port)
 
+func _resolve_endpoint_position(hit_point: Vector3, port: ConnectionPoint) -> Vector3:
+	if port != null:
+		return port.global_position
+	return hit_point + Vector3.UP * FREE_PLACEMENT_GROUND_OFFSET
+
 func _finalize_conveyor(hit_point: Vector3) -> void:
 	preview_port = _find_second_port(hit_point)
-	if preview_port:
-		hit_point = preview_port.global_position
+	hit_point = _resolve_endpoint_position(hit_point, preview_port)
 	
 	var actual_start := hit_point if conveyor_reversal else start_pos
 	var actual_end := start_pos if conveyor_reversal else hit_point

@@ -38,7 +38,7 @@ ThemeManager="*res://Scripts/UI/ThemeManager.gd"
 
 [gameplay]
 
-debug_start_in_normal_mode=true
+debug_start_in_normal_mode=false
 
 [global_group]
 
