@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://dw5wo0ukxyt6e"]
+
+[ext_resource type="Script" uid="uid://cjaiydfydwb54" path="res://Scripts/NPC/doggo.gd" id="1_htg1t"]
+[ext_resource type="PackedScene" uid="uid://cnae8ue3eic6w" path="res://Assets/Models/Animals/Doggo.glb" id="2_vv5y2"]
+
+[node name="Doggo" type="Node3D" unique_id=483233675]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+script = ExtResource("1_htg1t")
+
+[node name="Doggo" parent="." unique_id=1027868049 instance=ExtResource("2_vv5y2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8423102, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1341827748]
+
+[node name="Area3D" type="Area3D" parent="." unique_id=213585211]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
