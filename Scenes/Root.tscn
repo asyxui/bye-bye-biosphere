@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_uiroot"]
+[ext_resource type="Material" path="res://Resources/Terrain/WaterMaterial.tres" id="3_water_material"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_oss8w"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -22,25 +23,44 @@ database_path = "user://world.sqlite"
 
 [sub_resource type="VoxelBiome" id="VoxelBiome_bo0b3"]
 biome_name = "Plains"
-base_height = 20.0
+soil_depth_min = 6.0
+soil_depth_max = 10.0
 terrain_amplitude = 15.0
 threshold_center = 0.5
 
 [sub_resource type="VoxelBiome" id="VoxelBiome_eypal"]
 biome_name = "Desert"
-base_height = 10.0
+surface_voxel_type = 1
+soil_depth_min = 10.0
+soil_depth_max = 16.0
 terrain_amplitude = 4.0
 threshold_center = 0.1
 
 [sub_resource type="VoxelBiome" id="VoxelBiome_sn7fr"]
 biome_name = "Mountains"
-base_height = 250.0
+surface_voxel_type = 2
+soil_depth_min = 0.0
+soil_depth_max = 0.0
 terrain_amplitude = 150.0
 threshold_center = 0.9
 
+[sub_resource type="VoxelBiome" id="VoxelBiome_ocean01"]
+biome_name = "Ocean"
+surface_voxel_type = 1
+soil_depth_min = 4.0
+soil_depth_max = 8.0
+is_ocean = true
+water_level = 0.0
+
+[sub_resource type="Curve" id="Curve_sxhdm"]
+_limits = [-72.0, 300.0, 0.0, 1.0]
+_data = [Vector2(0, -62), 0.0, 0.0, 0, 0, Vector2(0.35, -20), 0.0, 0.0, 0, 0, Vector2(0.5, 0), 0.0, 0.0, 0, 0, Vector2(0.6, 18), 0.0, 0.0, 0, 0, Vector2(0.8, 78), 0.0, 0.0, 0, 0, Vector2(1, 188), 0.0, 0.0, 0, 0]
+point_count = 6
+
 [sub_resource type="VoxelGeneratorFast" id="VoxelGeneratorFast_pl8e4"]
-biomes = [SubResource("VoxelBiome_bo0b3"), SubResource("VoxelBiome_eypal"), SubResource("VoxelBiome_sn7fr")]
+biomes = [SubResource("VoxelBiome_bo0b3"), SubResource("VoxelBiome_eypal"), SubResource("VoxelBiome_sn7fr"), SubResource("VoxelBiome_ocean01")]
 noise_biome_period = 44.0
+height_curve = SubResource("Curve_sxhdm")
 
 [sub_resource type="VoxelBlockyModelEmpty" id="VoxelBlockyModelEmpty_xjdud"]
 culls_neighbors = false
@@ -63,8 +83,56 @@ color = Color(0.06631541, 0.023905009, 0.048508614, 1)
 transparency_index = 1
 material_override_0 = SubResource("StandardMaterial3D_qjaue")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dirt01"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_dirt01"]
+color = Color(0.36, 0.25, 0.15, 1)
+transparency_index = 1
+material_override_0 = SubResource("StandardMaterial3D_dirt01")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grass01"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_grass01"]
+color = Color(0.25, 0.55, 0.18, 1)
+transparency_index = 1
+material_override_0 = SubResource("StandardMaterial3D_grass01")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sand01"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_sand01"]
+color = Color(0.86, 0.75, 0.5, 1)
+transparency_index = 1
+material_override_0 = SubResource("StandardMaterial3D_sand01")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_snow01"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_snow01"]
+color = Color(0.95, 0.97, 1, 1)
+transparency_index = 1
+material_override_0 = SubResource("StandardMaterial3D_snow01")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gravel01"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="VoxelBlockyModelCube" id="VoxelBlockyModelCube_gravel01"]
+color = Color(0.42, 0.4, 0.38, 1)
+transparency_index = 1
+material_override_0 = SubResource("StandardMaterial3D_gravel01")
+
+[sub_resource type="VoxelBlockyFluid" id="VoxelBlockyFluid_water"]
+material = ExtResource("3_water_material")
+
+[sub_resource type="VoxelBlockyModelFluid" id="VoxelBlockyModelFluid_water01"]
+fluid = SubResource("VoxelBlockyFluid_water")
+transparency_index = 2
+lod_skirts_enabled = false
+
 [sub_resource type="VoxelBlockyLibrary" id="VoxelBlockyLibrary_50gmx"]
-models = Array[VoxelBlockyModel]([SubResource("VoxelBlockyModelEmpty_xjdud"), SubResource("VoxelBlockyModelCube_qjaue"), SubResource("VoxelBlockyModelCube_3auje")])
+models = Array[VoxelBlockyModel]([SubResource("VoxelBlockyModelEmpty_xjdud"), SubResource("VoxelBlockyModelCube_qjaue"), SubResource("VoxelBlockyModelCube_3auje"), SubResource("VoxelBlockyModelCube_dirt01"), SubResource("VoxelBlockyModelCube_grass01"), SubResource("VoxelBlockyModelCube_sand01"), SubResource("VoxelBlockyModelCube_snow01"), SubResource("VoxelBlockyModelCube_gravel01"), SubResource("VoxelBlockyModelFluid_water01")])
 
 [sub_resource type="VoxelMesherBlocky" id="VoxelMesherBlocky_qw7le"]
 library = SubResource("VoxelBlockyLibrary_50gmx")
@@ -97,7 +165,7 @@ stream = SubResource("VoxelStreamSQLite_rwtwo")
 generator = SubResource("VoxelGeneratorFast_pl8e4")
 mesher = SubResource("VoxelMesherBlocky_qw7le")
 format = SubResource("VoxelFormat_5k46t")
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 3, 0)
 
 [node name="Player" parent="." unique_id=1795958652 instance=ExtResource("1_qjaue")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 77, 0)

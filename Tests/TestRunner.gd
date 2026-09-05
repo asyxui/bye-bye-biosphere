@@ -6,6 +6,7 @@ const TEST_SCRIPTS := [
 	"res://Tests/HandcraftingTest.gd",
 	"res://Tests/ItemTransferTest.gd",
 	"res://Tests/ManualSmelterTest.gd",
+	"res://Tests/OceanLodConsistencyTest.gd",
 	"res://Tests/PersistenceStateTest.gd",
 	"res://Tests/PlaceableItemTest.gd",
 	"res://Tests/PlacementReceiptTest.gd",
