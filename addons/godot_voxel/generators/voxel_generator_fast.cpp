@@ -68,10 +68,10 @@ VoxelGenerator::Result VoxelGeneratorFast::generate_block(
 
 void VoxelGeneratorFast::prepare_noise()
 {
-	block_type_noise = memnew(ZN_FastNoiseLite);
-	terrain_noise = memnew(ZN_FastNoiseLite);
-	cave_noise = memnew(ZN_FastNoiseLite);
-	biome_noise = memnew(ZN_FastNoiseLite);
+	block_type_noise.instantiate();
+	terrain_noise.instantiate();
+	cave_noise.instantiate();
+	biome_noise.instantiate();
 
 
 	block_type_noise->set_noise_type(
@@ -549,7 +549,7 @@ void VoxelGeneratorFast::_bind_methods()
 		"get_cave_cutoff"
 	);
 
-	
+
 }
 
 } // namespace voxel
