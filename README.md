@@ -6,6 +6,8 @@
 
 Terrain uses [godot_voxel](addons/godot_voxel), a GDExtension that must be compiled from source before running the project.
 
+Terrain height and caves are generated separately, then a coastal seal blocks caves near sea level and leaves deep undersea caves enclosed by rock. Ocean voxels fill only open space between the seabed and the shared `Y=0` sea level; materials are assigned after terrain occupancy is resolved.
+
 ### Building godot_voxel
 
 1. Clone the `godot-cpp` repository into `addons/godot_voxel/godot-cpp`, using the branch matching your Godot version (`4.5`):

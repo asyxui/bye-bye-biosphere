@@ -8,7 +8,10 @@ const CANONICAL_ITEMS := {
 	"manual_smelter": "9",
 	"smelter": "10",
 	"sink": "11",
-	"conveyor": "12"
+	"conveyor": "12",
+	"dirt": "4",
+	"grass": "13",
+	"sand": "14"
 }
 const PLACEABLE_STRUCTURES := {
 	"9": "manual_smelter",

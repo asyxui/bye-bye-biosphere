@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="VoxelMaterialDefinition" format=3]
+
+[ext_resource type="Script" uid="uid://6eurs44tm2lv" path="res://Scripts/Terrain/VoxelMaterialDefinition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+voxel_type = 4
+material_name = "Grass"
+mined_item_id = "13"

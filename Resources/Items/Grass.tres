@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="InventoryItem" format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Items/Grass.png" id="1_grass_icon"]
+[ext_resource type="Script" uid="uid://dnsa8h5olxgbd" path="res://Scripts/Inventory/InventoryItem.gd" id="2_item_script"]
+
+[resource]
+script = ExtResource("2_item_script")
+id = "13"
+name = "Grass"
+description = "A tuft of surface grass"
+max_stack_size = 64
+icon = ExtResource("1_grass_icon")
+weight = 0.5
+dropColor = Color(0.25, 0.55, 0.18, 1)
