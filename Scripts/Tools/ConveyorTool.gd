@@ -83,37 +83,37 @@ func _finalize_conveyor(hit_point: Vector3) -> void:
 	
 	var actual_start := hit_point if conveyor_reversal else start_pos
 	var actual_end := start_pos if conveyor_reversal else hit_point
-	var placement_error: String = ConveyorConnectionManager.get_conveyor_placement_error(actual_start, actual_end, true)
+	var placeable_item_id := _get_placeable_item_id()
+	var item_error := ToolManager.get_placeable_availability_error(_tool_resource as ItemPlacementToolResource) if _tool_resource is ItemPlacementToolResource else ""
+	var placement_error: String = item_error if not item_error.is_empty() else ConveyorConnectionManager.get_conveyor_placement_error(actual_start, actual_end)
 	if not placement_error.is_empty():
 		preview_is_valid = false
 		_set_preview_color(false, placement_error)
 		return
 
+	# Inventory consumption can synchronously cancel this tool when placing its
+	# last item, so retain the connection targets before spawning.
+	var actual_start_port: ConnectionPoint = first_port if not conveyor_reversal else preview_port
+	var actual_end_port: ConnectionPoint = preview_port if not conveyor_reversal else first_port
+
 	# Spawn the actual conveyor only after the same validation used by the preview.
-	var spawned = _spawn_conveyor(actual_start, actual_end, false)
+	var spawned = _spawn_conveyor(actual_start, actual_end, placeable_item_id)
 	if spawned == null:
 		preview_is_valid = false
 		_set_preview_color(false, "Cannot place conveyor here")
 		return
 	var created_belt: ConveyorBeltObject = ConveyorConnectionManager.get_belt_for_scene(spawned)
-	var actual_start_port: ConnectionPoint = first_port if not conveyor_reversal else preview_port
-	var actual_end_port: ConnectionPoint = preview_port if not conveyor_reversal else first_port
 	if created_belt == null or (actual_start_port != null and not ConveyorConnectionManager.connect_belt_endpoint(created_belt, ConnectionPoint.PointType.START, actual_start_port)) or (actual_end_port != null and not ConveyorConnectionManager.connect_belt_endpoint(created_belt, ConnectionPoint.PointType.END, actual_end_port)):
-		if created_belt != null:
-			ConveyorConnectionManager.remove_conveyor(created_belt, false, false)
+		var removal_target = created_belt if created_belt != null else spawned
+		if removal_target != null:
+			ConveyorConnectionManager.remove_conveyor(removal_target, false)
 		preview_is_valid = false
 		_set_preview_color(false, "Ports are incompatible or occupied")
 		return
-	var construction_cost: Dictionary = ConveyorConnectionManager.get_construction_cost()
-	if not ConstructionCosts.consume(construction_cost, InventoryManager.get_inventory()):
-		ConveyorConnectionManager.remove_conveyor(created_belt, false, false)
-		preview_is_valid = false
-		_set_preview_color(false, ConstructionCosts.format_missing(ConstructionCosts.get_missing(construction_cost, InventoryManager.get_inventory())))
-		return
-	created_belt.construction_cost_paid = ConstructionCosts.cost_was_charged(construction_cost)
-	
 	_cleanup_preview()
 	waiting_for_second_press = false
+	if not placeable_item_id.is_empty():
+		ToolManager.notify_placeable_placed(placeable_item_id)
 
 func _create_preview_conveyor() -> void:
 	if preview_conveyor != null:
@@ -171,12 +171,17 @@ func _update_preview_transform(start: Vector3, end: Vector3) -> void:
 	preview_conveyor.scale.x = length / ConveyorConnectionManager.CONVEYOR_SCENE_LENGTH
 	var validation_start: Vector3 = start if not conveyor_reversal else end
 	var validation_end: Vector3 = end if not conveyor_reversal else start
-	var placement_error: String = ConveyorConnectionManager.get_conveyor_placement_error(validation_start, validation_end, true)
+	var placeable_item_id := _get_placeable_item_id()
+	var item_error := ToolManager.get_placeable_availability_error(_tool_resource as ItemPlacementToolResource) if _tool_resource is ItemPlacementToolResource else ""
+	var placement_error: String = item_error if not item_error.is_empty() else ConveyorConnectionManager.get_conveyor_placement_error(validation_start, validation_end)
 	preview_is_valid = placement_error.is_empty()
 	_set_preview_color(preview_is_valid, placement_error)
 
-func _spawn_conveyor(start: Vector3, end: Vector3, charge_cost: bool = true) -> Node:
-	return ConveyorConnectionManager.spawn_conveyor(start, end, "", charge_cost)
+func _spawn_conveyor(start: Vector3, end: Vector3, placement_item_id: String) -> Node:
+	return ConveyorConnectionManager.spawn_conveyor(start, end, "", placement_item_id)
+
+func _get_placeable_item_id() -> String:
+	return ToolManager.get_placeable_item_id(_tool_resource)
 
 func _set_preview_color(valid: bool, reason: String = "") -> void:
 	if not is_instance_valid(preview_conveyor):

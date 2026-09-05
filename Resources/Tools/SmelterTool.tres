@@ -9,4 +9,4 @@ name = "Smelter"
 description = "Place an iron smelter"
 tool_script_path = "res://Scripts/Tools/MachinePlacementTool.gd"
 is_multi_step = true
-construction_cost = {"3": 4}
+structure_placement_tool = true

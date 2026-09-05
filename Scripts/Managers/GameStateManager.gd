@@ -22,7 +22,7 @@ func set_creative_mode(enabled: bool) -> void:
 	_creative_mode = next_mode
 	mode_changed.emit(_creative_mode)
 
-func construction_costs_enabled() -> bool:
+func ingredient_costs_enabled() -> bool:
 	return not _creative_mode
 
 func _get_startup_creative_mode() -> bool:

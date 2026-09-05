@@ -20,11 +20,14 @@ func on_execute(_p: Node) -> void:
 		waiting_for_confirmation = true
 		_create_preview(hit)
 	elif preview_is_valid:
-		var placed_machine: Node3D = MachineManager.place_machine(_tool_resource.id, preview_position, preview_rotation_y)
+		var machine_type := _get_machine_type()
+		var placed_machine: Node3D = MachineManager.place_machine(machine_type, preview_position, preview_rotation_y, {}, "", _get_placeable_item_id())
 		if placed_machine != null:
 			_cleanup_preview()
+			if not _get_placeable_item_id().is_empty():
+				ToolManager.notify_placeable_placed(_get_placeable_item_id())
 		else:
-			var placement_error: String = MachineManager.get_placement_error(_tool_resource.id, preview_position, preview_rotation_y)
+			var placement_error: String = MachineManager.get_placement_error(machine_type, preview_position, preview_rotation_y)
 			_set_preview_color(false, placement_error if not placement_error.is_empty() else "Cannot place structure")
 
 func on_cancel() -> void:
@@ -37,7 +40,7 @@ func on_update(_delta: float) -> void:
 			_update_preview(hit)
 
 func _create_preview(position: Vector3) -> void:
-	var machine_scene: PackedScene = MachineManager.get_machine_scene(_tool_resource.id) if _tool_resource != null else null
+	var machine_scene: PackedScene = MachineManager.get_machine_scene(_get_machine_type()) if _tool_resource != null else null
 	if machine_scene == null:
 		waiting_for_confirmation = false
 		preview_is_valid = false
@@ -64,9 +67,21 @@ func _update_preview(position: Vector3) -> void:
 		preview_rotation_y = atan2(-direction.x, -direction.z)
 	preview.global_position = preview_position
 	preview.rotation.y = preview_rotation_y
-	var placement_error: String = MachineManager.get_placement_error(_tool_resource.id, preview_position, preview_rotation_y)
+	var placement_error := ToolManager.get_placeable_availability_error(_tool_resource as ItemPlacementToolResource) if _tool_resource is ItemPlacementToolResource else ""
+	if placement_error.is_empty():
+		placement_error = MachineManager.get_placement_error(_get_machine_type(), preview_position, preview_rotation_y)
 	preview_is_valid = placement_error.is_empty()
 	_set_preview_color(preview_is_valid, placement_error)
+
+func _get_machine_type() -> String:
+	var item_tool := _tool_resource as ItemPlacementToolResource
+	if item_tool != null:
+		return item_tool.structure_type
+	var binding := _tool_resource as HotbarBinding
+	return binding.binding_id if binding != null and binding.kind == HotbarBinding.KIND_TOOL else _tool_resource.id
+
+func _get_placeable_item_id() -> String:
+	return ToolManager.get_placeable_item_id(_tool_resource)
 
 func _set_preview_color(valid: bool, reason: String = "") -> void:
 	var color = Color(0.3, 1.0, 0.4, 0.5) if valid else Color(1.0, 0.2, 0.2, 0.5)

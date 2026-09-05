@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="InventoryItem" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="PlaceableItem" load_steps=3 format=3]
 
 [ext_resource type="Texture2D" path="res://Assets/Items/Rock.png" id="1_icon"]
-[ext_resource type="Script" path="res://Scripts/Inventory/InventoryItem.gd" id="2_script"]
+[ext_resource type="Script" path="res://Scripts/Inventory/PlaceableItem.gd" id="2_script"]
 
 [resource]
 script = ExtResource("2_script")
@@ -12,3 +12,6 @@ max_stack_size = 64
 icon = ExtResource("1_icon")
 weight = 5.0
 dropColor = Color(0.28, 0.29, 0.32, 1)
+structure_type = "conveyor"
+placement_category = "conveyor"
+placement_description = "Place a conveyor"

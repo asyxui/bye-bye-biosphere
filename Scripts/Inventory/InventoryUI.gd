@@ -149,8 +149,8 @@ func _get_recipe_status(recipe: Recipe) -> String:
 		return "Cannot craft: inventory has no room for the output."
 	var missing: Dictionary = Handcrafting.get_missing(recipe, inventory)
 	if not missing.is_empty():
-		return ConstructionCosts.format_missing(missing)
-	if not GameStateManager.construction_costs_enabled():
+		return Handcrafting.format_missing(missing)
+	if not GameStateManager.ingredient_costs_enabled():
 		return "Creative mode: ingredients not required."
 	return "Ready to craft."
 

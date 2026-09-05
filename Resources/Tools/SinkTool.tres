@@ -9,4 +9,4 @@ name = "Sink"
 description = "Place a delivery sink"
 tool_script_path = "res://Scripts/Tools/MachinePlacementTool.gd"
 is_multi_step = true
-construction_cost = {"3": 2}
+structure_placement_tool = true

@@ -51,7 +51,7 @@ func insert_stack(stack: ItemStack, quantity: int = -1) -> int:
 	if remaining != 0:
 		# This is defensive only: the preflight above should make this impossible.
 		stack.quantity += remaining
-		push_error("ItemBuffer insertion invariant failed; restored uninserted items")
+		push_error("ItemBuffer insertion invariant failed. Restored uninserted items")
 	return accepted - remaining
 
 func can_extract(item_id: String, quantity: int = 1) -> bool:

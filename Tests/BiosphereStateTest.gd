@@ -1,25 +1,24 @@
 ## Headless smoke tests for biosphere integrity and objective persistence.
-extends SceneTree
+extends "res://Tests/TestCase.gd"
 
-func _initialize() -> void:
+func _run() -> void:
 	BiosphereManager.clear_save_data()
-	assert(is_equal_approx(BiosphereManager.get_integrity_percent(), 100.0))
+	check(is_equal_approx(BiosphereManager.get_integrity_percent(), 100.0))
 
 	BiosphereManager.record_raw_material_extracted(10)
-	assert(is_equal_approx(BiosphereManager.get_integrity_percent(), 99.9))
-	assert(BiosphereManager.state.total_raw_material_extracted == 10)
+	check(is_equal_approx(BiosphereManager.get_integrity_percent(), 99.9))
+	check(BiosphereManager.state.total_raw_material_extracted == 10)
 
 	BiosphereManager.record_processed_material(1, 24.9)
-	assert(is_equal_approx(BiosphereManager.get_integrity_percent(), 75.0))
-	assert(BiosphereManager.has_triggered_event("air_quality_collapse_warning"))
+	check(is_equal_approx(BiosphereManager.get_integrity_percent(), 75.0))
+	check(BiosphereManager.has_triggered_event("air_quality_collapse_warning"))
 
-	BiosphereManager.record_delivery("3", 10)
-	assert(BiosphereManager.state.objective_completed)
+	BiosphereManager.record_delivery("5", 10)
+	check(BiosphereManager.state.objective_completed)
 
 	var saved_state: Dictionary = BiosphereManager.get_save_data()
 	BiosphereManager.clear_save_data()
 	BiosphereManager.load_save_data(saved_state)
-	assert(BiosphereManager.has_triggered_event("air_quality_collapse_warning"))
-	assert(BiosphereManager.state.objective_completed)
-	assert(BiosphereManager.state.objective_delivery_progress == 10)
-	quit()
+	check(BiosphereManager.has_triggered_event("air_quality_collapse_warning"))
+	check(BiosphereManager.state.objective_completed)
+	check(BiosphereManager.state.objective_delivery_progress == 10)

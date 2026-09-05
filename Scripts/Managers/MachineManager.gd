@@ -3,6 +3,7 @@ extends Node
 const PRODUCER_SCENE := preload("res://Scenes/Machines/Producer.tscn")
 const SINK_SCENE := preload("res://Scenes/Machines/Sink.tscn")
 const SMELTER_SCENE := preload("res://Scenes/Machines/Smelter.tscn")
+const MANUAL_SMELTER_SCENE := preload("res://Scenes/Machines/ManualSmelter.tscn")
 const STRUCTURE_GROUP := "structures"
 var machines: Array[Node3D] = []
 var _next_machine_id: int = 1
@@ -16,25 +17,14 @@ func get_machine_scene(machine_type: String) -> PackedScene:
 		"producer": return PRODUCER_SCENE
 		"sink": return SINK_SCENE
 		"smelter": return SMELTER_SCENE
+		"manual_smelter": return MANUAL_SMELTER_SCENE
 	return null
-
-func get_construction_cost(machine_type: String) -> Dictionary:
-	return ConstructionCosts.get_cost(machine_type)
 
 func can_place(machine_type: String, position: Vector3, _rotation_y: float) -> bool:
 	return _get_structure_placement_error(machine_type, position).is_empty()
 
-## Returns a player-facing placement error, including missing construction
-## materials when requested by the placement preview.
-func get_placement_error(machine_type: String, position: Vector3, _rotation_y: float, check_cost: bool = true) -> String:
-	var structure_error: String = _get_structure_placement_error(machine_type, position)
-	if not structure_error.is_empty():
-		return structure_error
-	if check_cost:
-		var missing: Dictionary = ConstructionCosts.get_missing(get_construction_cost(machine_type), InventoryManager.get_inventory())
-		if not missing.is_empty():
-			return ConstructionCosts.format_missing(missing)
-	return ""
+func get_placement_error(machine_type: String, position: Vector3, _rotation_y: float) -> String:
+	return _get_structure_placement_error(machine_type, position)
 
 func _get_structure_placement_error(machine_type: String, position: Vector3) -> String:
 	if get_machine_scene(machine_type) == null:
@@ -47,16 +37,25 @@ func _get_structure_placement_error(machine_type: String, position: Vector3) -> 
 			return "Too close to another structure"
 	return ""
 
-func place_machine(machine_type: String, position: Vector3, rotation_y: float, state: Dictionary = {}, saved_structure_id: String = "", construction_cost_paid: bool = true) -> Node3D:
+func place_machine(machine_type: String, position: Vector3, rotation_y: float, state: Dictionary = {}, saved_structure_id: String = "", placement_item_id: String = "", placement_receipt: Dictionary = {}) -> Node3D:
 	var is_loading: bool = not saved_structure_id.is_empty()
-	if not is_loading and not ToolManager.is_tool_available(machine_type):
+	var item_backed := not placement_item_id.is_empty()
+	if not is_loading and not item_backed and not ToolManager.is_tool_available(machine_type):
 		return null
 	if not _get_structure_placement_error(machine_type, position).is_empty():
 		return null
-	var construction_cost: Dictionary = get_construction_cost(machine_type)
 	var inventory: Inventory = InventoryManager.get_inventory()
-	if not is_loading and not ConstructionCosts.can_afford(construction_cost, inventory):
+	if not is_loading and item_backed and not GameStateManager.is_creative_mode() and inventory.get_extractable_quantity(placement_item_id) <= 0:
 		return null
+	var receipt: Dictionary = placement_receipt.duplicate(true) if PlacementReceipt.is_valid(placement_receipt) else {}
+	if not is_loading and item_backed:
+		if not ToolManager.consume_placeable_item(placement_item_id):
+			return null
+		receipt = PlacementReceipt.create(placement_item_id, 1, not GameStateManager.is_creative_mode(), GameStateManager.is_creative_mode())
+	elif not is_loading:
+		receipt = PlacementReceipt.create("", 0, false, GameStateManager.is_creative_mode())
+	elif receipt.is_empty():
+		receipt = PlacementReceipt.create("", 0, false, false)
 	var scene = get_machine_scene(machine_type)
 	var machine = scene.instantiate() as Node3D
 	# Global transforms require the node to be in the scene tree first.
@@ -65,14 +64,11 @@ func place_machine(machine_type: String, position: Vector3, rotation_y: float, s
 	machine.rotation.y = rotation_y
 	var structure_id := saved_structure_id if not saved_structure_id.is_empty() else _allocate_machine_id()
 	machine.set("structure_id", structure_id)
-	machine.set_meta("construction_cost_paid", construction_cost_paid if is_loading else ConstructionCosts.cost_was_charged(construction_cost))
+	machine.set_meta("placement_receipt", receipt)
 	machines.append(machine)
 	_configure_machine_ports(machine, structure_id)
 	if machine.has_method("load_machine_state"):
 		machine.load_machine_state(state)
-	if not is_loading and not ConstructionCosts.consume(construction_cost, inventory):
-		remove_machine(machine, false)
-		return null
 	return machine
 
 func get_machine_by_id(saved_structure_id: String) -> Node3D:
@@ -103,9 +99,8 @@ func remove_machine(machine: Node3D, return_materials: bool = true) -> bool:
 	machines.erase(machine)
 	_disconnect_ports(machine)
 	if return_materials:
-		var machine_type: String = str(machine.get("machine_type"))
-		if machine.get_meta("construction_cost_paid", true):
-			ConstructionCosts.refund(get_construction_cost(machine_type), InventoryManager.get_inventory(), machine.global_position)
+		var receipt: Dictionary = machine.get_meta("placement_receipt", {})
+		ToolManager.refund_placement(receipt, machine.global_position)
 	machine.remove_from_group("machines")
 	machine.remove_from_group(STRUCTURE_GROUP)
 	machine.queue_free()
@@ -133,7 +128,7 @@ func get_save_data() -> Dictionary:
 	var data: Array[Dictionary] = []
 	for machine in machines:
 		if is_instance_valid(machine):
-			data.append({"id": str(machine.get("structure_id")), "type": machine.get("machine_type"), "position": {"x": machine.global_position.x, "y": machine.global_position.y, "z": machine.global_position.z}, "rotation_y": machine.rotation.y, "state": machine.call("get_machine_state"), "construction_cost_paid": machine.get_meta("construction_cost_paid", true)})
+			data.append({"id": str(machine.get("structure_id")), "type": machine.get("machine_type"), "position": {"x": machine.global_position.x, "y": machine.global_position.y, "z": machine.global_position.z}, "rotation_y": machine.rotation.y, "state": machine.call("get_machine_state"), "placement_receipt": machine.get_meta("placement_receipt", {})})
 	return {"machines": data}
 
 func load_save_data(data: Dictionary) -> void:
@@ -141,13 +136,19 @@ func load_save_data(data: Dictionary) -> void:
 	_pending_machine_states.clear()
 	for machine_data in data.get("machines", []):
 		var p: Dictionary = machine_data.get("position", {})
+		var saved_receipt: Variant = machine_data.get("placement_receipt", {})
+		if not PlacementReceipt.is_valid(saved_receipt):
+			var legacy_item_id := str(machine_data.get("placeable_item_id", ""))
+			if not legacy_item_id.is_empty():
+				saved_receipt = PlacementReceipt.create(legacy_item_id, 1, true, false)
 		var machine: Node3D = place_machine(
 			machine_data.get("type", ""),
 			Vector3(p.get("x", 0.0), p.get("y", 0.0), p.get("z", 0.0)),
 			machine_data.get("rotation_y", 0.0),
 			{},
 			str(machine_data.get("id", "")),
-			bool(machine_data.get("construction_cost_paid", true))
+			str(machine_data.get("placeable_item_id", "")),
+			saved_receipt if saved_receipt is Dictionary else {}
 		)
 		if machine != null:
 			_pending_machine_states.append({"machine": machine, "state": machine_data.get("state", {})})

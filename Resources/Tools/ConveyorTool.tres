@@ -10,4 +10,4 @@ description = "Place conveyor belts"
 icon = null
 tool_script_path = "res://Scripts/Tools/ConveyorTool.gd"
 is_multi_step = true
-construction_cost = {"3": 1}
+structure_placement_tool = true

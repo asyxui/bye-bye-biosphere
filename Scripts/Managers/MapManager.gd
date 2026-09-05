@@ -134,13 +134,18 @@ func _destroy(origin: Vector3, direction: Vector3):
 				coordsWithDrops.append(coordsWorld[i])
 
 		voxelTool.do_sphere(hit.position, 2)
-		await get_tree().create_timer(0.2).timeout
 
+		# Count only blocks that the edit actually removed. This keeps the
+		# ecological counter and drops correct when a streamed voxel edit is
+		# rejected or only partially overlaps the terrain.
+		var removed_count := 0
 		for i in range(coordsWithDrops.size()):
 			var coord: Vector3 = coordsWithDrops[i]
-			# coord.y += 1
+			if voxelTool.get_voxel(coord) != 0:
+				continue
 			drop_voxel_material(drops[i], coord)
-		BiosphereManager.record_raw_material_extracted(drops.size())
+			removed_count += 1
+		BiosphereManager.record_raw_material_extracted(removed_count)
 
 func save_map() -> void:
 	# Delegate voxel save to VoxelStreamManager

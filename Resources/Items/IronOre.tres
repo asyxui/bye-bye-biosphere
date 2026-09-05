@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("2_s13cs")
 id = "6"
-name = "IronOre"
+name = "Iron Ore"
 description = "Rock-Solider"
 max_stack_size = 64
 icon = ExtResource("1_qffwe")

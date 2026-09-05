@@ -5,9 +5,9 @@
 [resource]
 script = ExtResource("1_recipe_script")
 id = "iron_smelting"
-input_item_ids = ["2"]
+input_item_ids = ["6"]
 input_quantities = [1]
-output_item_id = "3"
+output_item_id = "5"
 output_quantity = 1
 processing_duration = 2.0
 ecological_damage = 0.5

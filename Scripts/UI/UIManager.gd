@@ -96,6 +96,21 @@ func set_placement_status(message: String, valid: bool) -> void:
 func clear_placement_status() -> void:
 	set_placement_status("", false)
 
+func set_interaction_status(message: String, valid: bool = true) -> void:
+	if _root == null:
+		return
+	var status: Control = _root.get_node_or_null("HUD/InteractionStatus") as Control
+	if status == null:
+		return
+	var label: Label = status.get_node_or_null("Label") as Label
+	if label != null:
+		label.text = message
+		label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5, 1.0) if valid else Color(1.0, 0.35, 0.3, 1.0))
+	status.visible = not message.is_empty()
+
+func clear_interaction_status() -> void:
+	set_interaction_status("", false)
+
 ## The middle-button press can be intercepted by HUD controls before it reaches
 ## _unhandled_input, so the global wheel trigger is observed here.
 func _input(event: InputEvent) -> void:

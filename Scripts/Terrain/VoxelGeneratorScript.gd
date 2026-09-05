@@ -16,21 +16,13 @@ const BIOME_FREQUENCY = 1.0 / 30.0
 const CAVE_CUTOFF = 0.3
 
 const BLOCK_AIR := 0
-const BLOCK_STONE := 1
-const BLOCK_IRON_ORE := 2
-const IRON_ORE_NOISE_THRESHOLD := 0.35
-const STARTER_IRON_CENTER := Vector2(32.0, 0.0)
-const STARTER_IRON_RADIUS := 10.0
-const STARTER_IRON_DEPTH := 12.0
+const BLOCK_GREY := 1
+const BLOCK_PURPLE := 2
 
 var biome_cache: Array = []
 var _performance_mutex := Mutex.new()
 var _performance_capture_enabled := false
 var _performance_statistics: Dictionary = {}
-var _noise_prepared := false
-
-func _init() -> void:
-	prepare_noise()
 
 func _ready():
 	prepare_noise()
@@ -40,8 +32,6 @@ func _get_used_channels_mask() -> int:
 	return 1 << channel
 
 func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> void:
-	if not _noise_prepared:
-		prepare_noise()
 	if not _performance_capture_enabled:
 		_generate_block_without_performance(out_buffer, origin, lod)
 		return
@@ -49,13 +39,13 @@ func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> voi
 	var buffer_size := out_buffer.get_size()
 	var scale = 1 << lod
 	var biome_started_usec := Time.get_ticks_usec()
-	var height_scale := 0.0
+	#var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)
 	var biome_elapsed_usec := Time.get_ticks_usec() - biome_started_usec
 	var generation_started_usec := Time.get_ticks_usec()
-	if lod >= 2:
-		_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
-	else:
-		_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
+	#if lod >= 2:
+		#_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
+	#else:
+		#_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
 	var generation_elapsed_usec := Time.get_ticks_usec() - generation_started_usec
 	_merge_performance_samples("Biome calculation", biome_elapsed_usec, _generation_label_for_lod(lod), generation_elapsed_usec)
 
@@ -64,12 +54,14 @@ func _generate_block_without_performance(out_buffer: VoxelBuffer, origin: Vector
 	var buffer_size := out_buffer.get_size()
 	var scale = 1 << lod
 	
+	#var height_scale = get_blended_height_scale((origin.x + 8 * scale) * BIOME_FREQUENCY, (origin.z + 8 * scale) * BIOME_FREQUENCY)	
+	
 	# At high LODs, use simplified generation
 	if lod >= 2:
-		_generate_block_simple(out_buffer, origin, buffer_size, scale, 0.0)
+		#_generate_block_simple(out_buffer, origin, buffer_size, scale, height_scale)
 		return
 	
-	_generate_block_detailed(out_buffer, origin, buffer_size, scale, 0.0)
+	#_generate_block_detailed(out_buffer, origin, buffer_size, scale, height_scale)
 
 
 func _generate_block_detailed(out_buffer: VoxelBuffer, origin: Vector3i, buffer_size: Vector3i, scale: int, height_scale: float) -> void:
@@ -95,15 +87,9 @@ func _generate_block_detailed(out_buffer: VoxelBuffer, origin: Vector3i, buffer_
 				if world_y > height: continue	
 				if cave_noise_gen.get_noise_3d(world_x, world_y, world_z) >= CAVE_CUTOFF: continue
 				
-				var block_type = _get_block_type(world_x, world_y, world_z, height)
+				var block_val = block_type_noise_gen.get_noise_3d(world_x, world_y, world_z)
+				var block_type = BLOCK_PURPLE if block_val > 0.0 else BLOCK_GREY
 				out_buffer.set_voxel(block_type, x, y, z, VoxelBuffer.CHANNEL_TYPE)
-
-
-func _get_block_type(world_x: float, world_y: float, world_z: float, surface_height: float) -> int:
-	var starter_patch := Vector2(world_x, world_z).distance_to(STARTER_IRON_CENTER) <= STARTER_IRON_RADIUS
-	var exposed_starter_patch := starter_patch and world_y >= surface_height - STARTER_IRON_DEPTH
-	var noise_iron := block_type_noise_gen.get_noise_3d(world_x, world_y, world_z) > IRON_ORE_NOISE_THRESHOLD
-	return BLOCK_IRON_ORE if exposed_starter_patch or noise_iron else BLOCK_STONE
 
 
 func reset_performance_statistics() -> void:
@@ -164,13 +150,14 @@ func _generate_block_simple(out_buffer: VoxelBuffer, origin: Vector3i, buffer_si
 		var world_z = float(origin.z + z * scale)
 		for x in buffer_size.x:
 			var world_x = float(origin.x + x * scale)
-			var biome := get_blended_biome(world_x * BIOME_FREQUENCY, world_z * BIOME_FREQUENCY)
-			var height: float = biome["base_height"] + terrain_noise_gen.get_noise_2d(world_x, world_z) * biome["terrain_amplitude"]
+			var height: float = terrain_noise_gen.get_noise_2d(world_x, world_z) * height_scale
+			height += height_scale / 2
 			
 			var max_y = int((height - float(origin.y)) / float(scale))
 			max_y = clamp(max_y, 0, buffer_size.y)
 			
-			var block_type = _get_block_type(world_x, height, world_z, height)
+			var block_val = block_type_noise_gen.get_noise_2d(world_x, world_z)
+			var block_type = BLOCK_PURPLE if block_val > 0.0 else BLOCK_GREY
 
 			# Fill entire column below terrain (no caves)
 			out_buffer.fill_area(block_type, Vector3(x, 0, z) , Vector3(x + 1, max_y, z + 1), channel)
@@ -228,10 +215,6 @@ func get_blended_biome(x: float, z: float) -> Dictionary:
 	}
 
 func prepare_noise():
-	if _noise_prepared:
-		return
-	_noise_prepared = true
-
 	# Block type noise
 	block_type_noise_gen.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	block_type_noise_gen.seed = 0

@@ -99,9 +99,6 @@ func get_belt_for_scene(scene_node: Node) -> ConveyorBeltObject:
 			return belt
 	return null
 
-func get_construction_cost() -> Dictionary:
-	return ConstructionCosts.get_cost("conveyor")
-
 ## A downstream belt is connected when its start endpoint meets this belt's end
 ## endpoint. Endpoint matching is reconstructed from saved geometry, so the
 ## logical connection survives scene reloads without a visual dependency.
@@ -191,7 +188,7 @@ func _allocate_belt_id() -> String:
 
 ## Returns an empty string when placement is valid, otherwise a player-facing
 ## reason for the invalid preview state.
-func get_conveyor_placement_error(start: Vector3, end: Vector3, check_cost: bool = false) -> String:
+func get_conveyor_placement_error(start: Vector3, end: Vector3) -> String:
 	var delta := end - start
 	var length: float = delta.length()
 	if length < MIN_CONVEYOR_LENGTH:
@@ -216,17 +213,13 @@ func get_conveyor_placement_error(start: Vector3, end: Vector3, check_cost: bool
 			continue
 		if _segments_overlap(start, end, belt.start, belt.end):
 			return "Overlaps another conveyor"
-	if check_cost:
-		var missing: Dictionary = ConstructionCosts.get_missing(get_construction_cost(), InventoryManager.get_inventory())
-		if not missing.is_empty():
-			return ConstructionCosts.format_missing(missing)
 	return ""
 
 ## Placement validation shared by the conveyor tool and the manager. A
 ## touching endpoint is allowed so belts can connect to an existing port, but
 ## the spans themselves may not overlap an existing structure.
-func can_place_conveyor(start: Vector3, end: Vector3, check_cost: bool = false) -> bool:
-	return get_conveyor_placement_error(start, end, check_cost).is_empty()
+func can_place_conveyor(start: Vector3, end: Vector3) -> bool:
+	return get_conveyor_placement_error(start, end).is_empty()
 
 func _segment_has_machine_port_endpoint(machine: Node, start: Vector3, end: Vector3) -> bool:
 	for point in points:
@@ -260,16 +253,36 @@ func _segments_overlap(start_a: Vector3, end_a: Vector3, start_b: Vector3, end_b
 	var closest := minf(_point_segment_distance(a, c, d), _point_segment_distance(b, c, d))
 	closest = minf(closest, _point_segment_distance(c, a, b))
 	closest = minf(closest, _point_segment_distance(d, a, b))
-	var intersects = Geometry2D.segment_intersects_segment(a, b, c, d) != null
-	if not intersects and closest >= CONVEYOR_CLEARANCE:
+	var intersection = Geometry2D.segment_intersects_segment(a, b, c, d)
+	if intersection != null:
+		var endpoint_touch := false
+		for new_endpoint in [a, b]:
+			for existing_endpoint in [c, d]:
+				if intersection.distance_to(new_endpoint) < 0.0001 and intersection.distance_to(existing_endpoint) < 0.0001:
+					endpoint_touch = true
+		return not endpoint_touch
+
+	if closest >= CONVEYOR_CLEARANCE:
 		return false
 
-	# Permit a connection where the new span only touches an existing endpoint.
-	if a.distance_to(c) < 0.75 or a.distance_to(d) < 0.75:
-		return _point_segment_distance(b, c, d) >= CONVEYOR_CLEARANCE
-	if b.distance_to(c) < 0.75 or b.distance_to(d) < 0.75:
-		return _point_segment_distance(a, c, d) >= CONVEYOR_CLEARANCE
-	return true
+	# Collinear spans need an explicit interval check because Godot does not
+	# report every overlapping collinear pair as a segment intersection.
+	var existing := d - c
+	var existing_length := existing.length()
+	if existing_length > 0.0001:
+		var axis := existing / existing_length
+		var collinear := absf(axis.cross(a - c)) < 0.0001 and absf(axis.cross(b - c)) < 0.0001
+		if collinear:
+			var a_progress := (a - c).dot(axis)
+			var b_progress := (b - c).dot(axis)
+			var overlap_start := maxf(0.0, minf(a_progress, b_progress))
+			var overlap_end := minf(existing_length, maxf(a_progress, b_progress))
+			return overlap_end - overlap_start > 0.0001
+
+	# A non-intersecting clearance violation is only allowed when the new belt
+	# is snapping to an existing endpoint and immediately travels away from it.
+	var touches_endpoint := a.distance_to(c) < 0.75 or a.distance_to(d) < 0.75 or b.distance_to(c) < 0.75 or b.distance_to(d) < 0.75
+	return not touches_endpoint
 
 func _segment_near_point(start: Vector3, end: Vector3, point: Vector3, clearance: float) -> bool:
 	var segment_start := Vector2(start.x, start.z)
@@ -289,13 +302,13 @@ func _segment_progress(point: Vector2, start: Vector2, end: Vector2) -> float:
 	return clampf((point - start).dot(end - start) / (end - start).length_squared(), 0.0, 1.0)
 
 ## Spawn a conveyor belt at the given positions and register it for saving
-func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "", charge_cost: bool = true) -> Node:
+func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "", placement_item_id: String = "", saved_receipt: Dictionary = {}) -> Node:
 	var is_loading: bool = not saved_belt_id.is_empty()
-	if not can_place_conveyor(start, end, false):
+	if not can_place_conveyor(start, end):
 		return null
-	var construction_cost: Dictionary = get_construction_cost()
-	var inventory: Inventory = InventoryManager.get_inventory()
-	if charge_cost and not is_loading and not ConstructionCosts.can_afford(construction_cost, inventory):
+	if not is_loading and placement_item_id.is_empty() and not GameStateManager.is_creative_mode():
+		return null
+	if not is_loading and not placement_item_id.is_empty() and not ToolManager.consume_placeable_item(placement_item_id):
 		return null
 	var length = start.distance_to(end)
 
@@ -321,11 +334,10 @@ func spawn_conveyor(start: Vector3, end: Vector3, saved_belt_id: String = "", ch
 	get_tree().current_scene.add_child(conveyor)
 	belt.scene_node = conveyor
 	register_belt(belt)
-	if charge_cost and not is_loading and not ConstructionCosts.consume(construction_cost, inventory):
-		remove_conveyor(belt, false, false)
-		return null
-	if charge_cost:
-		belt.construction_cost_paid = ConstructionCosts.cost_was_charged(construction_cost, is_loading)
+	if is_loading and PlacementReceipt.is_valid(saved_receipt):
+		belt.placement_receipt = saved_receipt.duplicate(true)
+	elif not is_loading:
+		belt.placement_receipt = PlacementReceipt.create(placement_item_id, 1 if not placement_item_id.is_empty() else 0, not GameStateManager.is_creative_mode() and not placement_item_id.is_empty(), GameStateManager.is_creative_mode())
 	return conveyor
 
 ## Remove a belt from the live world and registry. Contents are converted to
@@ -341,8 +353,8 @@ func remove_conveyor(target, drop_contents: bool = true, return_materials: bool 
 	if drop_contents:
 		_drop_belt_contents(belt)
 	if return_materials:
-		if belt.construction_cost_paid:
-			ConstructionCosts.refund(get_construction_cost(), InventoryManager.get_inventory(), belt.start.lerp(belt.end, 0.5))
+		var drop_position := belt.start.lerp(belt.end, 0.5)
+		ToolManager.refund_placement(belt.placement_receipt, drop_position)
 	if is_instance_valid(belt.scene_node):
 		belt.scene_node.remove_from_group("structures")
 		belt.scene_node.queue_free()
@@ -379,7 +391,7 @@ func _drop_belt_contents(belt: ConveyorBeltObject) -> void:
 			push_error("Cannot create dismantling pickup for item id: %s" % stack.item_id)
 			continue
 		var drop_position: Vector3 = belt.start.lerp(belt.end, progress) + Vector3.UP * 0.3
-		MapManager.spawn_item_drop(item_resource, drop_position, null, stack.quantity)
+		MapManager.spawn_item_drop(item_resource, drop_position, null, stack.quantity, true)
 
 ## Saveable interface: get unique save key
 func get_save_key() -> String:
@@ -405,16 +417,17 @@ func load_save_data(data: Dictionary) -> void:
 	var pending_connections: Array[Dictionary] = []
 	var conveyor_data = data.get("belts", [])
 	for belt_dict in conveyor_data:
-		var belt = ConveyorBeltObject.from_dict(belt_dict)
+		var belt: ConveyorBeltObject = ConveyorBeltObject.from_dict(belt_dict)
 		if belt:
 			var saved_items: Array[ConveyorItem] = []
 			for saved_item in belt.items:
 				saved_items.append(saved_item)
 			belt.items.clear()
-			var scene_node = spawn_conveyor(belt.start, belt.end, belt.belt_id)
+			var saved_belt_id: String = belt.belt_id if not belt.belt_id.is_empty() else _allocate_belt_id()
+			var scene_node = spawn_conveyor(belt.start, belt.end, saved_belt_id, "", belt.placement_receipt)
 			var created_belt := get_belt_for_scene(scene_node)
 			if created_belt != null:
-				created_belt.construction_cost_paid = belt.construction_cost_paid
+				created_belt.placement_receipt = belt.placement_receipt.duplicate(true)
 				created_belt.start_port_id = str(belt_dict.get("start_port_id", ""))
 				created_belt.end_port_id = str(belt_dict.get("end_port_id", ""))
 				created_belt.downstream_belt_id = str(belt_dict.get("downstream_belt_id", ""))

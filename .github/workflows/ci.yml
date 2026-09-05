@@ -56,6 +56,14 @@ jobs:
         shell: pwsh
         run: '& $env:GODOT_CONSOLE --headless --path . --import'
 
+      - name: Run headless test scene
+        shell: pwsh
+        run: |
+          & $env:GODOT_CONSOLE --headless --path . --scene res://Tests/TestRunner.tscn
+          if ($LASTEXITCODE -ne 0) {
+            throw "Headless test scene failed."
+          }
+
       - name: Export Windows release
         shell: pwsh
         run: |

@@ -8,6 +8,8 @@ signal restoration_completed
 signal restoration_failed(error: String)
 
 const SAVES_DIR = "user://saves"
+const CURRENT_SAVE_VERSION: int = 1
+const INCOMPATIBLE_SAVE_MESSAGE := "This save uses an incompatible prototype format and cannot be loaded."
 
 # Saveable nodes are discovered by group membership, but their restore order
 # is part of the persistence contract. Machines must exist before conveyor
@@ -17,6 +19,7 @@ const SAVE_ORDER: Array[String] = ["machines", "conveyors", "biosphere", "invent
 const CLEAR_ORDER: Array[String] = ["conveyors", "machines", "biosphere", "inventory", "player", "tools"]
 
 var current_slot_id: String = ""
+var last_load_error: String = ""
 
 ## Get list of all available save slots
 func get_save_slots() -> Array[Dictionary]:
@@ -47,7 +50,7 @@ func get_save_slots() -> Array[Dictionary]:
 					"path": slot_path,
 					"timestamp": metadata.get("timestamp", 0),
 					"player_position": metadata.get("player_position", {}),
-					"version": metadata.get("version", 1)
+					"version": metadata.get("version", 0)
 				})
 		dir_name = dir.get_next()
 
@@ -83,7 +86,7 @@ func create_slot(slot_id: String) -> bool:
 		push_error("Failed to create save slot directory: %s" % slot_path)
 		return false
 
-	if not _write_json_atomic(slot_path, {}):
+	if not _write_json_atomic(slot_path, {"game_metadata": _new_game_metadata()}):
 		push_error("Failed to initialize save data: %s" % slot_path)
 		_delete_directory_recursive(slot_path)
 		return false
@@ -139,7 +142,7 @@ func save_game(slot_id: String) -> bool:
 
 	save_progress.emit(0.2)
 
-	var save_data: Dictionary = {}
+	var save_data: Dictionary = {"game_metadata": _new_game_metadata()}
 	var saveable_nodes: Array[Node] = _get_ordered_saveables(SAVE_ORDER)
 
 	CustomLogger.log_info("SaveManager: Found %d saveable nodes" % saveable_nodes.size())
@@ -186,6 +189,7 @@ func save_game(slot_id: String) -> bool:
 
 func load_game_data(slot_id: String) -> Variant:
 	current_slot_id = slot_id
+	last_load_error = ""
 	restoration_started.emit()
 
 	var slot_dir = get_slot_directory(slot_id)
@@ -197,12 +201,17 @@ func load_game_data(slot_id: String) -> Variant:
 	var canonical = paths[0]
 	var canonical_data = _read_json_dictionary(canonical)
 	if canonical_data is Dictionary:
+		if not validate_save_data(canonical_data):
+			restoration_failed.emit(last_load_error)
+			return null
 		return canonical_data
 
 	# Recovery from backup file (corruption)
 	for path in paths.slice(1):
 		var recovered_data = _read_json_dictionary(path)
 		if recovered_data is Dictionary:
+			if not validate_save_data(recovered_data):
+				continue
 			if FileAccess.file_exists(canonical):
 				_preserve_corrupt_file(canonical)
 			if not _write_json_atomic(slot_dir, recovered_data):
@@ -214,16 +223,16 @@ func load_game_data(slot_id: String) -> Variant:
 
 	if FileAccess.file_exists(canonical):
 		_preserve_corrupt_file(canonical)
-	var empty_data: Dictionary = {}
-	if not _write_json_atomic(slot_dir, empty_data):
-		var error = "No valid save JSON and failed to repair: %s" % slot_dir
-		push_error(error)
-		restoration_failed.emit(error)
-		return null
-	return empty_data
+	last_load_error = INCOMPATIBLE_SAVE_MESSAGE
+	push_error(last_load_error)
+	restoration_failed.emit(last_load_error)
+	return null
 
 
 func restore_game_state(save_data: Dictionary) -> bool:
+	if not validate_save_data(save_data):
+		restoration_failed.emit(last_load_error)
+		return false
 	var saveables_by_key: Dictionary = _get_saveables_by_key()
 	var restored_keys: Dictionary = {}
 
@@ -257,6 +266,19 @@ func restore_game_state(save_data: Dictionary) -> bool:
 
 	restoration_completed.emit()
 	return true
+
+func validate_save_data(save_data: Dictionary) -> bool:
+	if save_data == null:
+		last_load_error = INCOMPATIBLE_SAVE_MESSAGE
+		return false
+	var metadata: Variant = save_data.get("game_metadata", null)
+	if not metadata is Dictionary or int(metadata.get("version", -1)) != CURRENT_SAVE_VERSION:
+		last_load_error = INCOMPATIBLE_SAVE_MESSAGE
+		return false
+	return true
+
+func get_last_load_error() -> String:
+	return last_load_error if not last_load_error.is_empty() else INCOMPATIBLE_SAVE_MESSAGE
 
 
 func clear_all_saveables() -> void:
@@ -330,16 +352,22 @@ func _load_slot_metadata(slot_path: String) -> Dictionary:
 		var game_meta = data["game_metadata"]
 		if game_meta is Dictionary:
 			metadata["timestamp"] = game_meta.get("timestamp", 0)
-			metadata["version"] = game_meta.get("version", 1)
+			metadata["version"] = game_meta.get("version", 0)
 
 	# If no explicit timestamp, try to get file modification time
 	if not "timestamp" in metadata:
 		metadata["timestamp"] = FileAccess.get_modified_time(data_file) * 1000
 
 	if not "version" in metadata:
-		metadata["version"] = 1
+		metadata["version"] = 0
 
 	return metadata
+
+func _new_game_metadata() -> Dictionary:
+	return {
+		"version": CURRENT_SAVE_VERSION,
+		"timestamp": int(Time.get_unix_time_from_system() * 1000.0)
+	}
 
 
 func _read_json_dictionary(path: String) -> Variant:

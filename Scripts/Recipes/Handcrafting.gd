@@ -2,27 +2,29 @@ class_name Handcrafting
 extends RefCounted
 
 const RECIPES_PATH := "res://Resources/Recipes/Handcrafting"
+const RECIPE_ORDER := ["manual_smelter", "smelter", "sink", "conveyor"]
 
 static func get_recipes() -> Array[Recipe]:
 	var recipes: Array[Recipe] = []
-	var recipes_dir := DirAccess.open(RECIPES_PATH)
-	if recipes_dir == null:
-		return recipes
-
-	recipes_dir.list_dir_begin()
-	var filename := recipes_dir.get_next()
-	while not filename.is_empty():
-		if not recipes_dir.current_is_dir() and filename.ends_with(".tres"):
-			var recipe = load(RECIPES_PATH.path_join(filename))
-			if recipe is Recipe and recipe.handcraftable:
-				recipes.append(recipe)
-		filename = recipes_dir.get_next()
-	recipes_dir.list_dir_end()
-	recipes.sort_custom(func(a: Recipe, b: Recipe) -> bool: return a.id < b.id)
+	for filename in ResourceLoader.list_directory(RECIPES_PATH):
+		if not filename.ends_with(".tres"):
+			continue
+		var recipe = load(RECIPES_PATH.path_join(filename))
+		if recipe is Recipe and recipe.handcraftable:
+			recipes.append(recipe)
+	recipes.sort_custom(func(a: Recipe, b: Recipe) -> bool:
+		var a_index := RECIPE_ORDER.find(a.id)
+		var b_index := RECIPE_ORDER.find(b.id)
+		if a_index == -1:
+			a_index = RECIPE_ORDER.size()
+		if b_index == -1:
+			b_index = RECIPE_ORDER.size()
+		return (a_index == b_index and a.id < b.id) or a_index < b_index
+	)
 	return recipes
 
 static func get_missing(recipe: Recipe, inventory: Inventory) -> Dictionary:
-	if recipe == null or inventory == null or not GameStateManager.construction_costs_enabled():
+	if recipe == null or inventory == null or not GameStateManager.ingredient_costs_enabled():
 		return {}
 	var missing: Dictionary = {}
 	var requirements := recipe.get_input_requirements()
@@ -50,7 +52,7 @@ static func craft(recipe: Recipe, inventory: Inventory) -> bool:
 
 	var output_item: InventoryItem = ItemUtils.item_object_by_id(recipe.output_item_id)
 	var removed: Dictionary = {}
-	if GameStateManager.construction_costs_enabled():
+	if GameStateManager.ingredient_costs_enabled():
 		var requirements := recipe.get_input_requirements()
 		for item_key in requirements:
 			var item_id := str(item_key)
@@ -80,3 +82,14 @@ static func _restore_inputs(removed: Dictionary, inventory: Inventory) -> void:
 		var item: InventoryItem = ItemUtils.item_object_by_id(str(item_id))
 		if item != null:
 			inventory.add_item(item, int(removed[item_id]))
+
+static func format_missing(missing: Dictionary) -> String:
+	if missing.is_empty():
+		return ""
+	var requirements: Array[String] = []
+	for item_key in missing:
+		var item_id := str(item_key)
+		var item: InventoryItem = ItemUtils.item_object_by_id(item_id)
+		var item_name := item.get_display_name() if item != null else item_id
+		requirements.append("%d %s" % [int(missing[item_key]), item_name])
+	return "Missing: " + ", ".join(requirements)

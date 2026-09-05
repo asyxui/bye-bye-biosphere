@@ -8,7 +8,7 @@ const FIXED_SIMULATION_STEP: float = 1.0 / 60.0
 const MAX_SIMULATION_STEPS_PER_FRAME: int = 8
 const POSITION_EPSILON: float = 0.0001
 
-enum ProcessingState { IDLE, RUNNING, INPUT_STARVED, OUTPUT_BLOCKED }
+enum ProcessingState {IDLE, RUNNING, INPUT_STARVED, OUTPUT_BLOCKED}
 
 var machine_type: String = "smelter"
 var structure_id: String = ""
@@ -34,6 +34,63 @@ func get_input_buffer() -> ItemBuffer:
 
 func get_output_buffer() -> ItemBuffer:
 	return output_buffer
+
+func get_interaction_prompt(_player: Node) -> String:
+	var ready_output: ItemStack = output_buffer.peek_stack()
+	if ready_output != null and ready_output.quantity > 0:
+		if InventoryManager.get_inventory().get_insertable_quantity(ready_output, 1) <= 0:
+			return "Inventory full"
+		return "E: Collect %s" % _get_item_name(ready_output.item_id, "output")
+	if _processing_active:
+		return "Smelting: %.0f%%" % get_processing_progress_percent()
+	var input_item_id := _get_primary_input_item_id()
+	if input_item_id.is_empty():
+		return "No smelting recipe"
+	var input_probe := ItemStack.new(input_item_id, 1)
+	if input_buffer.get_insertable_quantity(input_probe, 1) <= 0:
+		return "Input full"
+	if InventoryManager.get_inventory().get_extractable_quantity(input_item_id) <= 0:
+		return "No %s" % _get_item_name(input_item_id, "input")
+	return "E: Insert %s" % _get_item_name(input_item_id, "input")
+
+func interact(_player: Node) -> bool:
+	var inventory: Inventory = InventoryManager.get_inventory()
+	if inventory == null:
+		return false
+	var ready_output: ItemStack = output_buffer.peek_stack()
+	if ready_output != null and ready_output.quantity > 0:
+		var collected := ItemTransfer.transfer(output_buffer, inventory, ready_output.item_id, 1)
+		if collected > 0:
+			inventory.items_changed.emit()
+			_update_status_label()
+		return collected > 0
+
+	var input_item_id := _get_primary_input_item_id()
+	if input_item_id.is_empty():
+		return false
+	var input_probe := ItemStack.new(input_item_id, 1)
+	if input_buffer.get_insertable_quantity(input_probe, 1) <= 0:
+		return false
+	if inventory.get_extractable_quantity(input_item_id) <= 0:
+		return false
+	return insert_from_inventory(1) > 0
+
+func get_processing_progress_percent() -> float:
+	if active_recipe == null or active_recipe.processing_duration <= POSITION_EPSILON:
+		return 0.0
+	return clampf(processing_progress / active_recipe.processing_duration, 0.0, 1.0) * 100.0
+
+func _get_primary_input_item_id() -> String:
+	if active_recipe == null:
+		return ""
+	var requirements: Dictionary = active_recipe.get_input_requirements()
+	if requirements.is_empty():
+		return ""
+	return str(requirements.keys()[0])
+
+func _get_item_name(item_id: String, fallback: String) -> String:
+	var item: InventoryItem = ItemUtils.item_object_by_id(item_id)
+	return item.name if item != null else fallback
 
 ## Inserts one or more recipe inputs from the player's inventory. The caller
 ## uses the shared ItemTransfer contract, so inventory ownership is removed
@@ -216,6 +273,8 @@ func load_machine_state(state: Dictionary) -> void:
 	_update_status_label()
 
 func _load_recipe_by_id(recipe_id: String) -> Recipe:
+	if recipe_id == IRON_SMELTING_RECIPE.id:
+		return IRON_SMELTING_RECIPE
 	var recipe_path := "res://Resources/Recipes/%s.tres" % recipe_id
 	if ResourceLoader.exists(recipe_path):
 		var loaded_recipe = load(recipe_path)

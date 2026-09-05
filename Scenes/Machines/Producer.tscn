@@ -44,7 +44,7 @@ position = Vector3(0, 0.8, -1.5)
 script = ExtResource("2")
 point_type = 1
 port_direction = 1
-accepted_item_ids = ["2"]
+accepted_item_ids = ["6"]
 accept_all_items = false
 max_connections = 1
 [node name="DropSpawn" type="Node3D" parent="."]

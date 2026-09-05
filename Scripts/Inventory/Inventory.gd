@@ -77,7 +77,7 @@ func insert_stack(stack: ItemStack, quantity: int = -1) -> int:
 			remaining -= moved
 	if remaining != 0:
 		stack.quantity += remaining
-		push_error("Inventory insertion invariant failed; restored uninserted items")
+		push_error("Inventory insertion invariant failed. Restored uninserted items")
 	return accepted - remaining
 
 func can_extract(item_id: String, quantity: int = 1) -> bool:

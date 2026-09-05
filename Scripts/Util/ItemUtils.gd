@@ -4,6 +4,8 @@ extends Node
 var _items_by_id: Dictionary = {}
 var _items_index_initialized := false
 
+const ITEMS_PATH := "res://Resources/Items"
+
 func _ready() -> void:
 	_ensure_item_index()
 
@@ -13,21 +15,26 @@ func item_object_by_id(item_id: String) -> InventoryItem:
 	_ensure_item_index()
 	return _items_by_id.get(str(item_id), null) as InventoryItem
 
+func get_all_items() -> Array[InventoryItem]:
+	_ensure_item_index()
+	var items: Array[InventoryItem] = []
+	for item_value in _items_by_id.values():
+		var item := item_value as InventoryItem
+		if item != null:
+			items.append(item)
+	items.sort_custom(func(a: InventoryItem, b: InventoryItem) -> bool:
+		return a.id < b.id
+	)
+	return items
+
 func _ensure_item_index() -> void:
 	if _items_index_initialized:
 		return
 	_items_index_initialized = true
 
-	var items_dir := DirAccess.open("res://Resources/Items")
-	if items_dir == null:
-		return
-
-	items_dir.list_dir_begin()
-	var filename := items_dir.get_next()
-	while not filename.is_empty():
-		if not items_dir.current_is_dir() and filename.ends_with(".tres"):
-			var item = load("res://Resources/Items/%s" % filename)
-			if item is InventoryItem:
-				_items_by_id[str(item.id)] = item
-		filename = items_dir.get_next()
-	items_dir.list_dir_end()
+	for filename in ResourceLoader.list_directory(ITEMS_PATH):
+		if not filename.ends_with(".tres"):
+			continue
+		var item = load(ITEMS_PATH.path_join(filename))
+		if item is InventoryItem:
+			_items_by_id[str(item.id)] = item
