@@ -7,6 +7,7 @@ var waiting_for_confirmation := false
 var preview_position := Vector3.ZERO
 var preview_rotation_y := 0.0
 var preview_is_valid := false
+var _preview_materials: Array[StandardMaterial3D] = []
 
 func on_activate(p: Node) -> void:
 	super.on_activate(p)
@@ -39,6 +40,17 @@ func on_update(_delta: float) -> void:
 		if hit != Vector3.ZERO:
 			_update_preview(hit)
 
+func _prepare_preview_materials() -> void:
+	_preview_materials.clear()
+
+	for child in preview.find_children("*", "MeshInstance3D", true, false):
+		var mesh := child as MeshInstance3D
+		if mesh.material_override is StandardMaterial3D:
+			var material := mesh.material_override.duplicate() as StandardMaterial3D
+			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			mesh.material_override = material
+			_preview_materials.append(material)
+
 func _create_preview(position: Vector3) -> void:
 	var machine_scene: PackedScene = MachineManager.get_machine_scene(_get_machine_type()) if _tool_resource != null else null
 	if machine_scene == null:
@@ -48,13 +60,16 @@ func _create_preview(position: Vector3) -> void:
 		return
 
 	preview = machine_scene.instantiate() as Node3D
+
 	if preview is CollisionObject3D:
 		preview.set_collision_layer_value(1, false)
 		preview.set_collision_mask_value(1, false)
-	preview.process_mode = Node.PROCESS_MODE_DISABLED
+		preview.process_mode = Node.PROCESS_MODE_DISABLED
+
 	player.get_tree().current_scene.add_child(preview)
 	preview.remove_from_group("structures")
 	preview.remove_from_group("machines")
+	_prepare_preview_materials()
 	preview_is_valid = false
 	_update_preview(position)
 
@@ -84,22 +99,25 @@ func _get_placeable_item_id() -> String:
 	return ToolManager.get_placeable_item_id(_tool_resource)
 
 func _set_preview_color(valid: bool, reason: String = "") -> void:
-	var color = Color(0.3, 1.0, 0.4, 0.5) if valid else Color(1.0, 0.2, 0.2, 0.5)
-	for child in preview.find_children("*", "MeshInstance3D", true, false):
-		var mesh = child as MeshInstance3D
-		if mesh.material_override is StandardMaterial3D:
-			var material = mesh.material_override.duplicate() as StandardMaterial3D
-			material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-			material.albedo_color = color
-			mesh.material_override = material
-	UIManager.set_placement_status("READY - click to place" if valid else reason, valid)
+	var color := Color(0.3, 1.0, 0.4, 0.5) if valid else Color(1.0, 0.2, 0.2, 0.5)
+
+	for material in _preview_materials:
+		material.albedo_color = color
+
+	UIManager.set_placement_status(
+		"READY - click to place" if valid else reason,
+		valid
+	)
 
 func _cleanup_preview() -> void:
 	waiting_for_confirmation = false
 	preview_is_valid = false
+	_preview_materials.clear()
+	
 	if is_instance_valid(preview):
 		preview.queue_free()
 		preview = null
+	
 	UIManager.clear_placement_status()
 
 func _get_center_hit() -> Vector3:
