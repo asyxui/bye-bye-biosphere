@@ -5,6 +5,7 @@ var tool_executor: Node
 var hotbar_tools: Array[Resource] = [] # HotbarBinding or null for each slot (size 10)
 var active_tool_instance: Object = null # Cache the active tool instance so state persists
 var selected_hotbar_slot: int = -1
+var base_tool: ToolResource = null
 
 signal tool_equipped(tool_id: String, slot_index: int)
 signal tool_activated(tool_id: String, slot_index: int)
@@ -46,7 +47,11 @@ func _load_tools() -> void:
 			continue
 		var tool = load(TOOLS_PATH.path_join(file_name))
 		if tool is ToolResource and not tool.id.is_empty():
-			tools[tool.id] = tool
+      
+      if tool.id == "freeHand":
+        base_tool = tool
+      else:
+			  tools[tool.id] = tool
 			print("Loaded tool: %s from %s" % [tool.id, file_name])
 
 func get_tool(tool_id: String):
@@ -194,7 +199,8 @@ func activate_tool(slot_index: int) -> void:
 		else:
 			UIManager.set_placement_status(error, false)
 	else:
-		print("No tool in slot %d" % slot_index)
+		tool_activated.emit(base_tool.id, slot_index)
+		print("No tool in slot %d, doing free-hand stuff" % slot_index)
 
 func _is_equipped_tool_available(tool: Resource) -> bool:
 	var binding := tool as HotbarBinding

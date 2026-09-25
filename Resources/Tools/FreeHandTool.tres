@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ToolResource" format=3 uid="uid://bnbptjxfbxdxx"]
+
+[ext_resource type="Script" uid="uid://cod25okn0wnqc" path="res://Scripts/Tools/ToolResource.gd" id="1_20u70"]
+
+[resource]
+script = ExtResource("1_20u70")
+id = "freeHand"
+name = "FreeHand"
+description = "Do stuff with Hands"
+tool_script_path = "res://Scripts/Tools/FreeHandTool.gd"
