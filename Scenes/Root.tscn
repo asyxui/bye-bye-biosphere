@@ -20,6 +20,7 @@ glow_enabled = true
 
 [sub_resource type="VoxelStreamSQLite" id="VoxelStreamSQLite_rwtwo"]
 database_path = "user://world.sqlite"
+save_generator_output = true
 
 [sub_resource type="VoxelBiome" id="VoxelBiome_bo0b3"]
 biome_name = "Plains"

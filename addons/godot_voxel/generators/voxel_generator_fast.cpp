@@ -54,47 +54,24 @@ VoxelGenerator::Result VoxelGeneratorFast::generate_block(VoxelQueryData input) 
 			Ref<VoxelBiome> primary_biome;
 			Ref<VoxelBiome> secondary_biome;
 			float secondary_weight = 0.0f;
-
-			// Amplitude (roughness) only -- height comes from continentalness below, never from biomes.
-			const float land_amplitude = get_blended_land_amplitude(
-					world_x / biome_period, world_z / biome_period, primary_biome, secondary_biome, secondary_weight);
-
-			const float continentalness = (continentalness_noise->get_noise_2d(world_x, world_z) + 1.0f) * 0.5f;
-			const float curve_height = height_curve.is_valid() ? height_curve->sample_baked(continentalness) : 0.0f;
-
-			// Sample the bare curve shape (no biome roughness yet) at neighbors, at this LOD's own voxel
-			// spacing, to measure how steep the terrain already is here before any biome adds to it.
 			const float slope_step = static_cast<float>(lod_scale);
-
-			const float continentalness_px =
-					(continentalness_noise->get_noise_2d(world_x + slope_step, world_z) + 1.0f) * 0.5f;
-			const float continentalness_nx =
-					(continentalness_noise->get_noise_2d(world_x - slope_step, world_z) + 1.0f) * 0.5f;
-			const float continentalness_pz =
-					(continentalness_noise->get_noise_2d(world_x, world_z + slope_step) + 1.0f) * 0.5f;
-			const float continentalness_nz =
-					(continentalness_noise->get_noise_2d(world_x, world_z - slope_step) + 1.0f) * 0.5f;
-
-			const float curve_px = height_curve.is_valid() ? height_curve->sample_baked(continentalness_px) : 0.0f;
-			const float curve_nx = height_curve.is_valid() ? height_curve->sample_baked(continentalness_nx) : 0.0f;
-			const float curve_pz = height_curve.is_valid() ? height_curve->sample_baked(continentalness_pz) : 0.0f;
-			const float curve_nz = height_curve.is_valid() ? height_curve->sample_baked(continentalness_nz) : 0.0f;
-
-			const float base_slope_x = Math::abs(curve_px - curve_nx) / (2.0f * slope_step);
-			const float base_slope_z = Math::abs(curve_pz - curve_nz) / (2.0f * slope_step);
-			const float base_slope = base_slope_x > base_slope_z ? base_slope_x : base_slope_z;
-
-			// Land roughness is suppressed both near sea level (by height, not by an arbitrary noise
-			// value) AND wherever the bare curve is already steep for any reason -- so no biome's
-			// amplitude, present or future, can ever compound on top of an already-steep coastline.
-			const float coast_margin_taper =
-					smoothstep(coast_margin_start, coast_margin_end, curve_height - ocean_water_level);
-			const float coast_slope_taper =
-					1.0f - smoothstep(coast_slope_taper_start, coast_slope_taper_end, base_slope);
-			const float effective_amplitude = base_roughness + land_amplitude * coast_margin_taper * coast_slope_taper;
-
-			const float terrain_height =
-					curve_height + effective_amplitude * terrain_noise->get_noise_2d(world_x, world_z);
+			float effective_amplitude = 0.0f;
+			float curve_px = 0.0f;
+			float curve_nx = 0.0f;
+			float curve_pz = 0.0f;
+			float curve_nz = 0.0f;
+			const float terrain_height = get_terrain_height(world_x,
+					world_z,
+					slope_step,
+					ocean_water_level,
+					effective_amplitude,
+					curve_px,
+					curve_nx,
+					curve_pz,
+					curve_nz,
+					primary_biome,
+					secondary_biome,
+					secondary_weight);
 
 			// Central difference at this LOD's own voxel spacing, so slope readings stay
 			// consistent across LODs and aren't biased towards the +x/+z directions. Reuses this
@@ -331,6 +308,8 @@ void VoxelGeneratorFast::prepare_noise() {
 		height_curve->add_point(Vector2(0.6f, 18.0f));
 		height_curve->add_point(Vector2(0.8f, 78.0f));
 		height_curve->add_point(Vector2(1.0f, 188.0f));
+		// sample_baked() can lazily rebuild its cache; do that before voxel workers read the curve.
+		height_curve->bake();
 	}
 }
 
@@ -388,6 +367,54 @@ float VoxelGeneratorFast::get_blended_land_amplitude(float x,
 	out_secondary_weight = tb;
 
 	return primary_biome->get_terrain_amplitude() * ta + secondary_biome->get_terrain_amplitude() * tb;
+}
+
+float VoxelGeneratorFast::get_terrain_height(float world_x,
+											float world_z,
+											float slope_step,
+											float ocean_water_level,
+											float &out_effective_amplitude,
+											float &out_curve_px,
+											float &out_curve_nx,
+											float &out_curve_pz,
+											float &out_curve_nz,
+											Ref<VoxelBiome> &out_primary_biome,
+											Ref<VoxelBiome> &out_secondary_biome,
+											float &out_secondary_weight) const {
+	const float land_amplitude = get_blended_land_amplitude(world_x / biome_period,
+			world_z / biome_period,
+			out_primary_biome,
+			out_secondary_biome,
+			out_secondary_weight);
+
+	const float continentalness = (continentalness_noise->get_noise_2d(world_x, world_z) + 1.0f) * 0.5f;
+	const float curve_height = height_curve.is_valid() ? height_curve->sample_baked(continentalness) : 0.0f;
+
+	const float continentalness_px =
+			(continentalness_noise->get_noise_2d(world_x + slope_step, world_z) + 1.0f) * 0.5f;
+	const float continentalness_nx =
+			(continentalness_noise->get_noise_2d(world_x - slope_step, world_z) + 1.0f) * 0.5f;
+	const float continentalness_pz =
+			(continentalness_noise->get_noise_2d(world_x, world_z + slope_step) + 1.0f) * 0.5f;
+	const float continentalness_nz =
+			(continentalness_noise->get_noise_2d(world_x, world_z - slope_step) + 1.0f) * 0.5f;
+
+	out_curve_px = height_curve.is_valid() ? height_curve->sample_baked(continentalness_px) : 0.0f;
+	out_curve_nx = height_curve.is_valid() ? height_curve->sample_baked(continentalness_nx) : 0.0f;
+	out_curve_pz = height_curve.is_valid() ? height_curve->sample_baked(continentalness_pz) : 0.0f;
+	out_curve_nz = height_curve.is_valid() ? height_curve->sample_baked(continentalness_nz) : 0.0f;
+
+	const float base_slope_x = Math::abs(out_curve_px - out_curve_nx) / (2.0f * slope_step);
+	const float base_slope_z = Math::abs(out_curve_pz - out_curve_nz) / (2.0f * slope_step);
+	const float base_slope = base_slope_x > base_slope_z ? base_slope_x : base_slope_z;
+
+	const float coast_margin_taper =
+			smoothstep(coast_margin_start, coast_margin_end, curve_height - ocean_water_level);
+	const float coast_slope_taper =
+			1.0f - smoothstep(coast_slope_taper_start, coast_slope_taper_end, base_slope);
+	out_effective_amplitude = base_roughness + land_amplitude * coast_margin_taper * coast_slope_taper;
+
+	return curve_height + out_effective_amplitude * terrain_noise->get_noise_2d(world_x, world_z);
 }
 
 Ref<VoxelBiome> VoxelGeneratorFast::find_ocean_biome() const {
@@ -510,6 +537,10 @@ float VoxelGeneratorFast::get_continentalness_period() const {
 
 void VoxelGeneratorFast::set_height_curve(Ref<Curve> value) {
 	height_curve = value;
+	if (height_curve.is_valid()) {
+		// sample_baked() can lazily rebuild its cache; do that before voxel workers read the curve.
+		height_curve->bake();
+	}
 }
 
 Ref<Curve> VoxelGeneratorFast::get_height_curve() const {
@@ -744,47 +775,30 @@ int VoxelGeneratorFast::get_outcrop_seed() const {
 
 String VoxelGeneratorFast::get_biome_at(Vector3 world_position) const {
 	Ref<VoxelBiome> ocean = find_ocean_biome();
-	if (ocean.is_valid()) {
-		const float continentalness_here =
-				(continentalness_noise->get_noise_2d(world_position.x, world_position.z) + 1.0f) * 0.5f;
-		const float approx_height = height_curve.is_valid() ? height_curve->sample_baked(continentalness_here) : 0.0f;
-		if (approx_height < ocean->get_water_level()) {
-			return ocean->get_biome_name() + " (submerged)";
-		}
-	}
-
-	const float x = world_position.x / biome_period;
-	const float z = world_position.z / biome_period;
-
-	const float t = (biome_noise->get_noise_2d(x, z) + 1.0f) * 0.5f;
-
 	Ref<VoxelBiome> primary_biome;
 	Ref<VoxelBiome> secondary_biome;
+	float secondary_weight = 0.0f;
+	float effective_amplitude = 0.0f;
+	float curve_px = 0.0f;
+	float curve_nx = 0.0f;
+	float curve_pz = 0.0f;
+	float curve_nz = 0.0f;
+	const float ocean_water_level = ocean.is_valid() ? ocean->get_water_level() : -1000000.0f;
+	const float terrain_height = get_terrain_height(world_position.x,
+			world_position.z,
+			1.0f,
+			ocean_water_level,
+			effective_amplitude,
+			curve_px,
+			curve_nx,
+			curve_pz,
+			curve_nz,
+			primary_biome,
+			secondary_biome,
+			secondary_weight);
 
-	float primary_weight = -1000.0f;
-	float secondary_weight = -1000.0f;
-
-	for (Variant v : biomes) {
-		Ref<VoxelBiome> biome = v;
-
-		if (biome.is_null() || biome->get_is_ocean())
-			continue;
-
-		const float dist = Math::abs(t - biome->get_threshold_center());
-
-		const float weight = 1.0f / Math::pow(dist + 0.001f, 2.0f);
-
-		if (weight > primary_weight) {
-			secondary_weight = primary_weight;
-			secondary_biome = primary_biome;
-
-			primary_weight = weight;
-			primary_biome = biome;
-		} else if (weight > secondary_weight) {
-			secondary_weight = weight;
-			secondary_biome = biome;
-		}
-	}
+	if (ocean.is_valid() && terrain_height < ocean_water_level)
+		return ocean->get_biome_name() + " (submerged)";
 
 	if (primary_biome.is_null())
 		return "None";
@@ -792,11 +806,10 @@ String VoxelGeneratorFast::get_biome_at(Vector3 world_position) const {
 	if (secondary_biome.is_null())
 		return primary_biome->get_biome_name() + " (100%)";
 
-	const float total_weight = primary_weight + secondary_weight;
-
-	const float primary_percentage = primary_weight / total_weight * 100.0f;
-
-	const float secondary_percentage = secondary_weight / total_weight * 100.0f;
+	const float primary_percentage = (1.0f - secondary_weight) * 100.0f;
+	const float secondary_percentage = secondary_weight * 100.0f;
+	const float t = (biome_noise->get_noise_2d(world_position.x / biome_period,
+			world_position.z / biome_period) + 1.0f) * 0.5f;
 
 	return vformat("%s (%.1f%%), %s (%.1f%%), threshold: %f",
 				   primary_biome->get_biome_name(),

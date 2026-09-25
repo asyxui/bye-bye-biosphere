@@ -1,10 +1,6 @@
 #include "voxel_biome.h"
 
 void VoxelBiome::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_base_height", "value"), &VoxelBiome::set_base_height);
-
-	ClassDB::bind_method(D_METHOD("get_base_height"), &VoxelBiome::get_base_height);
-
 	ClassDB::bind_method(D_METHOD("set_terrain_amplitude", "value"), &VoxelBiome::set_terrain_amplitude);
 
 	ClassDB::bind_method(D_METHOD("get_terrain_amplitude"), &VoxelBiome::get_terrain_amplitude);
@@ -55,8 +51,6 @@ void VoxelBiome::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "water_level"), "set_water_level", "get_water_level");
 
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "base_height"), "set_base_height", "get_base_height");
-
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "terrain_amplitude"), "set_terrain_amplitude", "get_terrain_amplitude");
 
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "threshold_center"), "set_threshold_center", "get_threshold_center");
@@ -68,14 +62,6 @@ void VoxelBiome::set_biome_name(String value) {
 
 String VoxelBiome::get_biome_name() const {
 	return biome_name;
-}
-
-void VoxelBiome::set_base_height(float value) {
-	base_height = value;
-}
-
-float VoxelBiome::get_base_height() const {
-	return base_height;
 }
 
 void VoxelBiome::set_terrain_amplitude(float value) {

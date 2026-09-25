@@ -11,7 +11,6 @@ class VoxelBiome : public Resource {
 
 private:
 	String biome_name = "Unnamed";
-	float base_height = 0.0f;
 	float terrain_amplitude = 0.0f;
 	float threshold_center = 0.0f;
 	int surface_voxel_type = 0;
@@ -33,9 +32,6 @@ public:
 
 	String get_biome_name() const;
 	void set_biome_name(String value);
-
-	void set_base_height(float value);
-	float get_base_height() const;
 
 	void set_terrain_amplitude(float value);
 	float get_terrain_amplitude() const;

@@ -200,6 +200,18 @@ private:
 									 Ref<VoxelBiome> &out_primary_biome,
 									 Ref<VoxelBiome> &out_secondary_biome,
 									 float &out_secondary_weight) const;
+	float get_terrain_height(float world_x,
+						 float world_z,
+						 float slope_step,
+						 float ocean_water_level,
+						 float &out_effective_amplitude,
+						 float &out_curve_px,
+						 float &out_curve_nx,
+						 float &out_curve_pz,
+						 float &out_curve_nz,
+						 Ref<VoxelBiome> &out_primary_biome,
+						 Ref<VoxelBiome> &out_secondary_biome,
+						 float &out_secondary_weight) const;
 
 	Ref<VoxelBiome> find_ocean_biome() const;
 
