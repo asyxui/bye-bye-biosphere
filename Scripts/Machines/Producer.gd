@@ -1,5 +1,7 @@
 extends StaticBody3D
 
+@onready var power_consumer: PowerConsumer = $PowerConsumer
+
 const EMIT_INTERVAL: float = 1.0
 const IRON_ORE := preload("res://Resources/Items/IronOre.tres")
 
@@ -14,6 +16,7 @@ var _production_accumulator: float = 0.0
 func _ready() -> void:
 	add_to_group("machines")
 	add_to_group("structures")
+	power_consumer.base_power_requirement = 50.0
 
 func get_input_buffer() -> ItemBuffer:
 	return input_buffer
@@ -22,7 +25,11 @@ func get_output_buffer() -> ItemBuffer:
 	return output_buffer
 
 func _physics_process(delta: float) -> void:
-	_production_accumulator += maxf(0.0, delta)
+	if not power_consumer.can_operate():
+		return
+
+	var power_ratio := power_consumer.get_power_ratio()
+	_production_accumulator += maxf(0.0, delta) * power_ratio
 	while _production_accumulator >= EMIT_INTERVAL:
 		_production_accumulator -= EMIT_INTERVAL
 		var produced: ItemStack = ItemStack.new(IRON_ORE, 1)

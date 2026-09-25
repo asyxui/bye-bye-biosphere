@@ -35,6 +35,7 @@ SaveManager="*res://Scripts/Managers/SaveManager.gd"
 GameStateRestoreManager="*res://Scripts/Managers/GameStateRestoreManager.gd"
 PerformanceTracker="*res://Scripts/Managers/PerformanceTracker.gd"
 ThemeManager="*res://Scripts/UI/ThemeManager.gd"
+ElectricityManager="*uid://bpbivbpk1lxq1"
 
 [gameplay]
 
