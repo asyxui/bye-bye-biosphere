@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Recipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Recipes/Recipe.gd" id="1_recipe_script"]
+
+[resource]
+script = ExtResource("1_recipe_script")
+id = "conveyor"
+display_name = "Conveyor"
+input_item_ids = ["5"]
+input_quantities = [1]
+output_item_id = "12"
+output_quantity = 1
+crafting_duration = 0.0
+handcraftable = true
+crafting_category = "handcrafting"

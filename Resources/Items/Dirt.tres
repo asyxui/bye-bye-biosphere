@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("2_5fdsa")
-id = "1"
+id = "4"
 name = "Dirt"
 description = "Root-Embedder"
 max_stack_size = 64

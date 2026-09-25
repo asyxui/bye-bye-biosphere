@@ -14,10 +14,11 @@ func _process(_delta: float) -> void:
 	if not enabled:
 		return
 	var pos := player.global_position
+	var terrain_pos := voxel_world.to_local(pos)
 	text = """FPS: %d
 Position: x: %.1f, y: %.1f, z: %.1f
 Biome: %s
-""" % [Engine.get_frames_per_second(), pos.x, pos.y, pos.z, voxel_world.generator.get_biome_at(pos)]
+""" % [Engine.get_frames_per_second(), pos.x, pos.y, pos.z, voxel_world.generator.get_biome_at(terrain_pos)]
 
 func toggle_label() -> void:
 	enabled = !enabled

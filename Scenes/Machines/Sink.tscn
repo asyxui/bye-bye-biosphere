@@ -48,8 +48,12 @@ position = Vector3(0, 0.85, 1.01)
 mesh = SubResource("IntakeMarkerMesh")
 material_override = SubResource("IntakeMarkerMat")
 [node name="Input" type="Node3D" parent="."]
-position = Vector3(0, 0, 1.5)
+position = Vector3(0, 0.8, 1.5)
 script = ExtResource("2")
+port_direction = 0
+accepted_item_ids = ["5"]
+accept_all_items = false
+max_connections = 1
 [node name="DeliveredLabel" type="Label3D" parent="."]
 position = Vector3(0, 2.7, 0)
 billboard = 1

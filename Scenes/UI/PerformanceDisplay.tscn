@@ -48,7 +48,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.88, 0.93, 0.98, 1)
 theme_override_font_sizes/font_size = 14
-text = "PERFORMANCE — WORLD LOAD"
+text = "PERFORMANCE: WORLD LOAD"
 
 [node name="Total" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/Header"]
 layout_mode = 2

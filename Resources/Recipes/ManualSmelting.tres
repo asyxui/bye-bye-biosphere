@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Recipe" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Recipes/Recipe.gd" id="1_recipe_script"]
+
+[resource]
+script = ExtResource("1_recipe_script")
+id = "manual_smelting"
+display_name = "Manual Smelting"
+input_item_ids = ["6"]
+input_quantities = [1]
+output_item_id = "5"
+output_quantity = 1
+processing_duration = 5.0
+ecological_damage = 0.5

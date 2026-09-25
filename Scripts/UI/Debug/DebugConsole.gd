@@ -100,7 +100,7 @@ func _update_console_ui() -> void:
 	console_panel.visible = is_console_open
 
 	if is_console_open:
-		input_line.grab_focus()
+		input_line.call_deferred("grab_focus")
 		input_line.clear()
 		history_index = -1
 		autocomplete_list.hide_suggestions()

@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Godot
-        uses: chickensoft-games/setup-godot@f166999204a4f2722c6fe042fbaa3b3ea0d9c789 # v2.4.1
+        uses: chickensoft-games/setup-godot@c233594225991af5aec714e52457cc76d6df8fa2 # v2.4.2
         with:
           version: 4.7.0
           use-dotnet: false
@@ -55,6 +55,14 @@ jobs:
       - name: Import and validate project
         shell: pwsh
         run: '& $env:GODOT_CONSOLE --headless --path . --import'
+
+      - name: Run headless test scene
+        shell: pwsh
+        run: |
+          & $env:GODOT_CONSOLE --headless --path . --scene res://Tests/TestRunner.tscn
+          if ($LASTEXITCODE -ne 0) {
+            throw "Headless test scene failed."
+          }
 
       - name: Export Windows release
         shell: pwsh

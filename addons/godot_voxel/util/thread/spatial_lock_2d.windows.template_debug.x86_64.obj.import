@@ -8,7 +8,7 @@ valid=false
 
 [deps]
 
-source_file="res://addons/CustomVoxelGenerator/godot_voxel/util/thread/spatial_lock_2d.windows.template_debug.x86_64.obj"
+source_file="res://addons/godot_voxel/util/thread/spatial_lock_2d.windows.template_debug.x86_64.obj"
 
 [params]
 

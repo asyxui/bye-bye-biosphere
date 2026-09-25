@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://c8s4dif53qa4d"]
+[gd_scene format=3 uid="uid://c8s4dif53qa4d"]
 
 [ext_resource type="Texture2D" uid="uid://b5iurlx3gkmq2" path="res://Assets/Conveyor/background-with-metallic-grid-texture.jpg" id="1_cel3d"]
 [ext_resource type="Texture2D" uid="uid://c2m5oglu1ecu" path="res://Assets/Conveyor/Texturelabs_Concrete_181L.jpg" id="1_rkfof"]
@@ -7,63 +7,74 @@
 [ext_resource type="PackedScene" uid="uid://ct5hbibsxlcre" path="res://Scenes/ConveyorBelt/StartNode.tscn" id="5_n7hj5"]
 [ext_resource type="PackedScene" uid="uid://bmodpey6blh6e" path="res://Scenes/ConveyorBelt/EndNode.tscn" id="6_0ieqd"]
 [ext_resource type="Script" uid="uid://dei4ocjq2dock" path="res://Scripts/ConveyorBelt/ConnectionPoint.gd" id="7_8nexv"]
+[ext_resource type="Script" path="res://Scripts/ConveyorBelt/ConveyorBeltVisual.gd" id="8_visual"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ucexd"]
-size = Vector3(20, 1, 1)
+[sub_resource type="BoxShape3D" id="BoxShape3D_frame"]
+size = Vector3(20, 0.48, 0.72)
 
-[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_rkfof"]
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_frame"]
 albedo_texture = ExtResource("1_rkfof")
 uv1_scale = Vector3(2, 20, 1)
 
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_6np6u"]
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_belt"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_cel3d"]
-size = Vector3(20, 0.01, 0.9)
+[sub_resource type="BoxShape3D" id="BoxShape3D_belt"]
+size = Vector3(20, 0.06, 0.82)
 
-[sub_resource type="BoxMesh" id="BoxMesh_83n0b"]
+[sub_resource type="BoxMesh" id="BoxMesh_belt"]
+size = Vector3(20, 0.06, 0.82)
 
-[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_skxa2"]
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_belt"]
 albedo_texture = ExtResource("1_cel3d")
 
-[node name="ConveyorBelt" type="StaticBody3D" groups=["structures"]]
+[node name="ConveyorBelt" type="StaticBody3D" unique_id=930255072 groups=["structures"]]
+script = ExtResource("8_visual")
 
-[node name="Stand" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-shape = SubResource("BoxShape3D_ucexd")
+[node name="ItemVisuals" type="Node3D" parent="." unique_id=2146075984]
 
-[node name="CSGCombiner3D" type="CSGCombiner3D" parent="Stand"]
-material_override = SubResource("ORMMaterial3D_rkfof")
+[node name="FrameCollision" type="CollisionShape3D" parent="." unique_id=987902930]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+shape = SubResource("BoxShape3D_frame")
 
-[node name="MeshInstance3D" type="CSGBox3D" parent="Stand/CSGCombiner3D"]
-transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="FrameVisual" type="CSGCombiner3D" parent="." unique_id=1757384295]
+material_override = SubResource("ORMMaterial3D_frame")
 
-[node name="CSGCylinder3D" type="CSGCylinder3D" parent="Stand/CSGCombiner3D"]
-transform = Transform3D(-4.371139e-08, -10, 0, 1, -4.371139e-07, 0, 0, 0, 1, 0, -0.007, -0.587)
+[node name="FrameBlock" type="CSGBox3D" parent="FrameVisual" unique_id=1865415785]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+size = Vector3(20, 0.48, 0.72)
+
+[node name="FrameGrooveLeft" type="CSGCylinder3D" parent="FrameVisual" unique_id=579179349]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, -0.3, -0.3)
 operation = 2
+radius = 0.17
+height = 20.0
 
-[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="Stand/CSGCombiner3D"]
-transform = Transform3D(-4.371139e-08, -10, 0, 1, -4.371139e-07, 0, 0, 0, 1, 0, -0.007, 0.587)
+[node name="FrameGrooveRight" type="CSGCylinder3D" parent="FrameVisual" unique_id=613945718]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, -0.3, 0.3)
 operation = 2
+radius = 0.17
+height = 20.0
 
-[node name="Belt" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-physics_material_override = SubResource("PhysicsMaterial_6np6u")
+[node name="Belt" type="StaticBody3D" parent="." unique_id=1176272670]
+physics_material_override = SubResource("PhysicsMaterial_belt")
 script = ExtResource("2_skxa2")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Belt"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.51, 0)
-shape = SubResource("BoxShape3D_cel3d")
+[node name="BeltCollision" type="CollisionShape3D" parent="Belt" unique_id=530117596]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.03, 0)
+shape = SubResource("BoxShape3D_belt")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Belt/CollisionShape3D"]
-transform = Transform3D(20, 0, 0, 0, 0.005, 0, 0, 0, 0.9, 0, 0, 0)
-mesh = SubResource("BoxMesh_83n0b")
-surface_material_override/0 = SubResource("ORMMaterial3D_skxa2")
+[node name="BeltSurface" type="MeshInstance3D" parent="." unique_id=2002959331]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.03, 0)
+mesh = SubResource("BoxMesh_belt")
+surface_material_override/0 = SubResource("ORMMaterial3D_belt")
 script = ExtResource("2_83n0b")
 
-[node name="StartNode" parent="." instance=ExtResource("5_n7hj5")]
+[node name="StartNode" parent="." unique_id=683347983 instance=ExtResource("5_n7hj5")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -10, 0, 0)
+is_machine_port = false
 
-[node name="EndNode" parent="." instance=ExtResource("6_0ieqd")]
+[node name="EndNode" parent="." unique_id=654803542 instance=ExtResource("6_0ieqd")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 10, 0, 0)
 script = ExtResource("7_8nexv")
 point_type = 1
+is_machine_port = false

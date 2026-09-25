@@ -1,0 +1,107 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Machines/Smelter.gd" id="1_smelter"]
+[ext_resource type="Script" path="res://Scripts/ConveyorBelt/ConnectionPoint.gd" id="2_port"]
+
+[sub_resource type="BoxShape3D" id="BodyShape"]
+size = Vector3(2.4, 2.4, 2.4)
+
+[sub_resource type="BoxMesh" id="BodyMesh"]
+size = Vector3(2.4, 2.4, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="BodyMaterial"]
+albedo_color = Color(0.25, 0.28, 0.3, 1)
+metallic = 0.75
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="ChimneyMesh"]
+top_radius = 0.42
+bottom_radius = 0.52
+height = 0.8
+
+[sub_resource type="StandardMaterial3D" id="ChimneyMaterial"]
+albedo_color = Color(0.12, 0.13, 0.14, 1)
+metallic = 0.8
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="PanelMesh"]
+size = Vector3(1.4, 0.08, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="PanelMaterial"]
+albedo_color = Color(0.78, 0.35, 0.08, 1)
+emission_enabled = true
+emission = Color(0.35, 0.08, 0.01, 1)
+
+[sub_resource type="BoxMesh" id="PortMarkerMesh"]
+size = Vector3(0.8, 0.18, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="InputMarkerMaterial"]
+albedo_color = Color(0.3, 0.65, 1, 1)
+emission_enabled = true
+emission = Color(0.05, 0.2, 0.6, 1)
+
+[sub_resource type="StandardMaterial3D" id="OutputMarkerMaterial"]
+albedo_color = Color(1, 0.55, 0.1, 1)
+emission_enabled = true
+emission = Color(0.65, 0.18, 0.01, 1)
+
+[sub_resource type="LabelSettings" id="StatusLabelSettings"]
+font_size = 32
+outline_size = 6
+font_color = Color(1, 1, 1, 1)
+
+[node name="Smelter" type="StaticBody3D" groups=["structures"]]
+script = ExtResource("1_smelter")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 1.2, 0)
+shape = SubResource("BodyShape")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.2, 0)
+mesh = SubResource("BodyMesh")
+material_override = SubResource("BodyMaterial")
+
+[node name="Chimney" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.8, 0)
+mesh = SubResource("ChimneyMesh")
+material_override = SubResource("ChimneyMaterial")
+
+[node name="ControlPanel" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.3, -1.24)
+mesh = SubResource("PanelMesh")
+material_override = SubResource("PanelMaterial")
+
+[node name="InputMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.8, -1.5)
+mesh = SubResource("PortMarkerMesh")
+material_override = SubResource("InputMarkerMaterial")
+
+[node name="OutputMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.8, 1.5)
+mesh = SubResource("PortMarkerMesh")
+material_override = SubResource("OutputMarkerMaterial")
+
+[node name="Input" type="Node3D" parent="."]
+position = Vector3(0, 0.8, -1.5)
+script = ExtResource("2_port")
+point_type = 0
+port_direction = 0
+accepted_item_ids = ["6"]
+accept_all_items = false
+max_connections = 1
+
+[node name="Output" type="Node3D" parent="."]
+position = Vector3(0, 0.8, 1.5)
+script = ExtResource("2_port")
+point_type = 1
+port_direction = 1
+accepted_item_ids = ["5"]
+accept_all_items = false
+max_connections = 1
+
+[node name="StatusLabel" type="Label3D" parent="."]
+position = Vector3(0, 3.8, 0)
+billboard = 1
+label_settings = SubResource("StatusLabelSettings")
+text = "Input-starved\n0%\nIn 0  Out 0"

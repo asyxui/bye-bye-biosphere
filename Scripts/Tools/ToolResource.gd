@@ -7,3 +7,5 @@ class_name ToolResource
 @export var icon: Texture2D
 @export var tool_script_path: String
 @export var is_multi_step: bool = false
+@export var creative_only: bool = false
+@export var structure_placement_tool: bool = false

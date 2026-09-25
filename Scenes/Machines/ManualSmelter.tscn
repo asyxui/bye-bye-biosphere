@@ -1,0 +1,57 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Machines/ManualSmelter.gd" id="1_manual_smelter"]
+
+[sub_resource type="BoxShape3D" id="BodyShape"]
+size = Vector3(2.4, 2.4, 2.4)
+
+[sub_resource type="BoxMesh" id="BodyMesh"]
+size = Vector3(2.4, 2.4, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="BodyMaterial"]
+albedo_color = Color(0.3, 0.24, 0.18, 1)
+metallic = 0.25
+roughness = 0.72
+
+[sub_resource type="CylinderMesh" id="ChimneyMesh"]
+top_radius = 0.42
+bottom_radius = 0.52
+height = 0.8
+
+[sub_resource type="StandardMaterial3D" id="ChimneyMaterial"]
+albedo_color = Color(0.12, 0.1, 0.08, 1)
+roughness = 0.8
+
+[sub_resource type="LabelSettings" id="StatusLabelSettings"]
+font_size = 30
+outline_size = 6
+font_color = Color(1, 1, 1, 1)
+
+[node name="ManualSmelter" type="StaticBody3D" groups=["structures"]]
+script = ExtResource("1_manual_smelter")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 1.2, 0)
+shape = SubResource("BodyShape")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.2, 0)
+mesh = SubResource("BodyMesh")
+material_override = SubResource("BodyMaterial")
+
+[node name="Chimney" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.8, 0)
+mesh = SubResource("ChimneyMesh")
+material_override = SubResource("ChimneyMaterial")
+
+[node name="WorkSurface" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.3, -1.24)
+mesh = SubResource("BodyMesh")
+scale = Vector3(0.55, 0.04, 0.42)
+material_override = SubResource("ChimneyMaterial")
+
+[node name="StatusLabel" type="Label3D" parent="."]
+position = Vector3(0, 3.8, 0)
+billboard = 1
+label_settings = SubResource("StatusLabelSettings")
+text = "Input-starved\n0%\nIn 0  Out 0"

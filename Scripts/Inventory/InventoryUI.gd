@@ -6,9 +6,11 @@ extends UIScreen
 @onready var weight_label = $Panel/MarginContainer/VBoxContainer/StatsContainer/WeightLabel
 @onready var slots_label = $Panel/MarginContainer/VBoxContainer/StatsContainer/SlotsLabel
 @onready var close_button = $Panel/MarginContainer/VBoxContainer/TitleBar/CloseButton
+@onready var recipe_list: VBoxContainer = $Panel/MarginContainer/VBoxContainer/CraftingSection/RecipeScroll/RecipeList
 
 var inventory = null  # Inventory type
 var slot_scenes: Array = []
+var crafting_recipes: Array[Recipe] = []
 var selected_slot_index: int = -1
 var dragging_from_slot: int = -1
 var inventory_interactions = null
@@ -21,6 +23,8 @@ func _ready() -> void:
 	
 	inventory = manager.get_inventory()
 	inventory.items_changed.connect(_on_inventory_changed)
+	GameStateManager.mode_changed.connect(_on_mode_changed)
+	crafting_recipes = Handcrafting.get_recipes()
 	
 	# Get or create InventoryInteractions
 	inventory_interactions = get_node_or_null("/root/InventoryInteractions")
@@ -74,6 +78,87 @@ func _refresh_display() -> void:
 	var weight_percent = (weight / inventory.max_weight) * 100
 	weight_label.text = "Weight: %.1f / %.1f kg (%.0f%%)" % [weight, inventory.max_weight, weight_percent]
 	slots_label.text = "Slots: %d / %d" % [inventory.inventory_size - inventory.get_empty_slots(), inventory.inventory_size]
+	_refresh_crafting()
+
+func _refresh_crafting() -> void:
+	for child in recipe_list.get_children():
+		recipe_list.remove_child(child)
+		child.queue_free()
+
+	for recipe in crafting_recipes:
+		recipe_list.add_child(_create_recipe_row(recipe))
+
+func _create_recipe_row(recipe: Recipe) -> Control:
+	var row := VBoxContainer.new()
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 2)
+
+	var header := HBoxContainer.new()
+	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var title := Label.new()
+	title.text = recipe.get_display_name()
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_theme_font_size_override("font_size", 15)
+	header.add_child(title)
+	var output_item: InventoryItem = ItemUtils.item_object_by_id(recipe.output_item_id)
+	var output_label := Label.new()
+	output_label.text = "Produces: %d %s" % [recipe.output_quantity, output_item.name if output_item != null else recipe.output_item_id]
+	output_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	output_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	header.add_child(output_label)
+	var craft_button := Button.new()
+	craft_button.text = "Craft"
+	craft_button.custom_minimum_size = Vector2(80, 30)
+	craft_button.pressed.connect(_on_craft_pressed.bind(recipe))
+	header.add_child(craft_button)
+	row.add_child(header)
+
+	var requirements := Label.new()
+	requirements.text = _format_recipe_requirements(recipe)
+	requirements.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	row.add_child(requirements)
+
+	var status := Label.new()
+	status.text = _get_recipe_status(recipe)
+	status.theme_type_variation = UIThemeTypes.STATUS_MUTED
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	row.add_child(status)
+
+	craft_button.disabled = not Handcrafting.can_craft(recipe, inventory)
+	craft_button.tooltip_text = status.text
+	return row
+
+func _format_recipe_requirements(recipe: Recipe) -> String:
+	var requirements: Array[String] = []
+	var recipe_requirements: Dictionary = recipe.get_input_requirements()
+	for item_key in recipe_requirements:
+		var item_id: String = str(item_key)
+		var required: int = int(recipe_requirements[item_key])
+		var owned: int = inventory.get_extractable_quantity(item_id)
+		var item: InventoryItem = ItemUtils.item_object_by_id(item_id)
+		var item_name: String = item.name if item != null else item_id
+		requirements.append("%s: %d / %d" % [item_name, owned, required])
+	return "Required: " + ", ".join(requirements)
+
+func _get_recipe_status(recipe: Recipe) -> String:
+	var output_item: InventoryItem = ItemUtils.item_object_by_id(recipe.output_item_id)
+	if output_item == null:
+		return "Unavailable: output item is missing."
+	var output_stack: ItemStack = ItemStack.new(output_item, recipe.output_quantity)
+	if inventory.get_insertable_quantity(output_stack, recipe.output_quantity) < recipe.output_quantity:
+		return "Cannot craft: inventory has no room for the output."
+	var missing: Dictionary = Handcrafting.get_missing(recipe, inventory)
+	if not missing.is_empty():
+		return Handcrafting.format_missing(missing)
+	if not GameStateManager.ingredient_costs_enabled():
+		return "Creative mode: ingredients not required."
+	return "Ready to craft."
+
+func _on_craft_pressed(recipe: Recipe) -> void:
+	Handcrafting.craft(recipe, inventory)
+
+func _on_mode_changed(_creative_enabled: bool) -> void:
+	_refresh_display()
 
 ## Handle slot selection
 func _on_slot_selected(slot_index: int) -> void:
@@ -211,7 +296,7 @@ func _find_target_slot_for_split(from_slot: int) -> int:
 	# Then try slots with the same item
 	for i in range(inventory.inventory_size):
 		var slot = inventory.get_slot_item(i)
-		if i != from_slot and slot.item == from_stack.item:
+		if i != from_slot and slot.is_same_item(from_stack):
 			return i
 	
 	return -1

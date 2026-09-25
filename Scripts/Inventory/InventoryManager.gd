@@ -26,7 +26,7 @@ func get_item_count(item) -> int:
 	return inventory.get_item_count(item)
 
 ## Get inventory reference
-func get_inventory():
+func get_inventory() -> Inventory:
 	return inventory
 
 ## Get total inventory weight
@@ -46,7 +46,8 @@ func get_save_data() -> Dictionary:
 		if not slot.is_empty() and slot.item:
 			save_data.append({
 				"item_id": slot.item.id,
-				"quantity": slot.quantity
+				"quantity": slot.quantity,
+				"metadata": slot.metadata
 			})
 		else:
 			save_data.append(null)
@@ -78,7 +79,10 @@ func load_save_data(data: Dictionary) -> void:
 		
 		var item = _load_item_by_id(item_id)
 		if item:
-			add_item(item, quantity)
+			var metadata: Dictionary = slot_data.get("metadata", {})
+			var stack := ItemStack.new(item, int(quantity), metadata)
+			inventory.insert_stack(stack)
+	inventory.items_changed.emit()
 
 
 ## Clear inventory (called during world transitions)
@@ -89,6 +93,10 @@ func clear_save_data() -> void:
 
 ## Helper to load item by ID
 func _load_item_by_id(item_id: String) -> Variant:
+	var resolved_item: InventoryItem = ItemUtils.item_object_by_id(str(item_id))
+	if resolved_item != null:
+		return resolved_item
+
 	# Try to load from Resources/Items directory
 	var item_path = "res://Resources/Items/%s.tres" % item_id
 	if ResourceLoader.exists(item_path):

@@ -4,5 +4,6 @@
 
 [node name="StartNode" type="Node3D"]
 script = ExtResource("1_w2isd")
+is_machine_port = false
 
 [node name="Marker3D" type="Marker3D" parent="."]

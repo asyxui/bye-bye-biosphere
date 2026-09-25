@@ -86,12 +86,12 @@ func configure_stream(slot_id: String) -> bool:
 	var voxel_db_path = absolute_slot_dir.path_join("world.sqlite")
 
 	voxel_stream = VoxelStreamSQLite.new()
-	voxel_stream.save_generator_output = true
+	voxel_stream.save_generator_output = false
 	voxel_stream.database_path = voxel_db_path
 	CustomLogger.log_info("Created new VoxelStreamSQLite with database_path: %s" % voxel_db_path)
 
 	_prepare_generator_performance_capture()
-	# Swap the stream only after resetting capture data; generation can now begin.
+	# Swap the stream only after resetting capture data, generation can now begin.
 	voxel_terrain.stream = voxel_stream
 	CustomLogger.log_info("Configured voxel stream for slot: %s" % slot_id)
 

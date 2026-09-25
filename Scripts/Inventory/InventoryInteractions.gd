@@ -21,7 +21,7 @@ func move_item(from_slot: int, to_slot: int) -> bool:
 		return inventory.move_slot(from_slot, to_slot)
 	
 	# Moving to occupied slot with different item - just swap
-	if to_stack.item != from_stack.item:
+	if not to_stack.is_same_item(from_stack):
 		return inventory.move_slot(from_slot, to_slot)
 	
 	# Moving to occupied slot with same item - merge/combine
@@ -53,7 +53,7 @@ func split_item(from_slot: int, to_slot: int, split_amount: int) -> bool:
 		return false
 	
 	# Can't split into slot with different item
-	if not to_stack.is_empty() and to_stack.item != from_stack.item:
+	if not to_stack.is_empty() and not to_stack.is_same_item(from_stack):
 		return false
 	
 	# Calculate how much we can actually transfer
@@ -71,7 +71,7 @@ func split_item(from_slot: int, to_slot: int, split_amount: int) -> bool:
 	from_stack.remove(transfer_amount)
 	
 	if to_stack.is_empty():
-		var new_stack = load("res://Scripts/Inventory/InventoryStack.gd").new(from_stack.item, 0)
+		var new_stack = load("res://Scripts/Inventory/InventoryStack.gd").new(from_stack.item, 0, from_stack.metadata)
 		inventory.slots[to_slot] = new_stack
 		to_stack = inventory.slots[to_slot]
 	
