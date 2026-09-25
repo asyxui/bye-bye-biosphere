@@ -87,7 +87,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		$Camera3D.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
-		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(70), deg_to_rad(70))
+		$Camera3D.rotation.x = clampf($Camera3D.rotation.x, -deg_to_rad(90), deg_to_rad(90))
 	elif event.is_action_pressed("click") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_activate_selected_tool()
 	elif event.is_action_pressed("right_click") and (active_tool != null or ToolManager.active_tool_instance != null):

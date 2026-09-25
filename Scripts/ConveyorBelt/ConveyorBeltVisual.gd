@@ -11,7 +11,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _visual_root == null:
 		return
-	var belt_data: Variant = get_meta("conveyor_belt_object", null)
+	if not has_meta("conveyor_belt_object"):
+		_hide_all_visuals()
+		return
+	var belt_data: Variant = get_meta("conveyor_belt_object")
 	if not belt_data is ConveyorBeltObject:
 		_hide_all_visuals()
 		return
