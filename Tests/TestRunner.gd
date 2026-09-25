@@ -9,10 +9,13 @@ const TEST_SCRIPTS := [
 	"res://Tests/OceanLodConsistencyTest.gd",
 	"res://Tests/PersistenceStateTest.gd",
 	"res://Tests/PlaceableItemTest.gd",
+	"res://Tests/QuestProgressTest.gd",
 	"res://Tests/PlacementReceiptTest.gd",
+	"res://Tests/RestoreFailureScreenTest.gd",
 	"res://Tests/ResourceConsistencyTest.gd",
 	"res://Tests/SaveSchemaTest.gd",
 	"res://Tests/SmelterSimulationTest.gd",
+	"res://Tests/UIManagerInputTest.gd",
 	"res://Tests/VoxelMaterialMiningTest.gd",
 ]
 

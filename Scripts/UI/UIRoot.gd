@@ -7,11 +7,17 @@ extends CanvasLayer
 @onready var settings_menu = $SettingsMenu
 @onready var save_load_menu = $SlotSelectionMenu
 @onready var loading_screen = $LoadingScreen
+@onready var quest_journal = $QuestJournal
 @onready var action_bar = $HUD/ActionBar
+@onready var restore_error = $RestoreFailureScreen
 
 func _ready() -> void:
 	UIManager.register_root(self)
 	_connect_navigation()
+	var restore_manager = get_node_or_null("/root/GameStateRestoreManager")
+	if restore_manager:
+		restore_manager.world_load_failed.connect(_on_world_load_failed)
+		restore_manager.world_loaded.connect(_on_world_loaded)
 
 func get_screens() -> Dictionary:
 	return {
@@ -22,12 +28,16 @@ func get_screens() -> Dictionary:
 		UIManager.ScreenId.SETTINGS: settings_menu,
 		UIManager.ScreenId.SAVE_LOAD: save_load_menu,
 		UIManager.ScreenId.LOADING: loading_screen,
+		UIManager.ScreenId.JOURNAL: quest_journal,
+		UIManager.ScreenId.RESTORE_ERROR: restore_error,
 	}
 
 func get_action_bar() -> Control:
 	return action_bar
 
 func _connect_navigation() -> void:
+	restore_error.choose_world.connect(_on_restore_error_choose_world)
+	restore_error.reset_world.connect(_on_restore_error_reset_world)
 	pause_menu.get_node("Panel/MarginContainer/VBoxContainer/ResumeButton").pressed.connect(UIManager.pop)
 	pause_menu.get_node("Panel/MarginContainer/VBoxContainer/SettingsButton").pressed.connect(func(): UIManager.push(UIManager.ScreenId.SETTINGS))
 	pause_menu.get_node("Panel/MarginContainer/VBoxContainer/SaveButton").pressed.connect(func(): UIManager.push(UIManager.ScreenId.SAVE_LOAD, {"save": true}))
@@ -55,6 +65,22 @@ func _on_slot_selected(slot_id: String) -> void:
 		return
 	UIManager.pop_screen(UIManager.ScreenId.SAVE_LOAD)
 	UIManager.pop_screen(UIManager.ScreenId.PAUSE)
+	UIManager.pop_screen(UIManager.ScreenId.RESTORE_ERROR)
 	var restore_manager = get_node_or_null("/root/GameStateRestoreManager")
 	if restore_manager:
 		await restore_manager.transition_to_world(slot_id)
+
+func _on_world_load_failed(error: String) -> void:
+	var restore_manager = get_node_or_null("/root/GameStateRestoreManager")
+	UIManager.show_restore_failure(error, restore_manager != null and not restore_manager.failed_slot_id.is_empty())
+
+func _on_world_loaded() -> void:
+	UIManager.pop_screen(UIManager.ScreenId.RESTORE_ERROR)
+
+func _on_restore_error_choose_world() -> void:
+	UIManager.push(UIManager.ScreenId.SAVE_LOAD)
+
+func _on_restore_error_reset_world() -> void:
+	var restore_manager = get_node_or_null("/root/GameStateRestoreManager")
+	if restore_manager:
+		await restore_manager.reset_failed_world()

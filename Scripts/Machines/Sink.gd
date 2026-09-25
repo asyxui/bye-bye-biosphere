@@ -29,7 +29,7 @@ func _physics_process(delta: float) -> void:
 		var extracted: ItemStack = input_buffer.extract_stack(buffered.item_id, 1)
 		if extracted != null and extracted.quantity > 0:
 			consumed_count += extracted.quantity
-			BiosphereManager.record_delivery(extracted.item_id, extracted.quantity)
+			GameplayEventBus.publish(GameplayEventBus.ITEM_DELIVERED, extracted.item_id, extracted.quantity)
 			_update_label()
 
 func _on_intake_body_entered(body: Node3D) -> void:
@@ -42,7 +42,7 @@ func _on_intake_body_entered(body: Node3D) -> void:
 	consumed_count += 1
 	var delivered_item: InventoryItem = drop.get("dropData") as InventoryItem
 	if delivered_item != null:
-		BiosphereManager.record_delivery(delivered_item.id, 1)
+		GameplayEventBus.publish(GameplayEventBus.ITEM_DELIVERED, delivered_item.id, 1)
 	_update_label()
 	drop.queue_free()
 

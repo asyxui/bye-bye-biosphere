@@ -37,5 +37,4 @@ func _run() -> void:
 		else:
 			check(MachineManager.get_machine_scene(structure_type) != null)
 
-	check(BiosphereManager.CONFIG.objective_item_id == CANONICAL_ITEMS["iron_ingot"])
 	check(ItemUtils.item_object_by_id("7") == null)

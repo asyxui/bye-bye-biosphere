@@ -75,6 +75,7 @@ static func craft(recipe: Recipe, inventory: Inventory) -> bool:
 		return false
 
 	inventory.items_changed.emit()
+	GameplayEventBus.publish(GameplayEventBus.ITEM_CRAFTED, output_item.id, recipe.output_quantity)
 	return true
 
 static func _restore_inputs(removed: Dictionary, inventory: Inventory) -> void:

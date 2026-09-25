@@ -16,6 +16,7 @@ var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBel
 var _next_belt_id: int = 1
 var _simulation_accumulator: float = 0.0
 var _pending_conveyor_contents: Array[Dictionary] = []
+var _is_restoring: bool = false
 
 func _ready() -> void:
 	# Register as saveable
@@ -142,7 +143,34 @@ func connect_belt_endpoint(belt: ConveyorBeltObject, endpoint: int, port: Connec
 	if not port.add_belt_connection(belt.belt_id, belt):
 		return false
 	belt.set_endpoint_port(endpoint, port)
+	if not _is_restoring and not GameStateManager.is_creative_mode() and has_valid_automated_line():
+		GameplayEventBus.publish(GameplayEventBus.AUTOMATED_LINE_CONNECTED, "smelter_to_sink")
 	return true
+
+func has_valid_automated_line() -> bool:
+	for belt in belts:
+		if not is_instance_valid(belt) or not _belt_starts_at_smelter_output(belt):
+			continue
+		var visited: Dictionary = {}
+		var current: ConveyorBeltObject = belt
+		while current != null and not visited.has(current.belt_id):
+			visited[current.belt_id] = true
+			if _belt_ends_at_sink_input(current):
+				return true
+			current = get_downstream_belt(current)
+	return false
+
+func _belt_starts_at_smelter_output(belt: ConveyorBeltObject) -> bool:
+	if belt.start_port == null or not is_instance_valid(belt.start_port):
+		return false
+	var owner := belt.start_port.get_owner_structure()
+	return owner != null and str(owner.get("machine_type")) == "smelter" and belt.start_port.port_direction == ConnectionPoint.PortDirection.OUTPUT and belt.start_port.accepts_item("5")
+
+func _belt_ends_at_sink_input(belt: ConveyorBeltObject) -> bool:
+	if belt.end_port == null or not is_instance_valid(belt.end_port):
+		return false
+	var owner := belt.end_port.get_owner_structure()
+	return owner != null and str(owner.get("machine_type")) == "sink" and belt.end_port.port_direction == ConnectionPoint.PortDirection.INPUT and belt.end_port.accepts_item("5")
 
 func disconnect_belt_endpoint(belt: ConveyorBeltObject, endpoint: int) -> void:
 	if belt == null:
@@ -411,6 +439,7 @@ func get_save_data() -> Dictionary:
 
 ## Load conveyor belts from save data
 func load_save_data(data: Dictionary) -> void:
+	_is_restoring = true
 	# Clear current belts
 	clear_save_data()
 	_pending_conveyor_contents.clear()
@@ -446,6 +475,7 @@ func load_save_data(data: Dictionary) -> void:
 			connect_belt_endpoint(connected_belt, ConnectionPoint.PointType.START, start_port)
 		if end_port != null:
 			connect_belt_endpoint(connected_belt, ConnectionPoint.PointType.END, end_port)
+	_is_restoring = false
 
 
 ## Release saved logical items after machine buffers and processing state have

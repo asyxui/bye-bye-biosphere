@@ -4,11 +4,11 @@ extends Node
 signal screen_changed(screen_id: int)
 signal context_changed(allows_gameplay: bool)
 
-enum ScreenId { NONE, INVENTORY, CONSOLE, TOOL_WHEEL, PAUSE, SETTINGS, SAVE_LOAD, LOADING }
+enum ScreenId { NONE, INVENTORY, CONSOLE, TOOL_WHEEL, JOURNAL, PAUSE, SETTINGS, SAVE_LOAD, LOADING, RESTORE_ERROR }
 enum Channel { OVERLAY, MENU, DIALOG, SYSTEM }
 
-const OVERLAY_SCREENS := [ScreenId.INVENTORY, ScreenId.CONSOLE, ScreenId.TOOL_WHEEL]
-const MENU_SCREENS := [ScreenId.PAUSE, ScreenId.SETTINGS, ScreenId.SAVE_LOAD]
+const OVERLAY_SCREENS := [ScreenId.INVENTORY, ScreenId.CONSOLE, ScreenId.TOOL_WHEEL, ScreenId.JOURNAL]
+const MENU_SCREENS := [ScreenId.PAUSE, ScreenId.SETTINGS, ScreenId.SAVE_LOAD, ScreenId.RESTORE_ERROR]
 
 var _root: CanvasLayer
 var _screens: Dictionary = {}
@@ -28,6 +28,8 @@ func register_root(root: CanvasLayer) -> void:
 	_apply_context()
 
 func push(screen_id: ScreenId, data: Dictionary = {}) -> void:
+	if screen_id == ScreenId.JOURNAL and GameStateManager.is_creative_mode():
+		return
 	if screen_id == ScreenId.LOADING:
 		_show_loading(data)
 		return
@@ -75,6 +77,12 @@ func pop_screen(screen_id: ScreenId) -> void:
 	_apply_context()
 	_restore_focus()
 
+func show_restore_failure(error: String, can_reset_world := true) -> void:
+	if is_open(ScreenId.RESTORE_ERROR):
+		_screens[ScreenId.RESTORE_ERROR].show_error(error, can_reset_world)
+		return
+	push(ScreenId.RESTORE_ERROR, {"error": error, "can_reset_world": can_reset_world})
+
 func is_open(screen_id: ScreenId) -> bool:
 	return _stack.has(screen_id)
 
@@ -114,6 +122,14 @@ func clear_interaction_status() -> void:
 ## The middle-button press can be intercepted by HUD controls before it reaches
 ## _unhandled_input, so the global wheel trigger is observed here.
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_K and allows_gameplay_input():
+		push(ScreenId.CONSOLE)
+		get_viewport().set_input_as_handled()
+		return
+	if is_open(ScreenId.CONSOLE) and (event.is_action_pressed("menu") or event.is_action_pressed("ui_cancel")):
+		pop_screen(ScreenId.CONSOLE)
+		get_viewport().set_input_as_handled()
+		return
 	if not allows_gameplay_input():
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE and event.pressed:
@@ -125,8 +141,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		pop_screen(ScreenId.TOOL_WHEEL)
 		get_viewport().set_input_as_handled()
 		return
+	if is_open(ScreenId.JOURNAL) and event.is_action_pressed("journal"):
+		pop_screen(ScreenId.JOURNAL)
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("menu") or event.is_action_pressed("ui_cancel"):
 		if GameStateManager.is_loading:
+			return
+		if is_open(ScreenId.RESTORE_ERROR) and _stack.back() == ScreenId.RESTORE_ERROR:
+			get_viewport().set_input_as_handled()
 			return
 		if not _stack.is_empty():
 			pop()
@@ -139,15 +162,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("inventory"):
 		toggle(ScreenId.INVENTORY)
 		get_viewport().set_input_as_handled()
-	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_K:
-		toggle(ScreenId.CONSOLE)
+	elif event.is_action_pressed("journal") and not GameStateManager.is_creative_mode():
+		toggle(ScreenId.JOURNAL)
 		get_viewport().set_input_as_handled()
 	if event.is_action_pressed("f3"):
 		UIManager._root.get_node("HUD/F3Screen").toggle_label()
 
 func _present(screen_id: ScreenId, data: Dictionary) -> void:
 	var screen = _screens[screen_id]
-	if screen_id == ScreenId.TOOL_WHEEL:
+	if screen_id == ScreenId.RESTORE_ERROR:
+		screen.show_error(data.get("error", ""), data.get("can_reset_world", true))
+	elif screen_id == ScreenId.TOOL_WHEEL:
 		screen.open_wheel(data.get("hotbar_slot", 0))
 	elif screen_id == ScreenId.SAVE_LOAD:
 		if data.get("save", false):
@@ -183,7 +208,7 @@ func _on_loading_changed(active: bool, operation: String, progress: float) -> vo
 
 func _apply_context() -> void:
 	var gameplay := allows_gameplay_input()
-	get_tree().paused = not gameplay and _has_menu_open()
+	get_tree().paused = _has_menu_open()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if gameplay else Input.MOUSE_MODE_VISIBLE
 	if gameplay:
 		get_viewport().gui_release_focus()

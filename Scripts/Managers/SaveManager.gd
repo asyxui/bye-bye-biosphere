@@ -8,15 +8,15 @@ signal restoration_completed
 signal restoration_failed(error: String)
 
 const SAVES_DIR = "user://saves"
-const CURRENT_SAVE_VERSION: int = 1
+const CURRENT_SAVE_VERSION: int = 2
 const INCOMPATIBLE_SAVE_MESSAGE := "This save uses an incompatible prototype format and cannot be loaded."
 
 # Saveable nodes are discovered by group membership, but their restore order
 # is part of the persistence contract. Machines must exist before conveyor
 # ports can be reconnected, and machine buffers must exist before belt items
 # resume simulation.
-const SAVE_ORDER: Array[String] = ["machines", "conveyors", "biosphere", "inventory", "player", "tools"]
-const CLEAR_ORDER: Array[String] = ["conveyors", "machines", "biosphere", "inventory", "player", "tools"]
+const SAVE_ORDER: Array[String] = ["machines", "conveyors", "biosphere", "inventory", "player", "tools", "quests"]
+const CLEAR_ORDER: Array[String] = ["conveyors", "machines", "biosphere", "inventory", "player", "tools", "quests"]
 
 var current_slot_id: String = ""
 var last_load_error: String = ""

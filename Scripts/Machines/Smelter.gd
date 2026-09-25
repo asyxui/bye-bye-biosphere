@@ -222,6 +222,7 @@ func _finish_processing() -> void:
 	total_ecological_damage += active_recipe.ecological_damage
 	ecological_damage_generated.emit(active_recipe.ecological_damage)
 	BiosphereManager.record_processed_material(active_recipe.output_quantity, active_recipe.ecological_damage)
+	GameplayEventBus.publish(GameplayEventBus.ITEM_PRODUCED, active_recipe.output_item_id, active_recipe.output_quantity)
 	processing_state = ProcessingState.IDLE
 	_update_status_label()
 

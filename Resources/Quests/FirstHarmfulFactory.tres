@@ -1,0 +1,104 @@
+[gd_resource type="Resource" script_class="QuestDefinition" load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Quests/QuestDefinition.gd" id="1_quest"]
+[ext_resource type="Script" path="res://Scripts/Quests/QuestStepDefinition.gd" id="2_step"]
+[ext_resource type="Script" path="res://Scripts/Quests/QuestObjectiveDefinition.gd" id="3_objective"]
+
+[sub_resource type="Resource" id="ObjectiveStone"]
+script = ExtResource("3_objective")
+objective_id = &"stone"
+event_type = &"item_mined"
+subject_id = "8"
+display_label = "Stone"
+target_count = 12
+
+[sub_resource type="Resource" id="ObjectiveIronOre"]
+script = ExtResource("3_objective")
+objective_id = &"iron_ore"
+event_type = &"item_mined"
+subject_id = "6"
+display_label = "Iron Ore"
+target_count = 1
+
+[sub_resource type="Resource" id="ObjectiveManualCraft"]
+script = ExtResource("3_objective")
+objective_id = &"manual_smelter_crafted"
+event_type = &"item_crafted"
+subject_id = "9"
+display_label = "Craft Manual Smelter"
+target_count = 1
+
+[sub_resource type="Resource" id="ObjectiveManualPlace"]
+script = ExtResource("3_objective")
+objective_id = &"manual_smelter_placed"
+event_type = &"machine_placed"
+subject_id = "manual_smelter"
+display_label = "Place Manual Smelter"
+target_count = 1
+
+[sub_resource type="Resource" id="ObjectiveIronIngots"]
+script = ExtResource("3_objective")
+objective_id = &"iron_ingots"
+event_type = &"item_produced"
+subject_id = "5"
+display_label = "Iron Ingots"
+target_count = 7
+
+[sub_resource type="Resource" id="ObjectiveFactoryLine"]
+script = ExtResource("3_objective")
+objective_id = &"factory_line"
+event_type = &"automated_line_connected"
+subject_id = "smelter_to_sink"
+display_label = "Connected Smelter to Sink"
+target_count = 1
+
+[sub_resource type="Resource" id="ObjectiveDelivery"]
+script = ExtResource("3_objective")
+objective_id = &"delivery_order"
+event_type = &"item_delivered"
+subject_id = "5"
+display_label = "Iron Ingots delivered"
+target_count = 10
+
+[sub_resource type="Resource" id="StepRecoverSite"]
+script = ExtResource("2_step")
+step_id = &"recover_site"
+title = "Gather resources"
+description = "Mine Stone and find Iron Ore."
+objectives = Array[ExtResource("3_objective")]( [SubResource("ObjectiveStone"), SubResource("ObjectiveIronOre")] )
+
+[sub_resource type="Resource" id="StepManualSmelter"]
+script = ExtResource("2_step")
+step_id = &"manual_smelter"
+title = "Start smelting"
+description = "Craft and place a Manual Smelter."
+objectives = Array[ExtResource("3_objective")]( [SubResource("ObjectiveManualCraft"), SubResource("ObjectiveManualPlace")] )
+
+[sub_resource type="Resource" id="StepProduceIngots"]
+script = ExtResource("2_step")
+step_id = &"produce_ingots"
+title = "Make iron"
+description = "Produce Iron Ingots."
+objectives = Array[ExtResource("3_objective")]( [SubResource("ObjectiveIronIngots")] )
+
+[sub_resource type="Resource" id="StepAutomatedLine"]
+script = ExtResource("2_step")
+step_id = &"automated_line"
+title = "Automate the line"
+description = "Connect a Smelter to a Sink with a Conveyor."
+objectives = Array[ExtResource("3_objective")]( [SubResource("ObjectiveFactoryLine")] )
+
+[sub_resource type="Resource" id="StepDeliveryOrder"]
+script = ExtResource("2_step")
+step_id = &"delivery_order"
+title = "Take a delivery contract"
+description = "Deliver Iron Ingots to the Sink as an optional order."
+optional = true
+objectives = Array[ExtResource("3_objective")]( [SubResource("ObjectiveDelivery")] )
+
+[resource]
+script = ExtResource("1_quest")
+quest_id = &"first_harmful_factory"
+title = "The First Harmful Factory"
+sort_order = 10
+steps = Array[ExtResource("2_step")]( [SubResource("StepRecoverSite"), SubResource("StepManualSmelter"), SubResource("StepProduceIngots"), SubResource("StepAutomatedLine"), SubResource("StepDeliveryOrder")] )

@@ -139,12 +139,20 @@ func _destroy(origin: Vector3, direction: Vector3):
 		# ecological counter and drops correct when a streamed voxel edit is
 		# rejected or only partially overlaps the terrain.
 		var removed_count := 0
+		var mined_item_counts: Dictionary = {}
 		for i in range(coordsWithDrops.size()):
 			var coord: Vector3 = coordsWithDrops[i]
 			if voxelTool.get_voxel(coord) != 0:
 				continue
 			drop_voxel_material(drops[i], coord)
+			var material := VoxelMaterialCatalog.get_definition(drops[i])
+			if material != null:
+				var mined_item: InventoryItem = material.get_mined_item()
+				if mined_item != null:
+					mined_item_counts[mined_item.id] = int(mined_item_counts.get(mined_item.id, 0)) + 1
 			removed_count += 1
+		for mined_item_id in mined_item_counts:
+			GameplayEventBus.publish(GameplayEventBus.ITEM_MINED, str(mined_item_id), int(mined_item_counts[mined_item_id]))
 		BiosphereManager.record_raw_material_extracted(removed_count)
 
 func save_map() -> void:

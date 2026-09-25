@@ -18,7 +18,8 @@ func _process(_delta: float) -> void:
 	text = """FPS: %d
 Position: x: %.1f, y: %.1f, z: %.1f
 Biome: %s
-""" % [Engine.get_frames_per_second(), pos.x, pos.y, pos.z, voxel_world.generator.get_biome_at(terrain_pos)]
+Biosphere: %.1f%%
+""" % [Engine.get_frames_per_second(), pos.x, pos.y, pos.z, voxel_world.generator.get_biome_at(terrain_pos), BiosphereManager.get_integrity_percent()]
 
 func toggle_label() -> void:
 	enabled = !enabled
