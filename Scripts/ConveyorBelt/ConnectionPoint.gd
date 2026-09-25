@@ -22,8 +22,7 @@ func _ready():
 	ConveyorConnectionManager.register_point(self)
 
 func _exit_tree():
-	if is_machine_port:
-		ConveyorConnectionManager.disconnect_port(self)
+	ConveyorConnectionManager.disconnect_port(self)
 	ConveyorConnectionManager.unregister_point(self)
 
 func get_forward_dir() -> Vector3:
@@ -46,7 +45,7 @@ func get_owner_structure() -> Node:
 	return null
 
 func can_connect_belt() -> bool:
-	return is_machine_port and connected_belt_ids.size() < maxi(1, max_connections)
+	return connected_belt_ids.size() < maxi(1, max_connections)
 
 func accepts_item(item_id: String) -> bool:
 	return accept_all_items or accepted_item_ids.has(item_id)

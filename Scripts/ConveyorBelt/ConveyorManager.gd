@@ -65,7 +65,7 @@ func find_closest_port(hit_pos: Vector3, desired_direction: int = -1, compatible
 	var closest: ConnectionPoint = null
 	var closest_dist := SNAP_DISTANCE
 	for point in points.duplicate():
-		if not is_instance_valid(point) or not point.is_machine_port:
+		if not is_instance_valid(point):
 			continue
 		if desired_direction >= 0 and point.port_direction != desired_direction:
 			continue
@@ -128,7 +128,7 @@ func get_connected_belt(port: ConnectionPoint) -> ConveyorBeltObject:
 	return belt as ConveyorBeltObject
 
 func connect_belt_endpoint(belt: ConveyorBeltObject, endpoint: int, port: ConnectionPoint) -> bool:
-	if belt == null or port == null or not port.is_machine_port or belt.belt_id.is_empty():
+	if belt == null or port == null or belt.belt_id.is_empty():
 		return false
 	var expected_direction := ConnectionPoint.PortDirection.OUTPUT if endpoint == ConnectionPoint.PointType.START else ConnectionPoint.PortDirection.INPUT
 	if port.port_direction != expected_direction or not port.can_connect_belt():

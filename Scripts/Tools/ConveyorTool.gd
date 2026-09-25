@@ -12,6 +12,7 @@ var conveyor_scene: PackedScene = preload("res://Scenes/ConveyorBelt/ConveyorBel
 # Tool state
 var waiting_for_second_press: bool = false
 var conveyor_reversal: bool = false
+var can_reverse: bool = true
 var start_pos: Vector3 = Vector3.ZERO
 var first_port: ConnectionPoint = null
 var preview_port: ConnectionPoint = null
@@ -44,6 +45,7 @@ func on_update(_delta: float) -> void:
 func _reset_state() -> void:
 	waiting_for_second_press = false
 	conveyor_reversal = false
+	can_reverse = true
 	first_port = null
 	preview_port = null
 	start_pos = Vector3.ZERO
@@ -65,15 +67,17 @@ func _start_conveyor_placement(hit_point: Vector3) -> void:
 	first_port = ConveyorConnectionManager.find_closest_port(hit_point)
 	if first_port:
 		conveyor_reversal = first_port.port_direction == ConnectionPoint.PortDirection.INPUT
+		can_reverse = false
 	
 	start_pos = _resolve_endpoint_position(hit_point, first_port)
 	_create_preview_conveyor()
 
 func _find_second_port(hit_point: Vector3) -> ConnectionPoint:
-	var desired_direction := ConnectionPoint.PortDirection.INPUT
-	if first_port != null:
-		desired_direction = ConnectionPoint.PortDirection.INPUT if first_port.port_direction == ConnectionPoint.PortDirection.OUTPUT else ConnectionPoint.PortDirection.OUTPUT
-	return ConveyorConnectionManager.find_closest_port(hit_point, desired_direction, first_port)
+	if first_port == null:
+		return ConveyorConnectionManager.find_closest_port(hit_point, -1)
+
+	var desired_direction := ConnectionPoint.PortDirection.OUTPUT if conveyor_reversal else ConnectionPoint.PortDirection.INPUT
+	return ConveyorConnectionManager.find_closest_port(hit_point, desired_direction if not can_reverse else -1, first_port)
 
 func _resolve_endpoint_position(hit_point: Vector3, port: ConnectionPoint) -> Vector3:
 	if port != null:
@@ -81,8 +85,14 @@ func _resolve_endpoint_position(hit_point: Vector3, port: ConnectionPoint) -> Ve
 	return hit_point + Vector3.UP * FREE_PLACEMENT_GROUND_OFFSET
 
 func _finalize_conveyor(hit_point: Vector3) -> void:
-	preview_port = _find_second_port(hit_point)
+	if preview_port == null:
+		preview_port = _find_second_port(hit_point)
+	
 	hit_point = _resolve_endpoint_position(hit_point, preview_port)
+	
+	# Check if the conveyor should be reversed based on the endpoint
+	if preview_port and preview_port.port_direction == ConnectionPoint.PortDirection.OUTPUT:
+		conveyor_reversal = true
 	
 	var actual_start := hit_point if conveyor_reversal else start_pos
 	var actual_end := start_pos if conveyor_reversal else hit_point
@@ -131,15 +141,15 @@ func _create_preview_conveyor() -> void:
 		belt.collision_layer = 0
 	
 	# Remove connection points from preview
-	for cp in preview_conveyor.get_children():
-		if cp is ConnectionPoint:
-			cp.queue_free()
+	for cp in preview_conveyor.find_children("*", "ConnectionPoint", true, false):
+		cp.queue_free()
 	
 	player.get_tree().current_scene.add_child(preview_conveyor)
 	_set_preview_color(false, "Select the second point")
 
 func _cleanup_preview() -> void:
 	conveyor_reversal = false
+	can_reverse = true
 	first_port = null
 	preview_port = null
 	preview_is_valid = false
