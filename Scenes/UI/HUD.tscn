@@ -3,24 +3,8 @@
 [ext_resource type="Script" uid="uid://c3wklh8cis626" path="res://Scripts/UI/ActionBar.gd" id="1_kqhfj"]
 [ext_resource type="Texture2D" uid="uid://dvt2vm0ldvpy4" path="res://Assets/Items/Apple.png" id="4_ykvyr"]
 [ext_resource type="Script" uid="uid://b5lxc51kltku5" path="res://Scripts/UI/Debug/F3Screen.gd" id="5_ykvyr"]
-[ext_resource type="Script" uid="uid://cs383dof813dw" path="res://Scripts/UI/BiosphereStatus.gd" id="6_biosphere_status"]
-[ext_resource type="Script" path="res://Scripts/UI/EarlyGameChecklist.gd" id="7_early_checklist"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBox_biosphere_status"]
-content_margin_left = 12.0
-content_margin_top = 10.0
-content_margin_right = 12.0
-content_margin_bottom = 10.0
-bg_color = Color(0.02, 0.04, 0.05, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.8, 0.55, 0.16, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[ext_resource type="Script" path="res://Scripts/UI/QuestTracker.gd" id="6_quest_tracker"]
+[ext_resource type="Script" path="res://Scripts/UI/BiosphereAlert.gd" id="7_biosphere_alert"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_placement_status"]
 content_margin_left = 14.0
@@ -38,21 +22,21 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="StyleBox_checklist"]
-content_margin_left = 12.0
-content_margin_top = 10.0
-content_margin_right = 12.0
-content_margin_bottom = 10.0
-bg_color = Color(0.02, 0.04, 0.05, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.25, 0.35, 0.4, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxFlat" id="StyleBox_quest_tracker"]
+content_margin_left = 3.0
+content_margin_top = 2.0
+content_margin_right = 3.0
+content_margin_bottom = 2.0
+bg_color = Color(0.035, 0.05, 0.055, 0.68)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.42, 0.53, 0.55, 0.56)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="Hud" type="CanvasLayer" unique_id=494431965]
 
@@ -179,53 +163,73 @@ offset_right = 51.0
 offset_bottom = 32.0
 script = ExtResource("5_ykvyr")
 
-[node name="BiosphereStatus" type="PanelContainer" parent="." unique_id=1608542983]
-z_index = 10
-offset_left = 12.0
-offset_top = 48.0
-offset_right = 402.0
-offset_bottom = 218.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBox_biosphere_status")
-script = ExtResource("6_biosphere_status")
-
-[node name="EarlyGameChecklist" type="PanelContainer" parent="." unique_id=222804884]
+[node name="QuestTracker" type="PanelContainer" parent="." unique_id=222804884]
 z_index = 10
 layout_mode = 0
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -390.0
-offset_top = 48.0
-offset_right = -12.0
-offset_bottom = 218.0
+offset_left = -278.0
+offset_top = 96.0
+offset_right = -16.0
+offset_bottom = 152.0
 grow_horizontal = 0
 grow_vertical = 0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBox_checklist")
-script = ExtResource("7_early_checklist")
+theme_override_styles/panel = SubResource("StyleBox_quest_tracker")
+script = ExtResource("6_quest_tracker")
 
-[node name="MarginContainer" type="MarginContainer" parent="EarlyGameChecklist" unique_id=222804885]
+[node name="MarginContainer" type="MarginContainer" parent="QuestTracker" unique_id=222804885]
 layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
 
-[node name="Label" type="Label" parent="EarlyGameChecklist/MarginContainer" unique_id=222804886]
+[node name="VBoxContainer" type="VBoxContainer" parent="QuestTracker/MarginContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.95, 0.85, 1)
-theme_override_font_sizes/font_size = 13
-text = "BOOTSTRAP CHECKLIST"
-autowrap_mode = 2
+theme_override_constants/separation = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="BiosphereStatus" unique_id=1245102625]
+[node name="Goal" type="Label" parent="QuestTracker/MarginContainer/VBoxContainer"]
 layout_mode = 2
-
-[node name="Label" type="Label" parent="BiosphereStatus/MarginContainer" unique_id=1723730659]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.95, 0.85, 1)
 theme_override_font_sizes/font_size = 15
-text = "FIELD INSTRUMENT
-BIOSPHERE: 100.0%
-INGOTS: 0 / 10"
+text = "Gather resources"
+
+[node name="Progress" type="Label" parent="QuestTracker/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Stone 0 / 12   Iron Ore 0 / 1"
 autowrap_mode = 2
+
+[node name="BiosphereAlert" type="PanelContainer" parent="."]
+visible = false
+z_index = 20
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 300.0
+offset_top = 48.0
+offset_right = -300.0
+offset_bottom = 135.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("7_biosphere_alert")
+
+[node name="MarginContainer" type="MarginContainer" parent="BiosphereAlert"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="BiosphereAlert/MarginContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "AIR QUALITY WARNING"
+autowrap_mode = 2
+
+[node name="Timer" type="Timer" parent="BiosphereAlert"]
+wait_time = 6.0
+one_shot = true
 
 [node name="PlacementStatus" type="PanelContainer" parent="." unique_id=233195210]
 visible = false

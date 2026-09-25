@@ -1,8 +1,6 @@
 extends Node
 
 signal state_changed(state: BiosphereState)
-signal event_triggered(event_id: String, title: String, description: String)
-signal objective_completed
 
 const CONFIG: BiosphereConfig = preload("res://Resources/BiosphereConfig.tres")
 
@@ -25,23 +23,8 @@ func record_processed_material(quantity: int, integrity_loss: float) -> void:
 	state.total_processed_material += quantity
 	_apply_integrity_loss(maxf(0.0, integrity_loss))
 
-func record_delivery(item_id: String, quantity: int) -> void:
-	if quantity <= 0 or item_id != CONFIG.objective_item_id or state.objective_completed:
-		return
-	state.objective_delivery_progress = mini(
-		CONFIG.objective_delivery_target,
-		state.objective_delivery_progress + quantity
-	)
-	if state.objective_delivery_progress >= CONFIG.objective_delivery_target:
-		state.objective_completed = true
-		objective_completed.emit()
-	state_changed.emit(state)
-
 func get_integrity_percent() -> float:
 	return clampf(state.biosphere_integrity, 0.0, 100.0)
-
-func get_delivery_target() -> int:
-	return CONFIG.objective_delivery_target
 
 func get_integrity_warning_threshold() -> float:
 	return CONFIG.air_quality_event_threshold
@@ -74,11 +57,7 @@ func _check_threshold_events() -> void:
 		return
 	state.triggered_event_ids.append(CONFIG.air_quality_event_id)
 	_refresh_environment()
-	event_triggered.emit(
-		CONFIG.air_quality_event_id,
-		CONFIG.air_quality_event_title,
-		CONFIG.air_quality_event_description
-	)
+	GameplayEventBus.publish(GameplayEventBus.BIOSPHERE_EVENT, CONFIG.air_quality_event_id)
 
 func _refresh_environment() -> void:
 	var current_scene: Node = get_tree().current_scene
@@ -105,8 +84,6 @@ func get_save_data() -> Dictionary:
 		"biosphere_integrity": state.biosphere_integrity,
 		"total_raw_material_extracted": state.total_raw_material_extracted,
 		"total_processed_material": state.total_processed_material,
-		"objective_delivery_progress": state.objective_delivery_progress,
-		"objective_completed": state.objective_completed,
 		"triggered_event_ids": state.triggered_event_ids.duplicate()
 	}
 
@@ -114,8 +91,6 @@ func load_save_data(data: Dictionary) -> void:
 	state.biosphere_integrity = clampf(float(data.get("biosphere_integrity", CONFIG.initial_integrity)), 0.0, 100.0)
 	state.total_raw_material_extracted = maxi(0, int(data.get("total_raw_material_extracted", 0)))
 	state.total_processed_material = maxi(0, int(data.get("total_processed_material", 0)))
-	state.objective_delivery_progress = clampi(int(data.get("objective_delivery_progress", 0)), 0, CONFIG.objective_delivery_target)
-	state.objective_completed = bool(data.get("objective_completed", false)) or state.objective_delivery_progress >= CONFIG.objective_delivery_target
 	state.triggered_event_ids.clear()
 	for event_id_value in data.get("triggered_event_ids", []):
 		var event_id: String = str(event_id_value)

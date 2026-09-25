@@ -69,6 +69,8 @@ func place_machine(machine_type: String, position: Vector3, rotation_y: float, s
 	_configure_machine_ports(machine, structure_id)
 	if machine.has_method("load_machine_state"):
 		machine.load_machine_state(state)
+	if not is_loading:
+		GameplayEventBus.publish(GameplayEventBus.MACHINE_PLACED, machine_type)
 	return machine
 
 func get_machine_by_id(saved_structure_id: String) -> Node3D:

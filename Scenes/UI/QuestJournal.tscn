@@ -1,0 +1,107 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/QuestJournal.gd" id="1_journal"]
+[ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/GameTheme.tres" id="2_theme"]
+
+[node name="QuestJournal" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_journal")
+theme = ExtResource("2_theme")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(700, 340)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -170.0
+offset_right = 350.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"ModalPanel"
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+theme_override_font_sizes/font_size = 25
+text = "Field journal"
+
+[node name="Content" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="QuestListPanel" type="PanelContainer" parent="Panel/MarginContainer/VBoxContainer/Content"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"InsetPanel"
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/Content/QuestListPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="QuestList" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/Content/QuestListPanel/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Detail" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="QuestTitle" type="Label" parent="Panel/MarginContainer/VBoxContainer/Content/Detail"]
+layout_mode = 2
+theme_type_variation = &"Caption"
+
+[node name="StepTitle" type="Label" parent="Panel/MarginContainer/VBoxContainer/Content/Detail"]
+layout_mode = 2
+theme_type_variation = &"ScreenTitle"
+theme_override_font_sizes/font_size = 24
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="Panel/MarginContainer/VBoxContainer/Content/Detail"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"Body"
+autowrap_mode = 2
+
+[node name="Objectives" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/Content/Detail"]
+layout_mode = 2
+theme_override_constants/separation = 6

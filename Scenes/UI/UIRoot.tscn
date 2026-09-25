@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/UIRoot.gd" id="1"]
 [ext_resource type="PackedScene" path="res://Scenes/Inventory/InventoryUI.tscn" id="2"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://Scenes/UI/SlotSelectionMenu.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/LoadingScreen.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/HUD.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/QuestJournal.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RestoreFailureScreen.tscn" id="11"]
 
 [node name="UIRoot" type="CanvasLayer"]
 process_mode = 3
@@ -23,3 +25,5 @@ script = ExtResource("1")
 [node name="SettingsMenu" parent="." instance=ExtResource("6")]
 [node name="SlotSelectionMenu" parent="." instance=ExtResource("7")]
 [node name="LoadingScreen" parent="." instance=ExtResource("8")]
+[node name="QuestJournal" parent="." instance=ExtResource("10")]
+[node name="RestoreFailureScreen" parent="." instance=ExtResource("11")]

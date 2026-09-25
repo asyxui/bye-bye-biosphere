@@ -5,6 +5,7 @@ signal world_created
 signal world_load_failed(error: String)
 
 var _is_restoring = false
+var failed_slot_id := ""
 
 
 func _ready() -> void:
@@ -55,8 +56,35 @@ func reset_current_world() -> bool:
 	if not reset_result[0]:
 		return _fail_restore("Failed to reset world: %s" % reset_result[1])
 
+	# Autoload managers survive a scene reload, so clear their in-memory world state too.
+	SaveManager.clear_all_saveables()
+
 	# Keep loading active while the new scene is instantiated. Startup will
 	# restart the operation name and synchronize the new LoadingScreen.
+	get_tree().reload_current_scene()
+	return true
+
+
+func reset_failed_world() -> bool:
+	if failed_slot_id.is_empty():
+		return _fail_restore("There is no failed world slot to reset")
+
+	GameStateManager.start_loading("Resetting World...")
+	UIManager.pop_screen(UIManager.ScreenId.RESTORE_ERROR)
+	var voxel_stream_manager = get_node_or_null("/root/VoxelStreamManager")
+	if voxel_stream_manager == null:
+		return _fail_restore("VoxelStreamManager not found")
+	if voxel_stream_manager.current_state != VoxelStreamManager.State.IDLE and not await voxel_stream_manager.unload_stream():
+		return _fail_restore("Failed to unload world before reset")
+
+	var slot_id := failed_slot_id
+	if DirAccess.dir_exists_absolute(SaveManager.get_slot_directory(slot_id)) and not SaveManager.delete_slot(slot_id):
+		return _fail_restore("Failed to delete world slot: %s" % slot_id)
+	if not SaveManager.create_slot(slot_id):
+		return _fail_restore("Failed to recreate world slot: %s" % slot_id)
+
+	SaveManager.clear_all_saveables()
+	get_tree().root.set_meta("current_save_slot", slot_id)
 	get_tree().reload_current_scene()
 	return true
 
@@ -75,6 +103,7 @@ func _load_existing_world(slot_id: String) -> bool:
 		return _fail_restore("Game restore already in progress")
 
 	_is_restoring = true
+	failed_slot_id = slot_id
 	GameStateManager.set_loading_progress(5)
 
 	# Validate the prototype save schema before touching the voxel stream or
@@ -118,6 +147,7 @@ func _load_existing_world(slot_id: String) -> bool:
 	get_tree().root.set_meta("current_save_slot", slot_id)
 	GameStateManager.finish_loading()
 	_is_restoring = false
+	failed_slot_id = ""
 	world_loaded.emit()
 	return true
 
@@ -132,6 +162,7 @@ func _auto_load_default_world() -> bool:
 		return await _load_existing_world("default")
 	else:
 		CustomLogger.log_info("Creating default world")
+		failed_slot_id = "default"
 		if SaveManager.create_slot("default") and await voxel_stream_manager.configure_stream("default"):
 			PerformanceTracker.checkpoint(_loading_timer_id(), "Initial terrain generation")
 			GameStateManager.set_loading_progress(15)
@@ -163,6 +194,7 @@ func _finalize_new_world(slot_id: String) -> bool:
 
 	GameStateManager.finish_loading()
 
+	failed_slot_id = ""
 	world_created.emit()
 	return true
 
