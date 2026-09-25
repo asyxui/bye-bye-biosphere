@@ -5,6 +5,7 @@ class_name LoadingScreen
 
 @onready var loading_label = $VBoxContainer/LoadingLabel
 @onready var progress_bar = $VBoxContainer/ProgressBar
+@onready var world_scan = $VBoxContainer/WorldScan
 
 var _fade_tween: Tween
 
@@ -20,12 +21,15 @@ func _on_loading_changed(active: bool, operation_name: String, progress: float) 
 		_fade_tween = null
 
 	if active:
-		UITransitions.open(self, Vector2(0, 4))
+		if not visible:
+			UITransitions.open(self, Vector2(0, 4))
+			world_scan.start()
 		loading_label.text = operation_name
 		progress_bar.value = progress
 		show()
 		return
 
+	world_scan.stop()
 	progress_bar.value = 100.0
 	_fade_tween = UITransitions.close(self)
 	_fade_tween.tween_callback(func():

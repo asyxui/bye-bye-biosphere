@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://c1n4g5mpal0x"]
+[gd_scene load_steps=5 format=3 uid="uid://c1n4g5mpal0x"]
 
 [ext_resource type="Theme" uid="uid://ccpr45sj16cli" path="res://Assets/GameTheme.tres" id="1_theme"]
 [ext_resource type="Script" path="res://Scripts/UI/LoadingScreen.gd" id="2_script"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/PerformanceDisplay.tscn" id="3_performance"]
+[ext_resource type="Script" path="res://Scripts/UI/WorldScan.gd" id="4_scan"]
 
 [node name="LoadingScreen" type="Control"]
 script = ExtResource("2_script")
@@ -19,6 +20,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -128.0
+offset_top = -128.0
+offset_right = 128.0
+offset_bottom = 128.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.1, 0.1, 0.1, 1)
@@ -31,9 +36,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -150.0
-offset_top = -50.0
+offset_top = -70.0
 offset_right = 150.0
-offset_bottom = 50.0
+offset_bottom = 70.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -42,6 +47,13 @@ layout_mode = 2
 text = "Loading..."
 theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
+
+[node name="WorldScan" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(300, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("4_scan")
 
 [node name="ProgressBar" type="ProgressBar" parent="VBoxContainer"]
 layout_mode = 2
