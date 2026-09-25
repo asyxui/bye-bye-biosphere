@@ -22,7 +22,9 @@ func _ready() -> void:
 
 func _on_tool_activated(_tool_id: String, slot_index: int) -> void:
 	var tool = ToolManager.get_tool_in_slot(slot_index)
-	if tool:
+	if _tool_id == "freeHand":
+		tool = ToolManager.base_tool
+	if tool :
 		# Check if this is the same tool that's already active and still has state
 		if (ToolManager.active_tool_instance and active_tool and 
 			active_tool.get_script().resource_path == tool.tool_script_path and

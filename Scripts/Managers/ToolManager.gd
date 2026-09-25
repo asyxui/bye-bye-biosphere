@@ -4,6 +4,7 @@ var tools: Dictionary = {}  # tool_id -> ToolResource
 var tool_executor: Node
 var hotbar_tools: Array[Resource] = []  # Array of ToolResource or null for each slot (size 10)
 var active_tool_instance: Object = null  # Cache the active tool instance so state persists
+var base_tool: ToolResource = null
 
 signal tool_equipped(tool_id: String, slot_index: int)
 signal tool_activated(tool_id: String, slot_index: int)
@@ -39,8 +40,11 @@ func _load_tools() -> void:
 					if tool.has_meta("id") or (tool.id if tool.has_method("get") else false):
 						var tool_id = tool.id if "id" in tool else ""
 						if tool_id:
-							tools[tool_id] = tool
-							print("Loaded tool: %s from %s" % [tool_id, file_name])
+							if tool_id == "freeHand":
+								base_tool = tool
+							else:
+								tools[tool_id] = tool
+								print("Loaded tool: %s from %s" % [tool_id, file_name])
 			file_name = dir.get_next()
 
 func get_tool(tool_id: String):
@@ -102,7 +106,8 @@ func activate_tool(slot_index: int) -> void:
 		# Emit signal - Player will listen for this and activate the tool itself
 		tool_activated.emit(tool.id, slot_index)
 	else:
-		print("No tool in slot %d" % slot_index)
+		tool_activated.emit(base_tool.id, slot_index)
+		print("No tool in slot %d, doing free-hand stuff" % slot_index)
 
 func get_hotbar_tools() -> Array[Resource]:
 	return hotbar_tools.duplicate()

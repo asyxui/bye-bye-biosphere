@@ -11,6 +11,9 @@ extends Node3D
 @export var turn_speed: float = 4.0
 @export var wander_duration_range: Vector2 = Vector2(2.0, 5.0)
 @export var idle_duration_range: Vector2 = Vector2(1.0, 3.0)
+@export var animation_player: AnimationPlayer
+@export var area: Area3D
+
 
 # ---- State ----
 enum State { FALLING, IDLE, WANDER, PETTED }
@@ -23,6 +26,10 @@ var pet_timer: float = 0.0
 func _ready() -> void:
 	add_to_group("Petable")
 	state = State.FALLING
+
+func _on_area_input_event(camera, event, position, normal, shape_idx) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		pet()
 
 
 func _process(delta: float) -> void:
@@ -44,7 +51,7 @@ func _process(delta: float) -> void:
 				_enter_idle()
 
 		State.PETTED:
-			#anim.play("happy")
+			animation_player.play("Wiggle")
 			pet_timer -= delta
 			if pet_timer <= 0.0:
 				_enter_idle()

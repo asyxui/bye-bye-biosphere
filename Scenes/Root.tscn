@@ -121,4 +121,4 @@ voxel_terrain = NodePath("../Terrain")
 player = NodePath("../Player")
 min_spawn_distance = 30.0
 max_spawn_distance = 150.0
-spawn_interval_range = Vector2(30, 600)
+spawn_interval_range = Vector2(300, 600)
