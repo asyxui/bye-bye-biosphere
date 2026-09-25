@@ -85,8 +85,12 @@ func _resolve_endpoint_position(hit_point: Vector3, port: ConnectionPoint) -> Ve
 	return hit_point + Vector3.UP * FREE_PLACEMENT_GROUND_OFFSET
 
 func _finalize_conveyor(hit_point: Vector3) -> void:
+	if preview_port == null:
+		preview_port = _find_second_port(hit_point)
+	
 	hit_point = _resolve_endpoint_position(hit_point, preview_port)
 	
+	# Check if the conveyor should be reversed based on the endpoint
 	if preview_port and preview_port.port_direction == ConnectionPoint.PortDirection.OUTPUT:
 		conveyor_reversal = true
 	
