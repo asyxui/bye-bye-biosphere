@@ -3,9 +3,9 @@
 [ext_resource type="Script" uid="uid://cdnhwr02jl1ig" path="res://Scripts/Main.gd" id="1_oss8w"]
 [ext_resource type="PackedScene" uid="uid://843h8d3cgi62" path="res://Scenes/Player.tscn" id="1_qjaue"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_uiroot"]
+[ext_resource type="Material" path="res://Resources/Terrain/WaterMaterial.tres" id="3_water_material"]
 [ext_resource type="Script" uid="uid://d0x0c2cb5m4qb" path="res://Scripts/Terrain/wildlife_spawner.gd" id="4_sxhdm"]
 [ext_resource type="PackedScene" uid="uid://dw5wo0ukxyt6e" path="res://Assets/Models/Animals/Doggo.tscn" id="5_oss8w"]
-[ext_resource type="Material" path="res://Resources/Terrain/WaterMaterial.tres" id="3_water_material"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_oss8w"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)

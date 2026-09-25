@@ -47,11 +47,11 @@ func _load_tools() -> void:
 			continue
 		var tool = load(TOOLS_PATH.path_join(file_name))
 		if tool is ToolResource and not tool.id.is_empty():
-      
-      if tool.id == "freeHand":
-        base_tool = tool
-      else:
-			  tools[tool.id] = tool
+	  
+			if tool.id == "freeHand":
+				base_tool = tool
+			else:
+				tools[tool.id] = tool
 			print("Loaded tool: %s from %s" % [tool.id, file_name])
 
 func get_tool(tool_id: String):
